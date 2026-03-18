@@ -1,7 +1,7 @@
 # Ancient Empires — Project Context for Claude Code
 
 ## Stack
-Next.js 14 (App Router), TypeScript strict, Supabase, Tailwind CSS,
+Next.js 15 (App Router), TypeScript strict, Supabase, Tailwind CSS v4,
 Leaflet + React-Leaflet, D3.js + Observable Plot, Framer Motion, Zustand, next-intl
 
 ## Architecture — CRITICAL
@@ -39,7 +39,7 @@ Key convention: negative integers for BC dates (-117 = 117 BC)
 ## Security — CRITICAL
 - SUPABASE_SERVICE_ROLE_KEY → server-side only, never NEXT_PUBLIC_
 - NEXT_PUBLIC_SUPABASE_ANON_KEY → client-safe (RLS enforces access)
-- Rate limiting: Vercel Edge Middleware active from Phase 0 (middleware.ts)
+- Rate limiting: active from Phase 0 (proxy.ts — Next.js 16 convention)
 - RLS enabled on ALL tables before any data import
 - All AI/Claude API keys: server-side Route Handlers only
 
@@ -50,18 +50,26 @@ Max size: 200KB per file (simplify at mapshaper.org before saving)
 
 ## Current Phase
 [UPDATE THIS at the end of each phase — takes 10 minutes, eliminates bus factor]
-Phase 0 — Architecture setup (Week 1-2)
-Status: IN PROGRESS
+Phase 1 — Data Foundation: Roman Empire (Week 3-4)
+Status: NOT STARTED
 
 ## What is complete
-- Supabase project created
-- GitHub repository created, develop branch exists
-- Schema SQL executed (all tables + RLS)
+- Phase 0 complete (Week 1-2)
+- Supabase project created with full schema (10 tables + RLS)
+- All 4 empires seeded in empires table
+- Next.js 15 project initialized (TypeScript strict, Tailwind v4)
+- Dependencies installed: @supabase/supabase-js, @supabase/ssr, zustand, framer-motion
+- lib/supabase/client.ts and server.ts created
+- lib/empires/config.ts with EMPIRE_CONFIGS and getEmpireBySlug()
+- app/[empire]/page.tsx dynamic routing (returns 404 for unknown slugs)
+- app/page.tsx landing page with 4 empire cards
+- proxy.ts rate limiting (100 req/min per IP on /api/*)
+- Vercel production deployment live at ancient-empires.vercel.app
+- GitHub: main, develop, feature/phase-0-architecture branches
+- Branch protection on main
 
 ## What is in progress
-- Next.js 14 project initialisation
-- Vercel deployment setup
-- Rate limiting middleware (middleware.ts)
+- (nothing — Phase 1 not yet started)
 
 ## Do NOT change without consultation
 - Supabase table schema (migrations are final once data is imported)
@@ -75,3 +83,6 @@ Status: IN PROGRESS
 - OG image cache (Supabase Storage) mandatory: prevents 2s render on every Twitter/WhatsApp share
 - Rate limiting from Phase 0: single Reddit post can exhaust Supabase free tier without it
 - data/personality-content Git branch removed: local one-time script instead (scripts/generate-personality-content.ts)
+- Next.js 15 installed (not 14) — same App Router architecture, no functional difference
+- Tailwind v4 installed — no tailwind.config.ts needed, config in CSS
+- Rate limiting file named proxy.ts (not middleware.ts) — Next.js 16 convention
