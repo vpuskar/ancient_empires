@@ -47,7 +47,7 @@ Key convention: negative integers for BC dates (-117 = 117 BC)
 
 - SUPABASE*SERVICE_ROLE_KEY → server-side only, never NEXT_PUBLIC*
 - NEXT_PUBLIC_SUPABASE_ANON_KEY → client-safe (RLS enforces access)
-- Rate limiting: active from Phase 0 (middleware.ts — Upstash Redis tiered)
+- Rate limiting: active from Phase 0 (proxy.ts — Upstash Redis tiered)
 - RLS enabled on ALL tables before any data import
 - All AI/Claude API keys: server-side Route Handlers only
 - Env vars validated at startup via Zod (lib/env.ts) — throws on missing/invalid
@@ -110,7 +110,7 @@ Status: NOT STARTED
 
 ### Phase 0 v1.4 additions ✓
 
-- middleware.ts: Upstash Redis tiered rate limiting (replaced proxy.ts)
+- proxy.ts: Upstash Redis tiered rate limiting
 - lib/env.ts: Zod validation for all env vars, throws at startup
 - lib/errors.ts: AppError class with code/statusCode + toApiError()
 - lib/services/rulers.ts, places.ts, quiz.ts: CRUD filtered by empire_id
@@ -142,7 +142,7 @@ Status: NOT STARTED
 - OG image cache (Supabase Storage) mandatory: prevents 2s render on every Twitter/WhatsApp share
 - Rate limiting from Phase 0: single Reddit post can exhaust Supabase free tier without it
 - Upstash Redis for rate limiting: in-memory Map resets on Vercel cold starts; Redis is persistent
-- middleware.ts (not proxy.ts): corrected to Next.js standard convention
+- proxy.ts (not middleware.ts): Next.js 16 renamed the file convention
 - ESLint v9 flat config (eslint.config.mjs): v9 dropped legacy .eslintrc support; .eslintrc.json kept as placeholder
 - @typescript-eslint/strict: no-non-null-assertion resolved via env validation (lib/env.ts), not eslint-disable
 - lib/services/\* pattern: API routes must never call Supabase directly
