@@ -1,0 +1,7 @@
+-- Phase 0 Initial Schema
+-- Schema was created directly in Supabase Dashboard (SQL Editor)
+-- Tables: empires, rulers, provinces, places, events, battles, 
+--         empire_extent, quiz_questions, chapters, analytics_cache, user_roles
+-- Includes: RLS policies, B-Tree indexes, TSVECTOR trigger, search_index materialized view
+-- Full schema is the source of truth in Supabase Dashboard
+-- This migration file serves as documentation for v1.4 compliance
