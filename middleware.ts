@@ -10,8 +10,16 @@ import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 
 const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL ?? (() => { throw new Error('Missing UPSTASH_REDIS_REST_URL') })(),
-  token: process.env.UPSTASH_REDIS_REST_TOKEN ?? (() => { throw new Error('Missing UPSTASH_REDIS_REST_TOKEN') })(),
+  url:
+    process.env.UPSTASH_REDIS_REST_URL ??
+    (() => {
+      throw new Error('Missing UPSTASH_REDIS_REST_URL');
+    })(),
+  token:
+    process.env.UPSTASH_REDIS_REST_TOKEN ??
+    (() => {
+      throw new Error('Missing UPSTASH_REDIS_REST_TOKEN');
+    })(),
 });
 
 const tiers = {
@@ -32,7 +40,7 @@ const tiers = {
 const EXPENSIVE_ROUTES = ['/api/personality/og', '/api/quiz/calculate'];
 
 function getTier(pathname: string): keyof typeof tiers {
-  if (EXPENSIVE_ROUTES.some(r => pathname.startsWith(r))) return 'expensive';
+  if (EXPENSIVE_ROUTES.some((r) => pathname.startsWith(r))) return 'expensive';
   return 'standard';
 }
 
@@ -79,4 +87,5 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: '/api/:path*',
-};
+}; // test
+// lint-staged test
