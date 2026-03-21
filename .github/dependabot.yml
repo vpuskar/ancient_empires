@@ -7,7 +7,7 @@ updates:
       day: monday
       time: "09:00"
       timezone: Europe/Zagreb
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 3
     target-branch: develop
 
   - package-ecosystem: github-actions
@@ -17,5 +17,5 @@ updates:
       day: monday
       time: "09:00"
       timezone: Europe/Zagreb
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
     target-branch: develop
