@@ -1,18 +1,13 @@
-import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
+// eslint.config.mjs — ESLint v9 flat config (v1.4 spec equivalent)
+// Extends: next/core-web-vitals + @typescript-eslint/strict + prettier
 
-const eslintConfig = defineConfig([
+import { defineConfig } from 'eslint/config';
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import tseslint from 'typescript-eslint';
+import prettierConfig from 'eslint-config-prettier';
+
+export default defineConfig([
   ...nextVitals,
-  ...nextTs,
-  // Override default ignores of eslint-config-next.
-  globalIgnores([
-    // Default ignores of eslint-config-next:
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
-  ]),
+  ...tseslint.configs.strict,
+  prettierConfig,
 ]);
-
-export default eslintConfig;
