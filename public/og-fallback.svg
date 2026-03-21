@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0c1a"/>
+      <stop offset="100%" style="stop-color:#1a1025"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#8B0000"/>
+      <stop offset="33%" style="stop-color:#DE2910"/>
+      <stop offset="66%" style="stop-color:#BC002D"/>
+      <stop offset="100%" style="stop-color:#1A6B3A"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle grid pattern -->
+  <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+    <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#ffffff08" stroke-width="1"/>
+  </pattern>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+
+  <!-- Accent bar -->
+  <rect x="0" y="0" width="1200" height="6" fill="url(#accent)"/>
+
+  <!-- Empire colour dots -->
+  <circle cx="480" cy="315" r="180" fill="#8B0000" opacity="0.07"/>
+  <circle cx="720" cy="315" r="180" fill="#DE2910" opacity="0.07"/>
+
+  <!-- Logo mark — stylised column -->
+  <g transform="translate(600, 185)">
+    <rect x="-4" y="0" width="8" height="60" fill="#c8a96e" rx="2"/>
+    <rect x="-18" y="-8" width="36" height="8" fill="#c8a96e" rx="2"/>
+    <rect x="-22" y="60" width="44" height="6" fill="#c8a96e" rx="1"/>
+    <rect x="-14" y="66" width="28" height="4" fill="#c8a96e" rx="1"/>
+  </g>
+
+  <!-- Main title -->
+  <text
+    x="600"
+    y="320"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="64"
+    font-weight="700"
+    fill="#f5f0e8"
+    text-anchor="middle"
+    letter-spacing="2"
+  >Ancient Empires</text>
+
+  <!-- Divider -->
+  <rect x="460" y="338" width="280" height="2" fill="url(#accent)" rx="1"/>
+
+  <!-- Subtitle -->
+  <text
+    x="600"
+    y="390"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="26"
+    fill="#c8a96e"
+    text-anchor="middle"
+    letter-spacing="4"
+  >INTERACTIVE HISTORY PLATFORM</text>
+
+  <!-- Empire names -->
+  <text x="600" y="450" font-family="Georgia, serif" font-size="16" fill="#ffffff40" text-anchor="middle" letter-spacing="6">
+    ROME  ·  CHINA  ·  JAPAN  ·  OTTOMAN
+  </text>
+</svg>
