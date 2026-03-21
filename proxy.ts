@@ -1,4 +1,4 @@
-// middleware.ts — Next.js Edge Middleware
+// proxy.ts — Next.js Edge Proxy
 // Upstash Redis tiered rate limiting (v1.4)
 //
 // Standard:  /api/*                    100 req / 60s per IP
@@ -37,7 +37,7 @@ function getTier(pathname: string): keyof typeof tiers {
   return 'standard';
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (!pathname.startsWith('/api/')) {
