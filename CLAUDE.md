@@ -92,7 +92,7 @@ Max size: 200KB per file (simplify at mapshaper.org before saving)
 ## Current Phase
 
 Phase 1 — Data Foundation: Roman Empire (Week 3-4)
-Status: NOT STARTED
+Status: COMPLETE
 
 ## What is complete
 
@@ -124,9 +124,17 @@ Status: NOT STARTED
 - vercel.json: weekly backup cron (Monday 03:00 UTC)
 - app/api/admin/backup/route.ts: Bearer CRON_SECRET auth
 
+### Phase 1 — Data Foundation: Roman Empire (Week 3-4) ✓
+
+- 68 rulers imported
+- 7608 places imported
+- 174 battles imported
+- 6 GeoJSON territorial snapshots
+- 4377 quiz questions imported
+
 ## What is in progress
 
-(nothing — Phase 1 not yet started)
+(nothing)
 
 ## Do NOT change without consultation
 
@@ -149,3 +157,5 @@ Status: NOT STARTED
 - Next.js 16 installed (not 15) — same App Router architecture
 - Tailwind v4 installed — no tailwind.config.ts needed, config in CSS
 - NEXT*PUBLIC_SENTRY_DSN added alongside SENTRY_DSN: DSN is not secret, browser needs NEXT_PUBLIC* prefix
+- places.province_id and places.founded_year: deferred — will backfill later when province mapping is finalized
+- battles.outcome and battles.opposing_force: deferred — requires manual curation, will backfill later
