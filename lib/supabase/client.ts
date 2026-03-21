@@ -1,8 +1,9 @@
 import { createBrowserClient } from '@supabase/ssr';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? (() => { throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL') })();
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? (() => { throw new Error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY') })();
+import { env } from '@/lib/env';
 
 export function createClient() {
-  return createBrowserClient(supabaseUrl, supabaseAnonKey);
+  return createBrowserClient(
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
 }

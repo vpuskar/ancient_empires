@@ -8,18 +8,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
+import { env } from '@/lib/env';
 
 const redis = new Redis({
-  url:
-    process.env.UPSTASH_REDIS_REST_URL ??
-    (() => {
-      throw new Error('Missing UPSTASH_REDIS_REST_URL');
-    })(),
-  token:
-    process.env.UPSTASH_REDIS_REST_TOKEN ??
-    (() => {
-      throw new Error('Missing UPSTASH_REDIS_REST_TOKEN');
-    })(),
+  url: env.UPSTASH_REDIS_REST_URL,
+  token: env.UPSTASH_REDIS_REST_TOKEN,
 });
 
 const tiers = {
@@ -87,5 +80,4 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: '/api/:path*',
-}; // test
-// lint-staged test
+};
