@@ -91,8 +91,8 @@ Max size: 200KB per file (simplify at mapshaper.org before saving)
 
 ## Current Phase
 
-Phase 1 — Data Foundation: Roman Empire (Week 3-4)
-Status: COMPLETE
+Phase 2 — Roman Empire MVP (Week 5-8)
+Status: NOT STARTED
 
 ## What is complete
 
@@ -128,13 +128,18 @@ Status: COMPLETE
 
 - 68 rulers imported
 - 7608 places imported
-- 174 battles imported
+- 101 battles imported (with outcome + opposing_force populated)
+- 52 provinces imported (Roman administrative divisions)
 - 6 GeoJSON territorial snapshots
 - 4377 quiz questions imported
 
 ## What is in progress
 
 (nothing)
+
+## Phase 2 prerequisites
+
+chapters table needs Roman Empire narrative content before feature/storytelling-chapters branch. Options: Claude Haiku batch generation (~15 chapters) or manual writing. Without this, storytelling UI has no data.
 
 ## Do NOT change without consultation
 
@@ -157,5 +162,5 @@ Status: COMPLETE
 - Next.js 16 installed (not 15) — same App Router architecture
 - Tailwind v4 installed — no tailwind.config.ts needed, config in CSS
 - NEXT*PUBLIC_SENTRY_DSN added alongside SENTRY_DSN: DSN is not secret, browser needs NEXT_PUBLIC* prefix
-- places.province_id and places.founded_year: deferred — will backfill later when province mapping is finalized
-- battles.outcome and battles.opposing_force: deferred — requires manual curation, will backfill later
+- places.province_id: deferred — provinces table populated (52 rows), but mapping 7608 places to provinces requires GeoJSON province boundaries for accurate ST_Contains; not a Phase 2 blocker
+- places.founded_year: deferred — will backfill later
