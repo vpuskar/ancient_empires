@@ -127,9 +127,9 @@ Status: NOT STARTED
 ### Phase 1 — Data Foundation: Roman Empire (Week 3-4) ✓
 
 - 68 rulers imported
-- 7608 places imported
+- 7608 places imported (founded_year backfilled, province_id mapped via nearest-centroid)
 - 101 battles imported (with outcome + opposing_force populated)
-- 52 provinces imported (Roman administrative divisions)
+- 52 provinces imported (Roman administrative divisions, centroid lat/lng added)
 - 6 GeoJSON territorial snapshots
 - 4377 quiz questions imported
 
@@ -140,6 +140,8 @@ Status: NOT STARTED
 ## Phase 2 prerequisites
 
 chapters table needs Roman Empire narrative content before feature/storytelling-chapters branch. Options: Claude Haiku batch generation (~15 chapters) or manual writing. Without this, storytelling UI has no data.
+
+events table is empty — needed for feature/horizontal-timeline branch. Roman historical events (political, military, cultural) need to be imported via Wikidata SPARQL or manual CSV.
 
 ## Do NOT change without consultation
 
@@ -162,5 +164,6 @@ chapters table needs Roman Empire narrative content before feature/storytelling-
 - Next.js 16 installed (not 15) — same App Router architecture
 - Tailwind v4 installed — no tailwind.config.ts needed, config in CSS
 - NEXT*PUBLIC_SENTRY_DSN added alongside SENTRY_DSN: DSN is not secret, browser needs NEXT_PUBLIC* prefix
-- places.province_id: deferred — provinces table populated (52 rows), but mapping 7608 places to provinces requires GeoJSON province boundaries for accurate ST_Contains; not a Phase 2 blocker
-- places.founded_year: deferred — will backfill later
+- places.province_id: DONE — nearest-centroid mapping (centroid lat/lng added to provinces table, 7608 places mapped to 52 provinces)
+- places.founded_year: DONE — backfilled manually
+- Province polygon boundaries (ST_Contains): deferred — existing 6 GeoJSON files are territorial snapshots of the whole empire, not per-province boundaries. DARE Atlas or AWMC have province polygons. Nearest-centroid covers 90%+ accuracy for MVP; upgrade to ST_Contains if precision needed later
