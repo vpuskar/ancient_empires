@@ -14,7 +14,7 @@ function EmpireCard({ empire }: { empire: EmpireConfig }) {
     >
       <h2 className="text-xl font-semibold text-white mb-2">{empire.name}</h2>
       <p className="text-zinc-400 text-sm">
-        {formatYear(empire.start)} – {formatYear(empire.end)}
+        {formatYear(empire.start)} - {formatYear(empire.end)}
       </p>
     </Link>
   )

@@ -1,4 +1,4 @@
-// proxy.ts — Next.js Edge Proxy
+// proxy.ts - Next.js Edge Proxy
 // Upstash Redis tiered rate limiting (v1.4)
 //
 // Standard:  /api/*                    100 req / 60s per IP
@@ -10,30 +10,46 @@ import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 import { env } from '@/lib/env';
 
-const redis = new Redis({
-  url: env.UPSTASH_REDIS_REST_URL,
-  token: env.UPSTASH_REDIS_REST_TOKEN,
-});
+let tiers:
+  | {
+      expensive: Ratelimit;
+      standard: Ratelimit;
+    }
+  | undefined;
 
-const tiers = {
-  expensive: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(15, '60 s'),
-    prefix: 'rl:exp',
-    ephemeralCache: new Map(),
-  }),
-  standard: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(100, '60 s'),
-    prefix: 'rl:std',
-    ephemeralCache: new Map(),
-  }),
-};
+function getTiers() {
+  if (!tiers) {
+    const redis = new Redis({
+      url: env.UPSTASH_REDIS_REST_URL,
+      token: env.UPSTASH_REDIS_REST_TOKEN,
+    });
+
+    tiers = {
+      expensive: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(15, '60 s'),
+        prefix: 'rl:exp',
+        ephemeralCache: new Map(),
+      }),
+      standard: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(100, '60 s'),
+        prefix: 'rl:std',
+        ephemeralCache: new Map(),
+      }),
+    };
+  }
+
+  return tiers;
+}
 
 const EXPENSIVE_ROUTES = ['/api/personality/og', '/api/quiz/calculate'];
 
-function getTier(pathname: string): keyof typeof tiers {
-  if (EXPENSIVE_ROUTES.some((r) => pathname.startsWith(r))) return 'expensive';
+function getTier(pathname: string): 'expensive' | 'standard' {
+  if (EXPENSIVE_ROUTES.some((route) => pathname.startsWith(route))) {
+    return 'expensive';
+  }
+
   return 'standard';
 }
 
@@ -50,7 +66,7 @@ export async function proxy(request: NextRequest) {
     'anonymous';
 
   const tier = getTier(pathname);
-  const { success, limit, remaining, reset } = await tiers[tier].limit(ip);
+  const { success, limit, remaining, reset } = await getTiers()[tier].limit(ip);
 
   const retryAfter = Math.ceil((reset - Date.now()) / 1000);
 

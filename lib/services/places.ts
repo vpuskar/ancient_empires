@@ -20,7 +20,7 @@ export interface Place {
   lng: number;
   type: PlaceType;
   description: string | null;
-  founded: number | null;
+  founded_year: number | null;
   abandoned: number | null;
 }
 

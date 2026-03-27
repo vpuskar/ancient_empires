@@ -1,4 +1,4 @@
-// lib/errors.ts — centralised error handling
+// lib/errors.ts - centralised error handling
 
 export class AppError extends Error {
   constructor(

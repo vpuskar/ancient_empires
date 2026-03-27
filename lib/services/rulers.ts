@@ -1,6 +1,6 @@
 // lib/services/rulers.ts
 // All DB access for the `rulers` table goes through here.
-// Negative integers = BC dates (-117 → 117 BC).
+// Negative integers represent BC dates (-117 becomes 117 BC).
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { AppError } from '@/lib/errors';
@@ -9,11 +9,13 @@ export interface Ruler {
   id: number;
   empire_id: number;
   name: string;
+  native_name: string | null;
+  dynasty: string | null;
   born: number | null;
   died: number | null;
   reign_start: number;
   reign_end: number | null;
-  bio: string | null;
+  bio_short: string | null;
   personality_type: string | null;
   image_url: string | null;
 }

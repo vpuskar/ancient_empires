@@ -1,5 +1,5 @@
 /**
- * Shared UI Components — barrel export
+ * Shared UI Components - barrel export
  *
  * Usage:
  *   import { GoldDivider, RevealOnScroll, EraLabel, EmptyState } from '@/components/ui';
