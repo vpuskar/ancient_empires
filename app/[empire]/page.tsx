@@ -25,7 +25,7 @@ export default async function EmpirePage({
       >
         <h1 className="text-4xl font-bold mb-2">{empire.name}</h1>
         <p className="text-zinc-400 text-lg">
-          {formatYear(empire.start)} – {formatYear(empire.end)}
+          {formatYear(empire.start)} - {formatYear(empire.end)}
         </p>
       </div>
     </main>

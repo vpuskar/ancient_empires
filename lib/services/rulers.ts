@@ -1,6 +1,6 @@
 // lib/services/rulers.ts
 // All DB access for the `rulers` table goes through here.
-// Negative integers = BC dates (-117 → 117 BC).
+// Negative integers represent BC dates (-117 becomes 117 BC).
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { AppError } from '@/lib/errors';
