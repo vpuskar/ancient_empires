@@ -9,11 +9,13 @@ export interface Ruler {
   id: number;
   empire_id: number;
   name: string;
+  native_name: string | null;
+  dynasty: string | null;
   born: number | null;
   died: number | null;
   reign_start: number;
   reign_end: number | null;
-  bio: string | null;
+  bio_short: string | null;
   personality_type: string | null;
   image_url: string | null;
 }
