@@ -101,7 +101,7 @@ Files (Roman Empire):
 ## Current Phase
 
 Phase 2 — Roman Empire MVP (Week 5-8)
-Status: READY TO START — all data populated
+Status: IN PROGRESS — rulers encyclopaedia and chapters built, map/timeline deferred to own branches
 
 ## What is complete
 
@@ -116,6 +116,12 @@ Status: READY TO START — all data populated
 - app/page.tsx landing page with 4 empire cards
 - Vercel production deployment live at ancient-empires.vercel.app
 - GitHub: main, develop branches; branch protection on main
+
+### Phase 2 shared work ✓
+
+- lib/fonts.ts: font configuration
+- components/ui/: EmptyState, EraLabel, GoldDivider, RevealOnScroll shared UI components
+- lib/services/stats.ts: stats service
 
 ### Phase 0 v1.4 additions ✓
 
@@ -177,7 +183,15 @@ mode system will require either schema extension or 3x content generation.
 
 ## What is in progress
 
-(nothing — ready for Phase 2 UI development)
+### Phase 2 — Roman Empire MVP (Week 5-8)
+
+- feature/rulers-encyclopaedia (active):
+  - Rulers list page with filtering UX: app/[empire]/rulers/
+  - Rulers components: components/rulers/
+  - Storytelling chapters: app/[empire]/chapters/
+  - Shared empire navigation: components/navigation/
+  - Place interface fix: `founded` → `founded_year` in lib/services/places.ts
+  - Incomplete map/timeline pages and components removed (belong in own feature branches)
 
 ## Phase 2 feature branches
 
