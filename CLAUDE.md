@@ -89,10 +89,19 @@ GeoJSON files NEVER go into the database.
 Location: /public/geojson/
 Max size: 200KB per file (simplify at mapshaper.org before saving)
 
+Files (Roman Empire):
+
+- roman_bc500.geojson — 500 BC, early Kingdom
+- roman_bc200.geojson — 200 BC, after Second Punic War
+- roman_bc1.geojson — 1 BC, late Republic
+- roman_100.geojson — 100 AD, near peak (Trajan)
+- roman_200.geojson — 200 AD, Severan stable maximum
+- roman_400.geojson — 400 AD, post-division
+
 ## Current Phase
 
 Phase 2 — Roman Empire MVP (Week 5-8)
-Status: NOT STARTED
+Status: READY TO START — all data populated
 
 ## What is complete
 
@@ -132,16 +141,53 @@ Status: NOT STARTED
 - 52 provinces imported (Roman administrative divisions, centroid lat/lng added)
 - 6 GeoJSON territorial snapshots
 - 4377 quiz questions imported
+- 6 empire_extent rows imported (linking GeoJSON files to years + area_km2 estimates)
+- 98 events imported (62 with ruler_id mapped — 51 manual, 11 auto by reign period; 36 Republic-era without ruler)
+- 7 chapters imported (Markdown, mid-detail level, ~300-450 words each)
+- battles.place_id backfilled for all 101 battles (nearest-place matching from 7608 places)
+
+### Data completeness — Roman Empire
+
+| Table          | Rows  | Key fields populated                                   |
+| -------------- | ----- | ------------------------------------------------------ |
+| empires        | 4     | all 4 empires seeded                                   |
+| rulers         | 68    | name, dynasty, reign_start/end, bio_short, image_url   |
+| provinces      | 52    | name, centroid lat/lng                                 |
+| places         | 7,608 | lat/lng, type, province_id, founded_year               |
+| battles        | 101   | lat/lng, outcome, opposing_force, place_id, casualties |
+| events         | 98    | year, category, significance (1-5), ruler_id (62/98)   |
+| chapters       | 7     | slug, title, content_md (Markdown), period_start/end   |
+| empire_extent  | 6     | year, geojson_url, area_km2, notes                     |
+| quiz_questions | 4,377 | (full set for Roman Empire)                            |
+
+## Content Design Vision (received, deferred to Phase 3+)
+
+Three-mode content system planned:
+
+- Story Mode: linear narrative, scroll-driven
+- Explore Mode: non-linear, linked topics/maps/timelines
+- Learn Mode: quizzes, flashcards, glossary, tiered detail levels
+
+Three detail levels per chapter: Beginner / Intermediate / Expert
+Gamification layer: achievements, badges, collection system, quest chains
+AI chatbot layer: context-sensitive help at three detail levels
+
+Current chapters are single-level (intermediate). Multi-level content and
+mode system will require either schema extension or 3x content generation.
 
 ## What is in progress
 
-(nothing)
+(nothing — ready for Phase 2 UI development)
 
-## Phase 2 prerequisites
+## Phase 2 feature branches
 
-chapters table needs Roman Empire narrative content before feature/storytelling-chapters branch. Options: Claude Haiku batch generation (~15 chapters) or manual writing. Without this, storytelling UI has no data.
-
-events table is empty — needed for feature/horizontal-timeline branch. Roman historical events (political, military, cultural) need to be imported via Wikidata SPARQL or manual CSV.
+- feature/empire-selector-landing — Landing page with 4 empires
+- feature/rulers-encyclopaedia — Rulers list + filter + detail
+- feature/interactive-map — Leaflet map (dynamic import!)
+- feature/storytelling-chapters — Scroll-driven narrative
+- feature/horizontal-timeline — Events timeline
+- feature/posthog-analytics — PostHog init + events
+- feature/error-reporting — 'Report an error' link
 
 ## Do NOT change without consultation
 
@@ -166,4 +212,6 @@ events table is empty — needed for feature/horizontal-timeline branch. Roman h
 - NEXT*PUBLIC_SENTRY_DSN added alongside SENTRY_DSN: DSN is not secret, browser needs NEXT_PUBLIC* prefix
 - places.province_id: DONE — nearest-centroid mapping (centroid lat/lng added to provinces table, 7608 places mapped to 52 provinces)
 - places.founded_year: DONE — backfilled manually
+- battles.place_id: DONE — nearest-place matching (all 101 battles linked to closest place from 7608)
+- events.ruler_id: DONE — hybrid mapping (51 manual + 11 auto by reign period; 36 Republic-era events correctly NULL)
 - Province polygon boundaries (ST_Contains): deferred — existing 6 GeoJSON files are territorial snapshots of the whole empire, not per-province boundaries. DARE Atlas or AWMC have province polygons. Nearest-centroid covers 90%+ accuracy for MVP; upgrade to ST_Contains if precision needed later
