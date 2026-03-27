@@ -75,9 +75,9 @@ export function RulersEncyclopaedia({
   }, [rulers, search, selectedDynasty, sortBy]);
 
   const selectedRuler =
-    filteredRulers.find((ruler) => ruler.id === selectedRulerId) ??
-    filteredRulers[0] ??
-    null;
+    selectedRulerId === null
+      ? null
+      : filteredRulers.find((ruler) => ruler.id === selectedRulerId) ?? null;
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] px-4 py-12 text-white">
@@ -136,9 +136,13 @@ export function RulersEncyclopaedia({
 
         <section className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
           <div className="space-y-3">
+            <p className="text-sm text-zinc-400">
+              {filteredRulers.length} {filteredRulers.length === 1 ? 'ruler' : 'rulers'}
+            </p>
+
             {filteredRulers.length === 0 ? (
               <div className="rounded-xl border border-zinc-800 bg-zinc-950/70 p-6 text-zinc-400">
-                No rulers match the current filters.
+                No rulers match your filters.
               </div>
             ) : (
               filteredRulers.map((ruler) => {
@@ -183,37 +187,33 @@ export function RulersEncyclopaedia({
             )}
           </div>
 
-          <aside className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 lg:sticky lg:top-6 lg:self-start">
-            {selectedRuler ? (
-              <>
-                <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Selected ruler</p>
-                <h2 className="mt-3 text-3xl font-bold text-white">{selectedRuler.name}</h2>
+          {selectedRuler ? (
+            <aside className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 lg:sticky lg:top-6 lg:self-start">
+              <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Selected ruler</p>
+              <h2 className="mt-3 text-3xl font-bold text-white">{selectedRuler.name}</h2>
 
-                {selectedRuler.native_name ? (
-                  <p className="mt-2 text-base italic text-zinc-400">
-                    {selectedRuler.native_name}
-                  </p>
-                ) : null}
-
-                <div className="mt-5 space-y-3 text-sm text-zinc-300">
-                  <p>
-                    <span className="text-zinc-500">Dynasty:</span>{' '}
-                    {selectedRuler.dynasty ?? 'Unknown'}
-                  </p>
-                  <p>
-                    <span className="text-zinc-500">Reign:</span>{' '}
-                    {formatReign(selectedRuler.reign_start, selectedRuler.reign_end)}
-                  </p>
-                </div>
-
-                <p className="mt-6 leading-7 text-zinc-300">
-                  {selectedRuler.bio_short ?? 'No biography available.'}
+              {selectedRuler.native_name ? (
+                <p className="mt-2 text-base italic text-zinc-400">
+                  {selectedRuler.native_name}
                 </p>
-              </>
-            ) : (
-              <p className="text-zinc-400">No ruler available for the current filters.</p>
-            )}
-          </aside>
+              ) : null}
+
+              <div className="mt-5 space-y-3 text-sm text-zinc-300">
+                <p>
+                  <span className="text-zinc-500">Dynasty:</span>{' '}
+                  {selectedRuler.dynasty ?? 'Unknown'}
+                </p>
+                <p>
+                  <span className="text-zinc-500">Reign:</span>{' '}
+                  {formatReign(selectedRuler.reign_start, selectedRuler.reign_end)}
+                </p>
+              </div>
+
+              <p className="mt-6 leading-7 text-zinc-300">
+                {selectedRuler.bio_short ?? 'No biography available.'}
+              </p>
+            </aside>
+          ) : null}
         </section>
       </div>
     </main>
