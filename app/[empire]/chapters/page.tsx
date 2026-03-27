@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
+import { EmpireSectionNav } from '@/components/navigation/EmpireSectionNav';
 import { getEmpireBySlug } from '@/lib/empires/config';
 import { getChapters } from '@/lib/services/chapters';
 import { createClient } from '@/lib/supabase/server';
@@ -58,6 +59,8 @@ export default async function EmpireChaptersPage({
             into the events, figures, and turning points that shaped its story.
           </p>
         </header>
+
+        <EmpireSectionNav empire={empire} />
 
         <section className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
           <aside className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-5 lg:sticky lg:top-6 lg:self-start">

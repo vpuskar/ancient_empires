@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { EmpireSectionNav } from '@/components/navigation/EmpireSectionNav';
 import type { EmpireConfig } from '@/lib/empires/config';
 import type { Event } from '@/lib/services/events';
 
@@ -44,6 +45,8 @@ export function EmpireTimeline({ empire, events }: EmpireTimelineProps) {
             focused detail panel.
           </p>
         </header>
+
+        <EmpireSectionNav empire={empire} />
 
         <section className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 md:p-5">
           <div className="mb-5 flex items-center justify-between gap-4 border-b border-zinc-800 pb-4">

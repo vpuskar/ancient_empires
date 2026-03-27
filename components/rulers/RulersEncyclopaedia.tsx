@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { EmpireSectionNav } from '@/components/navigation/EmpireSectionNav';
 import type { EmpireConfig } from '@/lib/empires/config';
 import type { Ruler } from '@/lib/services/rulers';
 
@@ -93,6 +94,8 @@ export function RulersEncyclopaedia({
           </p>
         </header>
 
+        <EmpireSectionNav empire={empire} />
+
         <section className="mb-6 grid gap-4 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 md:grid-cols-3">
           <label className="block">
             <span className="mb-2 block text-sm font-medium text-zinc-300">Search</span>
@@ -140,7 +143,11 @@ export function RulersEncyclopaedia({
               {filteredRulers.length} {filteredRulers.length === 1 ? 'ruler' : 'rulers'}
             </p>
 
-            {filteredRulers.length === 0 ? (
+            {rulers.length === 0 ? (
+              <div className="rounded-xl border border-zinc-800 bg-zinc-950/70 p-6 text-zinc-400">
+                No rulers are available yet for this empire.
+              </div>
+            ) : filteredRulers.length === 0 ? (
               <div className="rounded-xl border border-zinc-800 bg-zinc-950/70 p-6 text-zinc-400">
                 No rulers match your filters.
               </div>
