@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { createBrowserClient } from '@supabase/ssr';
-import { env } from '@/lib/env';
 import type { EmpireConfig } from '@/lib/empires/config';
 
 import 'leaflet/dist/leaflet.css';
@@ -185,8 +184,8 @@ export default function MapInner({ empire }: { empire: EmpireConfig }) {
   useEffect(() => {
     async function load() {
       const supabase = createBrowserClient(
-        env.NEXT_PUBLIC_SUPABASE_URL,
-        env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+        process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
       );
 
       const [placesRes, battlesRes, provincesRes] = await Promise.all([
