@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import type { EmpireConfig } from '@/lib/empires/config';
 import type { TimelineEvent } from '@/lib/services/events';
+import { track } from '@/lib/posthog/track';
 import { EventDetailCard } from './EventDetailCard';
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -155,7 +156,15 @@ export function HorizontalTimeline({ events, empire }: Props) {
             return (
               <g
                 key={event.id}
-                onClick={() => setSelectedEvent(event)}
+                onClick={() => {
+                  setSelectedEvent(event);
+                  track('timeline_event_clicked', {
+                    empire: empire.slug,
+                    event_name: event.name,
+                    event_year: event.year,
+                    category: event.category,
+                  });
+                }}
                 onMouseEnter={() => setHoveredId(event.id)}
                 onMouseLeave={() => setHoveredId(null)}
                 className="cursor-pointer"

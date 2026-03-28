@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import type { EmpireConfig } from '@/lib/empires/config';
 import type { Chapter } from '@/lib/services/chapters';
+import { track } from '@/lib/posthog/track';
 import { ChapterReader } from './ChapterReader';
 import { TimelineDivider } from './LayoutBreaker';
 
@@ -86,6 +87,7 @@ export function ChaptersContainer({ empire, chapters = [] }: Props) {
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setMobileNavOpen(false);
+      track('chapter_viewed', { empire: empire.slug, chapter_slug: slug });
     }
   }
 
