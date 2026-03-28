@@ -6,6 +6,7 @@ import L from 'leaflet';
 import { createBrowserClient } from '@supabase/ssr';
 import type { EmpireConfig } from '@/lib/empires/config';
 import { track } from '@/lib/posthog/track';
+import { ReportError } from '@/components/shared/ReportError';
 
 import 'leaflet/dist/leaflet.css';
 
@@ -439,6 +440,20 @@ export default function MapInner({ empire }: { empire: EmpireConfig }) {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Report error */}
+      <div className="absolute bottom-4 left-4 z-[1000]">
+        <ReportError
+          empire={empire.name}
+          page="Interactive Map"
+          context={{
+            visible_places: filteredPlaces.length,
+            active_filter: selectedProvince
+              ? `Province ${selectedProvince}`
+              : 'None',
+          }}
+        />
       </div>
 
       {/* Place count */}

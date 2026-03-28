@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import type { EmpireConfig } from '@/lib/empires/config';
 import type { TimelineEvent } from '@/lib/services/events';
+import { ReportError } from '@/components/shared/ReportError';
 import { HorizontalTimeline } from './HorizontalTimeline';
 import TimelineErrorBoundary from './TimelineErrorBoundary';
 
@@ -78,6 +79,17 @@ export function TimelineContainer({ empire, events = [] }: Props) {
           <HorizontalTimeline events={filteredEvents} empire={empire} />
         </TimelineErrorBoundary>
       )}
+
+      <div className="mt-8 flex justify-center">
+        <ReportError
+          empire={empire.name}
+          page="Timeline"
+          context={{
+            total_events: events.length,
+            active_filter: activeFilter,
+          }}
+        />
+      </div>
     </div>
   );
 }
