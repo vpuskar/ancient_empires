@@ -20,10 +20,11 @@ interface Props {
   events: TimelineEvent[];
 }
 
-export function TimelineContainer({ empire, events }: Props) {
+export function TimelineContainer({ empire, events = [] }: Props) {
   const [activeFilter, setActiveFilter] = useState<CategoryFilter>('all');
 
   const filteredEvents = useMemo(() => {
+    if (!events?.length) return [];
     if (activeFilter === 'all') return events;
     return events.filter((e) => e.category === activeFilter);
   }, [events, activeFilter]);

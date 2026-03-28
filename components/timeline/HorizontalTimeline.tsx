@@ -83,6 +83,8 @@ export function HorizontalTimeline({ events, empire }: Props) {
     isDragging.current = false;
   }, []);
 
+  if (!events || events.length === 0) return null;
+
   return (
     <div className="relative">
       {/* Autoplay toggle */}
@@ -130,7 +132,7 @@ export function HorizontalTimeline({ events, empire }: Props) {
             fill="#8B7355"
             fontSize={11}
           >
-            {formatYear(events[0]?.year ?? empire.start)}
+            {formatYear(events[0]?.year ?? empire.start ?? 0)}
           </text>
           <text
             x={totalWidth - PADDING}
@@ -139,7 +141,7 @@ export function HorizontalTimeline({ events, empire }: Props) {
             fill="#8B7355"
             fontSize={11}
           >
-            {formatYear(events[events.length - 1]?.year ?? empire.end)}
+            {formatYear(events.at(-1)?.year ?? empire.end ?? 0)}
           </text>
 
           {/* Event markers */}
