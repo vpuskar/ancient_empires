@@ -33,3 +33,24 @@ export async function getChapters(
   if (error) throw AppError.internal(error.message);
   return data ?? [];
 }
+
+export async function getChapterBySlug(
+  client: SupabaseClient,
+  empireId: number,
+  slug: string
+): Promise<Chapter | null> {
+  const { data, error } = await client
+    .from('chapters')
+    .select(
+      'id, empire_id, slug, title, sort_order, content_md, period_start, period_end, updated_at'
+    )
+    .eq('empire_id', empireId)
+    .eq('slug', slug)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') return null;
+    throw AppError.internal(error.message);
+  }
+  return data;
+}
