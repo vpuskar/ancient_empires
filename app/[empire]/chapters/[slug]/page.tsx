@@ -3,6 +3,7 @@ import { getEmpireBySlug } from '@/lib/empires/config';
 import { getChapterBySlug } from '@/lib/services/chapters';
 import { createClient } from '@/lib/supabase/server';
 import { ChapterReader } from '@/components/chapters/ChapterReader';
+import { ReportError } from '@/components/shared/ReportError';
 
 export const revalidate = 3600;
 
@@ -83,6 +84,17 @@ export default async function ChapterPage({
         <article className="rounded-xl border border-[#8B7355]/20 bg-[#1a1815]/60 p-6 md:p-8">
           <ChapterReader content={chapter.content_md} />
         </article>
+
+        <div className="mt-12 flex justify-center border-t border-[#2A2520] pt-6">
+          <ReportError
+            empire={empire.name}
+            page="Chapter"
+            context={{
+              chapter_slug: chapter.slug,
+              chapter_title: chapter.title,
+            }}
+          />
+        </div>
       </div>
     </main>
   );

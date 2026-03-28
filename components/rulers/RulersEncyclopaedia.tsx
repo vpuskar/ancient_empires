@@ -5,6 +5,7 @@ import { EmpireSectionNav } from '@/components/navigation/EmpireSectionNav';
 import type { EmpireConfig } from '@/lib/empires/config';
 import type { Ruler } from '@/lib/services/rulers';
 import { track } from '@/lib/posthog/track';
+import { ReportError } from '@/components/shared/ReportError';
 
 interface RulersEncyclopaediaProps {
   empire: EmpireConfig;
@@ -248,6 +249,18 @@ export function RulersEncyclopaedia({
               <p className="mt-6 leading-7 text-zinc-300">
                 {selectedRuler.bio_short ?? 'No biography available.'}
               </p>
+
+              <div className="mt-6 border-t border-zinc-800 pt-4 flex justify-center">
+                <ReportError
+                  empire={empire.name}
+                  page="Ruler Detail"
+                  context={{
+                    ruler_id: selectedRuler.id,
+                    ruler_name: selectedRuler.name,
+                    reign_period: `${selectedRuler.reign_start} - ${selectedRuler.reign_end}`,
+                  }}
+                />
+              </div>
             </aside>
           ) : null}
         </section>
