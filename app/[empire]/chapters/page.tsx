@@ -15,7 +15,10 @@ function formatYear(year: number | null): string {
   return year < 0 ? `${Math.abs(year)} BC` : `${year} AD`;
 }
 
-function formatPeriodRange(start: number | null, end: number | null): string | null {
+function formatPeriodRange(
+  start: number | null,
+  end: number | null
+): string | null {
   if (start === null && end === null) {
     return null;
   }
@@ -49,14 +52,20 @@ export default async function EmpireChaptersPage({
   return (
     <main className="min-h-screen bg-[#0a0a0a] px-4 py-12 text-white">
       <div className="mx-auto max-w-6xl">
-        <header className="mb-8 border-l-4 pl-6" style={{ borderColor: empire.color }}>
+        <header
+          className="mb-8 border-l-4 pl-6"
+          style={{ borderColor: empire.color }}
+        >
           <p className="mb-2 text-sm uppercase tracking-[0.2em] text-zinc-500">
             Chapters
           </p>
-          <h1 className="text-4xl font-bold">{empire.name} Storytelling Chapters</h1>
+          <h1 className="text-4xl font-bold">
+            {empire.name} Storytelling Chapters
+          </h1>
           <p className="mt-3 max-w-2xl text-zinc-400">
-            Read through the empire in structured chapters, moving from broad eras
-            into the events, figures, and turning points that shaped its story.
+            Read through the empire in structured chapters, moving from broad
+            eras into the events, figures, and turning points that shaped its
+            story.
           </p>
         </header>
 
@@ -83,10 +92,18 @@ export default async function EmpireChaptersPage({
                     href={`#${chapter.slug}`}
                     className="block rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-zinc-300 transition hover:border-zinc-600 hover:text-white"
                   >
-                    <span className="block font-medium text-white">{chapter.title}</span>
-                    {formatPeriodRange(chapter.period_start, chapter.period_end) ? (
+                    <span className="block font-medium text-white">
+                      {chapter.title}
+                    </span>
+                    {formatPeriodRange(
+                      chapter.period_start,
+                      chapter.period_end
+                    ) ? (
                       <span className="mt-1 block text-xs uppercase tracking-[0.16em] text-zinc-500">
-                        {formatPeriodRange(chapter.period_start, chapter.period_end)}
+                        {formatPeriodRange(
+                          chapter.period_start,
+                          chapter.period_end
+                        )}
                       </span>
                     ) : null}
                   </a>
@@ -111,10 +128,18 @@ export default async function EmpireChaptersPage({
                     <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
                       Chapter {chapter.sort_order}
                     </p>
-                    <h2 className="mt-3 text-3xl font-bold text-white">{chapter.title}</h2>
-                    {formatPeriodRange(chapter.period_start, chapter.period_end) ? (
+                    <h2 className="mt-3 text-3xl font-bold text-white">
+                      {chapter.title}
+                    </h2>
+                    {formatPeriodRange(
+                      chapter.period_start,
+                      chapter.period_end
+                    ) ? (
                       <p className="mt-3 text-sm font-medium text-zinc-400">
-                        {formatPeriodRange(chapter.period_start, chapter.period_end)}
+                        {formatPeriodRange(
+                          chapter.period_start,
+                          chapter.period_end
+                        )}
                       </p>
                     ) : null}
                   </header>

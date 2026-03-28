@@ -1,21 +1,21 @@
-import { notFound } from 'next/navigation'
-import { EmpireSectionNav } from '@/components/navigation/EmpireSectionNav'
-import { getEmpireBySlug } from '@/lib/empires/config'
+import { notFound } from 'next/navigation';
+import { EmpireSectionNav } from '@/components/navigation/EmpireSectionNav';
+import { getEmpireBySlug } from '@/lib/empires/config';
 
 function formatYear(year: number): string {
-  return year < 0 ? `${Math.abs(year)} BC` : `${year} AD`
+  return year < 0 ? `${Math.abs(year)} BC` : `${year} AD`;
 }
 
 export default async function EmpirePage({
   params,
 }: {
-  params: Promise<{ empire: string }>
+  params: Promise<{ empire: string }>;
 }) {
-  const { empire: slug } = await params
-  const empire = getEmpireBySlug(slug)
+  const { empire: slug } = await params;
+  const empire = getEmpireBySlug(slug);
 
   if (!empire) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -39,5 +39,5 @@ export default async function EmpirePage({
         </section>
       </div>
     </main>
-  )
+  );
 }
