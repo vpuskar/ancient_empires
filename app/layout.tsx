@@ -1,5 +1,6 @@
 ﻿import type { Metadata } from 'next';
 import { fontDisplay, fontBody } from '@/lib/fonts';
+import { PostHogProvider } from '@/components/analytics/PostHogProvider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -24,7 +25,7 @@ export default function RootLayout({
       <body
         className={`${fontDisplay.variable} ${fontBody.variable} font-body antialiased`}
       >
-        {children}
+        <PostHogProvider>{children}</PostHogProvider>
       </body>
     </html>
   );
