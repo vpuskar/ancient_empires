@@ -2,7 +2,28 @@
 
 import { useState, useEffect, useRef } from 'react';
 
-const EMPIRES = [
+// TODO: replace with actual navigation/routing logic
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function sendPrompt(message: string) {
+  // placeholder for empire navigation
+}
+
+type Empire = {
+  id: number;
+  slug: string;
+  name: string;
+  nativeName: string;
+  period: string;
+  color: string;
+  colorLight: string;
+  gradient: string;
+  description: string;
+  stat: { label: string; value: string };
+  rulers: number | string;
+  places: string;
+};
+
+const EMPIRES: Empire[] = [
   {
     id: 1,
     slug: 'roman',
@@ -73,8 +94,12 @@ const STATS = [
   { value: 98, label: 'Key events', suffix: '' },
 ];
 
-function getTextureOverlay(slug) {
-  const base = { position: 'absolute', inset: 0, pointerEvents: 'none' };
+function getTextureOverlay(slug: string) {
+  const base = {
+    position: 'absolute' as const,
+    inset: 0,
+    pointerEvents: 'none' as const,
+  };
   switch (slug) {
     case 'roman':
       return (
@@ -218,7 +243,15 @@ function getTextureOverlay(slug) {
   }
 }
 
-function EmpireCard({ empire, index, isVisible }) {
+function EmpireCard({
+  empire,
+  index,
+  isVisible,
+}: {
+  empire: Empire;
+  index: number;
+  isVisible: boolean;
+}) {
   const [hovered, setHovered] = useState(false);
   const isRoman = empire.id === 1;
   const delay = index * 0.15;
@@ -409,7 +442,17 @@ function EmpireCard({ empire, index, isVisible }) {
   );
 }
 
-function AnimatedCounter({ end, duration = 2000, isVisible, suffix = '' }) {
+function AnimatedCounter({
+  end,
+  duration = 2000,
+  isVisible,
+  suffix = '',
+}: {
+  end: number;
+  duration?: number;
+  isVisible: boolean;
+  suffix?: string;
+}) {
   const [count, setCount] = useState(0);
   useEffect(() => {
     if (!isVisible) return;
@@ -440,9 +483,9 @@ export default function AncientEmpiresLanding() {
   const [statsVisible, setStatsVisible] = useState(false);
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
   const [btnHover, setBtnHover] = useState(false);
-  const cardsRef = useRef(null);
-  const statsRef = useRef(null);
-  const headerRef = useRef(null);
+  const cardsRef = useRef<HTMLElement>(null);
+  const statsRef = useRef<HTMLElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     setTimeout(() => setHeroVisible(true), 100);
@@ -463,7 +506,7 @@ export default function AncientEmpiresLanding() {
   }, []);
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e: MouseEvent) => {
       if (!headerRef.current) return;
       const rect = headerRef.current.getBoundingClientRect();
       const x = (e.clientX - rect.left - rect.width / 2) * 0.02;
