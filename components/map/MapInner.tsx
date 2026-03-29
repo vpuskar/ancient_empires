@@ -5,6 +5,8 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { createBrowserClient } from '@supabase/ssr';
 import type { EmpireConfig } from '@/lib/empires/config';
+import { track } from '@/lib/posthog/track';
+import { ReportError } from '@/components/shared/ReportError';
 
 import 'leaflet/dist/leaflet.css';
 
@@ -369,11 +371,17 @@ export default function MapInner({ empire }: { empire: EmpireConfig }) {
           </label>
           <select
             value={selectedProvince ?? ''}
-            onChange={(e) =>
-              setSelectedProvince(
-                e.target.value ? Number(e.target.value) : null
-              )
-            }
+            onChange={(e) => {
+              const val = e.target.value ? Number(e.target.value) : null;
+              setSelectedProvince(val);
+              if (val) {
+                track('map_filter_applied', {
+                  empire: empire.slug,
+                  filter_type: 'province',
+                  province_id: val,
+                });
+              }
+            }}
             className="w-full rounded border border-[#8B7355]/50 bg-[#1a1815] px-2 py-1.5 text-sm text-[#F0ECE2] outline-none focus:border-[#C9A84C]"
           >
             <option value="">All Provinces</option>
@@ -391,7 +399,14 @@ export default function MapInner({ empire }: { empire: EmpireConfig }) {
             <input
               type="checkbox"
               checked={showBattles}
-              onChange={(e) => setShowBattles(e.target.checked)}
+              onChange={(e) => {
+                setShowBattles(e.target.checked);
+                track('map_filter_applied', {
+                  empire: empire.slug,
+                  filter_type: 'battles',
+                  enabled: e.target.checked,
+                });
+              }}
               className="accent-[#DC143C]"
             />
             <span>Battle Sites</span>
@@ -425,6 +440,20 @@ export default function MapInner({ empire }: { empire: EmpireConfig }) {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Report error */}
+      <div className="absolute bottom-4 left-4 z-[1000]">
+        <ReportError
+          empire={empire.name}
+          page="Interactive Map"
+          context={{
+            visible_places: filteredPlaces.length,
+            active_filter: selectedProvince
+              ? `Province ${selectedProvince}`
+              : 'None',
+          }}
+        />
       </div>
 
       {/* Place count */}

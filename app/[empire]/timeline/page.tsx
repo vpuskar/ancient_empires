@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation';
 import { getEmpireBySlug } from '@/lib/empires/config';
-import { getChapters } from '@/lib/services/chapters';
+import { getEventsWithRulers } from '@/lib/services/events';
 import { createClient } from '@/lib/supabase/server';
-import { ChaptersContainer } from '@/components/chapters/ChaptersContainer';
+import { TimelineContainer } from '@/components/timeline/TimelineContainer';
 
 export const revalidate = 3600;
 
@@ -16,12 +16,12 @@ export async function generateMetadata({
   if (!empire) return {};
 
   return {
-    title: `${empire.name} — Historical Chapters`,
-    description: `Read through the history of the ${empire.name} in structured storytelling chapters, from its founding to its fall.`,
+    title: `${empire.name} — Historical Timeline`,
+    description: `Explore ${empire.name} history through an interactive timeline of key political, military, and cultural events.`,
   };
 }
 
-export default async function ChaptersPage({
+export default async function TimelinePage({
   params,
 }: {
   params: Promise<{ empire: string }>;
@@ -34,7 +34,7 @@ export default async function ChaptersPage({
   }
 
   const supabase = await createClient();
-  const chapters = await getChapters(supabase, empire.id);
+  const events = await getEventsWithRulers(supabase, empire.id);
 
   return (
     <main className="min-h-screen bg-[#0C0B09] text-[#F0ECE2]">
@@ -44,11 +44,11 @@ export default async function ChaptersPage({
             {empire.name}
           </h1>
           <p className="mt-1 text-sm tracking-widest text-[#C9A84C] uppercase">
-            Storytelling Chapters
+            Historical Timeline
           </p>
         </div>
       </header>
-      <ChaptersContainer empire={empire} chapters={chapters} />
+      <TimelineContainer empire={empire} events={events} />
     </main>
   );
 }
