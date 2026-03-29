@@ -1,12 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-
-// TODO: replace with actual navigation/routing logic
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function sendPrompt(message: string) {
-  // placeholder for empire navigation
-}
+import { useRouter } from 'next/navigation';
 
 type Empire = {
   id: number;
@@ -247,10 +242,12 @@ function EmpireCard({
   empire,
   index,
   isVisible,
+  onNavigate,
 }: {
   empire: Empire;
   index: number;
   isVisible: boolean;
+  onNavigate: (slug: string) => void;
 }) {
   const [hovered, setHovered] = useState(false);
   const isRoman = empire.id === 1;
@@ -260,7 +257,7 @@ function EmpireCard({
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onClick={() => isRoman && sendPrompt(`Explore the ${empire.name}`)}
+      onClick={() => isRoman && onNavigate(empire.slug)}
       style={{
         position: 'relative',
         borderRadius: '16px',
@@ -478,6 +475,7 @@ function AnimatedCounter({
 }
 
 export default function AncientEmpiresLanding() {
+  const router = useRouter();
   const [heroVisible, setHeroVisible] = useState(false);
   const [cardsVisible, setCardsVisible] = useState(false);
   const [statsVisible, setStatsVisible] = useState(false);
@@ -731,7 +729,9 @@ export default function AncientEmpiresLanding() {
 
         {/* CTA */}
         <div
-          onClick={() => sendPrompt('Show me the Roman Empire')}
+          onClick={() =>
+            cardsRef.current?.scrollIntoView({ behavior: 'smooth' })
+          }
           onMouseEnter={() => setBtnHover(true)}
           onMouseLeave={() => setBtnHover(false)}
           style={{
@@ -874,6 +874,7 @@ export default function AncientEmpiresLanding() {
               empire={empire}
               index={i}
               isVisible={cardsVisible}
+              onNavigate={(slug) => router.push(`/${slug}`)}
             />
           ))}
         </div>
