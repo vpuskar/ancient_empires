@@ -4,6 +4,8 @@ import { useMemo, useState } from 'react';
 import { EmpireSectionNav } from '@/components/navigation/EmpireSectionNav';
 import type { EmpireConfig } from '@/lib/empires/config';
 import type { Ruler } from '@/lib/services/rulers';
+import { track } from '@/lib/posthog/track';
+import { ReportError } from '@/components/shared/ReportError';
 
 interface RulersEncyclopaediaProps {
   empire: EmpireConfig;
@@ -78,19 +80,22 @@ export function RulersEncyclopaedia({
   const selectedRuler =
     selectedRulerId === null
       ? null
-      : filteredRulers.find((ruler) => ruler.id === selectedRulerId) ?? null;
+      : (filteredRulers.find((ruler) => ruler.id === selectedRulerId) ?? null);
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] px-4 py-12 text-white">
       <div className="mx-auto max-w-6xl">
-        <header className="mb-8 border-l-4 pl-6" style={{ borderColor: empire.color }}>
+        <header
+          className="mb-8 border-l-4 pl-6"
+          style={{ borderColor: empire.color }}
+        >
           <p className="mb-2 text-sm uppercase tracking-[0.2em] text-zinc-500">
             Rulers Encyclopaedia
           </p>
           <h1 className="text-4xl font-bold">{empire.name} Rulers</h1>
           <p className="mt-3 max-w-2xl text-zinc-400">
-            Browse rulers by dynasty, search by name, and inspect each reign in a
-            focused detail panel.
+            Browse rulers by dynasty, search by name, and inspect each reign in
+            a focused detail panel.
           </p>
         </header>
 
@@ -98,7 +103,9 @@ export function RulersEncyclopaedia({
 
         <section className="mb-6 grid gap-4 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 md:grid-cols-3">
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-zinc-300">Search</span>
+            <span className="mb-2 block text-sm font-medium text-zinc-300">
+              Search
+            </span>
             <input
               type="search"
               value={search}
@@ -109,7 +116,9 @@ export function RulersEncyclopaedia({
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-zinc-300">Dynasty</span>
+            <span className="mb-2 block text-sm font-medium text-zinc-300">
+              Dynasty
+            </span>
             <select
               value={selectedDynasty}
               onChange={(event) => setSelectedDynasty(event.target.value)}
@@ -125,7 +134,9 @@ export function RulersEncyclopaedia({
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-zinc-300">Sort</span>
+            <span className="mb-2 block text-sm font-medium text-zinc-300">
+              Sort
+            </span>
             <select
               value={sortBy}
               onChange={(event) => setSortBy(event.target.value as SortOption)}
@@ -140,7 +151,8 @@ export function RulersEncyclopaedia({
         <section className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
           <div className="space-y-3">
             <p className="text-sm text-zinc-400">
-              {filteredRulers.length} {filteredRulers.length === 1 ? 'ruler' : 'rulers'}
+              {filteredRulers.length}{' '}
+              {filteredRulers.length === 1 ? 'ruler' : 'rulers'}
             </p>
 
             {rulers.length === 0 ? (
@@ -159,7 +171,14 @@ export function RulersEncyclopaedia({
                   <button
                     key={ruler.id}
                     type="button"
-                    onClick={() => setSelectedRulerId(ruler.id)}
+                    onClick={() => {
+                      setSelectedRulerId(ruler.id);
+                      track('ruler_viewed', {
+                        empire: empire.slug,
+                        ruler_name: ruler.name,
+                        ruler_id: ruler.id,
+                      });
+                    }}
                     className="block w-full rounded-xl border border-zinc-800 bg-zinc-950/70 p-5 text-left transition hover:border-zinc-600"
                     style={
                       isSelected
@@ -172,7 +191,9 @@ export function RulersEncyclopaedia({
                   >
                     <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                       <div>
-                        <h2 className="text-xl font-semibold text-white">{ruler.name}</h2>
+                        <h2 className="text-xl font-semibold text-white">
+                          {ruler.name}
+                        </h2>
                         {ruler.native_name ? (
                           <p className="mt-1 text-sm italic text-zinc-400">
                             {ruler.native_name}
@@ -186,7 +207,9 @@ export function RulersEncyclopaedia({
                     </div>
 
                     {ruler.dynasty ? (
-                      <p className="mt-3 text-sm text-zinc-400">{ruler.dynasty}</p>
+                      <p className="mt-3 text-sm text-zinc-400">
+                        {ruler.dynasty}
+                      </p>
                     ) : null}
                   </button>
                 );
@@ -196,8 +219,12 @@ export function RulersEncyclopaedia({
 
           {selectedRuler ? (
             <aside className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 lg:sticky lg:top-6 lg:self-start">
-              <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Selected ruler</p>
-              <h2 className="mt-3 text-3xl font-bold text-white">{selectedRuler.name}</h2>
+              <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">
+                Selected ruler
+              </p>
+              <h2 className="mt-3 text-3xl font-bold text-white">
+                {selectedRuler.name}
+              </h2>
 
               {selectedRuler.native_name ? (
                 <p className="mt-2 text-base italic text-zinc-400">
@@ -212,13 +239,28 @@ export function RulersEncyclopaedia({
                 </p>
                 <p>
                   <span className="text-zinc-500">Reign:</span>{' '}
-                  {formatReign(selectedRuler.reign_start, selectedRuler.reign_end)}
+                  {formatReign(
+                    selectedRuler.reign_start,
+                    selectedRuler.reign_end
+                  )}
                 </p>
               </div>
 
               <p className="mt-6 leading-7 text-zinc-300">
                 {selectedRuler.bio_short ?? 'No biography available.'}
               </p>
+
+              <div className="mt-6 border-t border-zinc-800 pt-4 flex justify-center">
+                <ReportError
+                  empire={empire.name}
+                  page="Ruler Detail"
+                  context={{
+                    ruler_id: selectedRuler.id,
+                    ruler_name: selectedRuler.name,
+                    reign_period: `${selectedRuler.reign_start} - ${selectedRuler.reign_end}`,
+                  }}
+                />
+              </div>
             </aside>
           ) : null}
         </section>

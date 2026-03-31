@@ -1,10 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getEmpireBySlug } from '@/lib/empires/config';
-import { getChapters } from '@/lib/services/chapters';
-import { createClient } from '@/lib/supabase/server';
-import { ChaptersContainer } from '@/components/chapters/ChaptersContainer';
-
-export const revalidate = 3600;
+import InteractiveMap from '@/components/map/InteractiveMap';
 
 export async function generateMetadata({
   params,
@@ -16,12 +12,12 @@ export async function generateMetadata({
   if (!empire) return {};
 
   return {
-    title: `${empire.name} — Historical Chapters`,
-    description: `Read through the history of the ${empire.name} in structured storytelling chapters, from its founding to its fall.`,
+    title: `${empire.name} — Interactive Map`,
+    description: `Explore cities, forts, temples, ports, and battle sites of the ${empire.name} on an interactive map.`,
   };
 }
 
-export default async function ChaptersPage({
+export default async function MapPage({
   params,
 }: {
   params: Promise<{ empire: string }>;
@@ -33,9 +29,6 @@ export default async function ChaptersPage({
     notFound();
   }
 
-  const supabase = await createClient();
-  const chapters = await getChapters(supabase, empire.id);
-
   return (
     <main className="min-h-screen bg-[#0C0B09] text-[#F0ECE2]">
       <header className="px-6 py-6">
@@ -44,11 +37,11 @@ export default async function ChaptersPage({
             {empire.name}
           </h1>
           <p className="mt-1 text-sm tracking-widest text-[#C9A84C] uppercase">
-            Storytelling Chapters
+            Interactive Map
           </p>
         </div>
       </header>
-      <ChaptersContainer empire={empire} chapters={chapters} />
+      <InteractiveMap empire={empire} />
     </main>
   );
 }
