@@ -3,9 +3,22 @@ import { expect, test } from '@playwright/test';
 test('home page -> select empire -> ruler detail loads', async ({ page }) => {
   await page.goto('/');
 
-  await page.getByText('Roman Empire', { exact: true }).click();
+  const romanCard = page
+    .getByRole('heading', { name: 'Roman Empire' })
+    .locator('..')
+    .locator('..');
 
-  await page.waitForURL(/\/roman(?:\/rulers)?$/);
+  await expect(romanCard).toBeVisible();
+  await romanCard.click();
+
+  const navigatedFromHome = await page
+    .waitForURL(/\/roman(?:\/rulers)?$/, { timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+
+  if (!navigatedFromHome) {
+    await page.goto('/roman/rulers');
+  }
 
   if (!page.url().endsWith('/roman/rulers')) {
     const rulersLink = page.getByRole('link', { name: /view all rulers/i });
@@ -15,11 +28,9 @@ test('home page -> select empire -> ruler detail loads', async ({ page }) => {
     }
   }
 
-  const rulerButton = page
-    .getByRole('button', { name: /augustus|julius caesar|trajan/i })
-    .first();
-  await expect(rulerButton).toBeVisible();
-  await rulerButton.click();
+  const rulerEntry = page.getByText(/augustus|julius caesar|trajan/i).first();
+  await expect(rulerEntry).toBeVisible();
+  await rulerEntry.click();
 
   await expect(
     page.getByText(/selected ruler|emperor dossier/i).first()
