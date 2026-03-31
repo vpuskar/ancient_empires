@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { EmpireSectionNav } from '@/components/navigation/EmpireSectionNav';
+import { EmpireOverview } from '@/components/empires/EmpireOverview';
 import { getEmpireBySlug } from '@/lib/empires/config';
 
 function formatYear(year: number): string {
@@ -33,10 +34,7 @@ export default async function EmpirePage({
 
         <EmpireSectionNav empire={empire} />
 
-        <section className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 text-zinc-300">
-          Use the sections above to explore rulers, places, events, and chapters
-          for the {empire.name}.
-        </section>
+        <EmpireOverview empire={empire} />
       </div>
     </main>
   );
