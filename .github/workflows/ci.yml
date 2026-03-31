@@ -8,6 +8,15 @@ jobs:
   ci:
     name: Lint · Type-check · Test · Build
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+      NEXT_PUBLIC_SENTRY_DSN: https://placeholder-public@sentry.io/123
+      SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
+      UPSTASH_REDIS_REST_URL: https://placeholder.upstash.io
+      UPSTASH_REDIS_REST_TOKEN: placeholder-upstash-token
+      SENTRY_DSN: https://placeholder@sentry.io/123
+      CRON_SECRET: placeholder-cron-secret-32chars
 
     steps:
       - name: Checkout
@@ -30,22 +39,6 @@ jobs:
 
       - name: Test
         run: npm run test
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
-          SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
-          UPSTASH_REDIS_REST_URL: https://placeholder.upstash.io
-          UPSTASH_REDIS_REST_TOKEN: placeholder-upstash-token
-          SENTRY_DSN: https://placeholder@sentry.io/123
-          CRON_SECRET: placeholder-cron-secret-32chars
 
       - name: Build
         run: npm run build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
-          SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
-          UPSTASH_REDIS_REST_URL: https://placeholder.upstash.io
-          UPSTASH_REDIS_REST_TOKEN: placeholder-upstash-token
-          SENTRY_DSN: https://placeholder@sentry.io/123
-          CRON_SECRET: placeholder-cron-secret-32chars
