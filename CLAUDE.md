@@ -122,6 +122,7 @@ Status: IN PROGRESS — rulers encyclopaedia and chapters built, map/timeline de
 - lib/fonts.ts: font configuration
 - components/ui/: EmptyState, EraLabel, GoldDivider, RevealOnScroll shared UI components
 - lib/services/stats.ts: stats service
+- PostHog live with autocapture enabled (US Cloud region)
 
 ### Phase 0 v1.4 additions ✓
 
@@ -131,6 +132,7 @@ Status: IN PROGRESS — rulers encyclopaedia and chapters built, map/timeline de
 - lib/services/rulers.ts, places.ts, quiz.ts: CRUD filtered by empire_id
 - ESLint v9 + Prettier + husky pre-commit hook
 - Vitest + tests/smoke.test.ts (4 passing)
+- GitHub Issue labels configured: bug, data-error, empire:roman, empire:chinese, empire:japanese, empire:ottoman, ui-issue, map, quiz, user-reported
 - GitHub Actions CI: .github/workflows/ci.yml
 - Dependabot: .github/dependabot.yml (npm + Actions, weekly, Monday)
 - GitHub Issue labels configured for error reporting triage
@@ -193,6 +195,7 @@ mode system will require either schema extension or 3x content generation.
   - Shared empire navigation: components/navigation/
   - Place interface fix: `founded` → `founded_year` in lib/services/places.ts
   - Incomplete map/timeline pages and components removed (belong in own feature branches)
+- Technical debt: Playwright E2E tests still pending for Phase 2 DoD; 4 of 5 tests can be written now, with the quiz test deferred to Phase 3.
 
 ## Phase 2 feature branches
 
