@@ -127,6 +127,7 @@ Status: READY TO START — all data populated
 - Vitest + tests/smoke.test.ts (4 passing)
 - GitHub Actions CI: .github/workflows/ci.yml
 - Dependabot: .github/dependabot.yml (npm + Actions, weekly, Monday)
+- GitHub Issue labels configured for error reporting triage
 - Sentry: sentry.client.config.ts + sentry.server.config.ts + app/error.tsx
 - OG fallback: public/og-fallback.png + public/og-fallback.svg
 - Supabase CLI linked, migration placeholder committed
