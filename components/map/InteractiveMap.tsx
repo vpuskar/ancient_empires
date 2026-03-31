@@ -2,7 +2,6 @@
 
 import dynamic from 'next/dynamic';
 import type { EmpireConfig } from '@/lib/empires/config';
-import MapErrorBoundary from './MapErrorBoundary';
 
 const MapInner = dynamic(() => import('./MapInner'), {
   ssr: false,
@@ -25,9 +24,5 @@ function MapLoadingSkeleton() {
 }
 
 export default function InteractiveMap({ empire }: { empire: EmpireConfig }) {
-  return (
-    <MapErrorBoundary>
-      <MapInner empire={empire} />
-    </MapErrorBoundary>
-  );
+  return <MapInner empire={empire} />;
 }

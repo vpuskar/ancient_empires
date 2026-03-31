@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getEmpireBySlug } from '@/lib/empires/config';
 import InteractiveMap from '@/components/map/InteractiveMap';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
 export async function generateMetadata({
   params,
@@ -41,7 +42,9 @@ export default async function MapPage({
           </p>
         </div>
       </header>
-      <InteractiveMap empire={empire} />
+      <ErrorBoundary moduleName="Interactive map">
+        <InteractiveMap empire={empire} />
+      </ErrorBoundary>
     </main>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
 type TimelineEvent = {
   id: number;
@@ -458,18 +459,19 @@ export default function HorizontalTimeline() {
   }, []);
 
   return (
-    <div
-      style={{
-        height: '100vh',
-        background: '#0C0B09',
-        color: '#F0ECE2',
-        fontFamily: "'DM Sans', sans-serif",
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
+    <ErrorBoundary moduleName="Timeline">
+      <div
+        style={{
+          height: '100vh',
+          background: '#0C0B09',
+          color: '#F0ECE2',
+          fontFamily: "'DM Sans', sans-serif",
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
       <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap"
         rel="stylesheet"
@@ -1323,7 +1325,7 @@ export default function HorizontalTimeline() {
         </div>
       )}
 
-      <style>{`
+        <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
         ::selection { background: rgba(201,168,76,0.3); color: #F0ECE2 }
         button { font-family: inherit }
@@ -1337,6 +1339,7 @@ export default function HorizontalTimeline() {
           header { padding: 16px 16px 0 !important }
         }
       `}</style>
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }
