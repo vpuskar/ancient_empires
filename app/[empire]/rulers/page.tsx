@@ -2,8 +2,11 @@
 
 /* eslint-disable @next/next/no-page-custom-font */
 
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { useEffect, useState } from "react";
 import type { ChangeEvent, CSSProperties } from "react";
+import { getEmpireBySlug } from '@/lib/empires/config';
 
 interface Ruler {
   id: number;
@@ -395,6 +398,13 @@ function RulerDetail({ ruler, onClose }: RulerDetailProps) {
 }
 
 export default function RulersEncyclopaedia() {
+  const params = useParams<{ empire: string | string[] }>();
+  const routeEmpire = Array.isArray(params.empire)
+    ? params.empire[0]
+    : params.empire;
+  const empire = routeEmpire ? getEmpireBySlug(routeEmpire) : undefined;
+  const slug = empire?.slug ?? routeEmpire ?? '';
+  const empireName = empire?.name ?? routeEmpire ?? 'Empire';
   const [visible, setVisible] = useState(false);
   const [search, setSearch] = useState("");
   const [dynasty, setDynasty] = useState("All");
@@ -488,13 +498,35 @@ export default function RulersEncyclopaedia() {
         }}>
           {/* Back nav */}
           <div style={{ textAlign: "left", marginBottom: "32px" }}>
-            <div onClick={() => window.history.back()} style={{
-              cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "6px",
-              fontSize: "11px", color: "rgba(240,236,226,0.35)", letterSpacing: "0.1em", textTransform: "uppercase",
-            }}>
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 13L5 8L10 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              Roman Empire
-            </div>
+            <Link
+              href={`/${slug}`}
+              aria-label={`Back to ${empireName}`}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "8px 12px",
+                borderRadius: "999px",
+                fontSize: "0",
+                fontWeight: 600,
+                color: "#C9A84C",
+                letterSpacing: "0.06em",
+                textTransform: "none",
+                textDecoration: "none",
+                border: "1px solid rgba(201,168,76,0.18)",
+                background: "rgba(201,168,76,0.08)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
+                backdropFilter: "blur(10px)",
+                WebkitBackdropFilter: "blur(10px)",
+                transition:
+                  "color 0.2s ease, border-color 0.2s ease, background 0.2s ease",
+              }}
+            >
+              <span aria-hidden="true" style={{ fontSize: "11px" }}>
+                &larr;
+              </span>
+              <span style={{ fontSize: "11px" }}>{empireName}</span>
+            </Link>
           </div>
 
           <div style={{
