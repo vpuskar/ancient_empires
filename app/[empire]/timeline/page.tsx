@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getEmpireBySlug } from '@/lib/empires/config';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
@@ -307,12 +308,14 @@ function easeInOutCubic(t: number) {
 /* ================================================================
    MAIN COMPONENT
    ================================================================ */
-export default function HorizontalTimeline({
-  params,
-}: {
-  params: { empire: string };
-}) {
-  const empire = getEmpireBySlug(params.empire);
+export default function HorizontalTimeline() {
+  const params = useParams<{ empire: string | string[] }>();
+  const routeEmpire = Array.isArray(params.empire)
+    ? params.empire[0]
+    : params.empire;
+  const empire = routeEmpire ? getEmpireBySlug(routeEmpire) : undefined;
+  const slug = empire?.slug ?? routeEmpire ?? '';
+  const empireName = empire?.name ?? routeEmpire ?? 'Empire';
   const [active, setActive] = useState<number | null>(null);
   const [filter, setFilter] = useState('all');
   const [ready, setReady] = useState(false);
@@ -568,18 +571,33 @@ export default function HorizontalTimeline({
       >
         <div style={{ textAlign: 'left', marginBottom: '32px' }}>
           <Link
-            href={`/${params.empire}`}
+            href={`/${slug}`}
+            aria-label={`Back to ${empireName}`}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              fontSize: '11px',
-              color: 'rgba(240,236,226,0.35)',
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
+              gap: '8px',
+              padding: '8px 12px',
+              borderRadius: '999px',
+              fontSize: '0',
+              fontWeight: 600,
+              color: '#C9A84C',
+              letterSpacing: '0.06em',
+              textTransform: 'none',
               textDecoration: 'none',
+              border: '1px solid rgba(201,168,76,0.18)',
+              background: 'rgba(201,168,76,0.08)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+              transition:
+                'color 0.2s ease, border-color 0.2s ease, background 0.2s ease',
             }}
           >
-            ← {empire?.name ?? params.empire}
+            <span aria-hidden="true" style={{ fontSize: '11px' }}>
+              &larr;
+            </span>
+            <span style={{ fontSize: '11px' }}>{empireName}</span>
           </Link>
         </div>
         <div
