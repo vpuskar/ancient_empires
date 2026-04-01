@@ -101,7 +101,7 @@ Files (Roman Empire):
 ## Current Phase
 
 Phase 2 — Roman Empire MVP (Week 5-8)
-Status: IN PROGRESS — rulers encyclopaedia and chapters built, map/timeline deferred to own branches
+Status: COMPLETE — Phase 2 DoD satisfied (Lighthouse > 85 achieved)
 
 ## What is complete
 
@@ -122,6 +122,19 @@ Status: IN PROGRESS — rulers encyclopaedia and chapters built, map/timeline de
 - lib/fonts.ts: font configuration
 - components/ui/: EmptyState, EraLabel, GoldDivider, RevealOnScroll shared UI components
 - lib/services/stats.ts: stats service
+- PostHog live with autocapture enabled (US Cloud region)
+
+### Phase 2 — Roman Empire MVP (Week 5-8) ✓
+
+- All 7 feature branches merged to develop
+- PostHog configured and live (US Cloud, autocapture enabled)
+- GitHub Issue labels configured (bug, data-error, empire:roman, empire:chinese, empire:japanese, empire:ottoman, ui-issue, map, quiz, user-reported)
+- Global error boundary (app/error.tsx) + reusable ErrorBoundary component
+- Per-module error boundaries on map and timeline pages
+- Cache-Control headers on API routes
+- Leaflet dynamic import verified
+- Playwright E2E tests: 4 critical paths passing
+- Lighthouse: Performance 89, Accessibility 100, Best Practices 100, SEO 60
 
 ### Phase 0 v1.4 additions ✓
 
@@ -131,6 +144,7 @@ Status: IN PROGRESS — rulers encyclopaedia and chapters built, map/timeline de
 - lib/services/rulers.ts, places.ts, quiz.ts: CRUD filtered by empire_id
 - ESLint v9 + Prettier + husky pre-commit hook
 - Vitest + tests/smoke.test.ts (4 passing)
+- GitHub Issue labels configured: bug, data-error, empire:roman, empire:chinese, empire:japanese, empire:ottoman, ui-issue, map, quiz, user-reported
 - GitHub Actions CI: .github/workflows/ci.yml
 - Dependabot: .github/dependabot.yml (npm + Actions, weekly, Monday)
 - GitHub Issue labels configured for error reporting triage
@@ -182,17 +196,13 @@ AI chatbot layer: context-sensitive help at three detail levels
 Current chapters are single-level (intermediate). Multi-level content and
 mode system will require either schema extension or 3x content generation.
 
-## What is in progress
+## Known technical debt
 
-### Phase 2 — Roman Empire MVP (Week 5-8)
-
-- feature/rulers-encyclopaedia (active):
-  - Rulers list page with filtering UX: app/[empire]/rulers/
-  - Rulers components: components/rulers/
-  - Storytelling chapters: app/[empire]/chapters/
-  - Shared empire navigation: components/navigation/
-  - Place interface fix: `founded` → `founded_year` in lib/services/places.ts
-  - Incomplete map/timeline pages and components removed (belong in own feature branches)
+- iOS Safari test deferred (not yet verified)
+- SEO score 60 — to be addressed in Phase 3 (sitemap, JSON-LD, OG)
+- Playwright quiz test deferred to Phase 3 (quiz module does not exist yet)
+- Server-side PostHog capture deferred to Phase 3 (quiz_completed, share_clicked events)
+- CI env vars use mock values — consider GitHub Secrets for real keys in future
 
 ## Phase 2 feature branches
 
