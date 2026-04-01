@@ -1,6 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { getEmpireBySlug } from '@/lib/empires/config';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
 type TimelineEvent = {
@@ -305,7 +307,12 @@ function easeInOutCubic(t: number) {
 /* ================================================================
    MAIN COMPONENT
    ================================================================ */
-export default function HorizontalTimeline() {
+export default function HorizontalTimeline({
+  params,
+}: {
+  params: { empire: string };
+}) {
+  const empire = getEmpireBySlug(params.empire);
   const [active, setActive] = useState<number | null>(null);
   const [filter, setFilter] = useState('all');
   const [ready, setReady] = useState(false);
@@ -559,6 +566,22 @@ export default function HorizontalTimeline() {
           transition: 'all 0.8s ease',
         }}
       >
+        <div style={{ textAlign: 'left', marginBottom: '32px' }}>
+          <Link
+            href={`/${params.empire}`}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              fontSize: '11px',
+              color: 'rgba(240,236,226,0.35)',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              textDecoration: 'none',
+            }}
+          >
+            ← {empire?.name ?? params.empire}
+          </Link>
+        </div>
         <div
           style={{
             display: 'flex',
