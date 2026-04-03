@@ -2,6 +2,7 @@ export interface EmpireConfig {
   id: number;
   name: string;
   nativeName: string;
+  capital: string;
   slug: string;
   color: string;
   start: number;
@@ -15,6 +16,7 @@ export const EMPIRE_CONFIGS: EmpireConfig[] = [
     id: 1,
     name: 'Roman Empire',
     nativeName: 'Imperium Romanum',
+    capital: 'ROMA',
     slug: 'roman',
     color: '#8B0000',
     start: -509,
@@ -26,6 +28,7 @@ export const EMPIRE_CONFIGS: EmpireConfig[] = [
     id: 2,
     name: 'Chinese Empire',
     nativeName: 'Zhonghua Diguo',
+    capital: 'CHANGAN',
     slug: 'chinese',
     color: '#DE2910',
     start: -221,
@@ -37,6 +40,7 @@ export const EMPIRE_CONFIGS: EmpireConfig[] = [
     id: 3,
     name: 'Japanese Empire',
     nativeName: 'Dai Nippon Teikoku',
+    capital: 'HEIAN-KYO',
     slug: 'japanese',
     color: '#BC002D',
     start: -660,
@@ -48,6 +52,7 @@ export const EMPIRE_CONFIGS: EmpireConfig[] = [
     id: 4,
     name: 'Ottoman Empire',
     nativeName: 'Devlet-i Aliyye-i Osmaniye',
+    capital: 'KOSTANTINIYYE',
     slug: 'ottoman',
     color: '#1A6B3A',
     start: 1299,
@@ -58,5 +63,6 @@ export const EMPIRE_CONFIGS: EmpireConfig[] = [
 ];
 
 export function getEmpireBySlug(slug: string): EmpireConfig | undefined {
+  return EMPIRE_CONFIGS.find((empire) => empire.slug === slug);
   return EMPIRE_CONFIGS.find((e) => e.slug === slug);
 }
