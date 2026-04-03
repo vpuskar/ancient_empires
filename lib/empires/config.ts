@@ -64,4 +64,5 @@ export const EMPIRE_CONFIGS: EmpireConfig[] = [
 
 export function getEmpireBySlug(slug: string): EmpireConfig | undefined {
   return EMPIRE_CONFIGS.find((empire) => empire.slug === slug);
+  return EMPIRE_CONFIGS.find((e) => e.slug === slug);
 }
