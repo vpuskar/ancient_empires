@@ -15,6 +15,20 @@ interface EmpireExtentRow {
 
 type SnapshotEnrichment = Omit<TimelineSnapshot, 'year' | 'label' | 'areaKm2'>;
 
+function getGenericEnrichment(year: number): SnapshotEnrichment {
+  return {
+    era: 'Imperial Transition',
+    eraDesc:
+      'This snapshot has not yet been given a curated narrative, but it still marks a meaningful territorial moment in the empire timeline.',
+    eraRange: formatYearLabel(year),
+    ruler: null,
+    provinces: ['Core Territory'],
+    storyTitle: 'Territorial Transition',
+    storySummary:
+      'The frontier changed at this point in ways that shaped the empire\'s long-term position. Curated narrative details can be added later without changing the data contract.',
+  };
+}
+
 const ROMAN_SNAPSHOTS: Record<number, SnapshotEnrichment> = {
   [-500]: {
     era: 'Roman Kingdom',
@@ -45,12 +59,12 @@ const ROMAN_SNAPSHOTS: Record<number, SnapshotEnrichment> = {
     storySummary:
       'Victory in the Punic Wars and campaigns in the Hellenistic east turned Rome from an Italian republic into a naval and imperial power. Territorial control now spanned multiple seas, forcing Rome to govern distant provinces for the first time.',
   },
-  [-27]: {
-    era: 'Julio-Claudian',
+  [-1]: {
+    era: 'Late Republic',
     eraDesc:
-      'Augustus transformed republican offices into a stable imperial system, preserving old forms while centralizing real power.',
-    eraRange: '27 BC - 68 AD',
-    ruler: 'Augustus',
+      'Rome stood at the hinge between republican collapse and imperial rule, with conquest, civil war, and centralized authority remaking the Mediterranean world.',
+    eraRange: '133 BC - 27 BC',
+    ruler: null,
     provinces: [
       'Italia',
       'Gallia Narbonensis',
@@ -61,14 +75,14 @@ const ROMAN_SNAPSHOTS: Record<number, SnapshotEnrichment> = {
       'Aegyptus',
       'Syria',
     ],
-    storyTitle: 'The First Emperor',
+    storyTitle: 'Republic at the Edge',
     storySummary:
-      'After a century of civil war, Rome traded republican competition for imperial order under Augustus. The empire became more coherent administratively, with frontiers, taxation, and military command increasingly tied to one ruler.',
+      'By 1 BC Rome had already assembled a vast Mediterranean dominion, but its political order remained unsettled after decades of civil war. The territorial footprint of empire existed before the imperial constitution fully did.',
   },
-  [117]: {
+  [100]: {
     era: 'Nerva-Antonine Dynasty',
     eraDesc:
-      'Adoptive succession, administrative competence, and military success produced the most expansive and confident version of Roman rule.',
+      'Under Trajan, Rome approached its widest extent through disciplined administration, military pressure, and confidence at the center.',
     eraRange: '96 - 192 AD',
     ruler: 'Trajan',
     provinces: [
@@ -84,9 +98,9 @@ const ROMAN_SNAPSHOTS: Record<number, SnapshotEnrichment> = {
       'Mesopotamia',
       'Syria',
     ],
-    storyTitle: 'Peak of Empire',
+    storyTitle: 'Near the Summit',
     storySummary:
-      'By 117 AD Rome reached its maximum territorial extent, stretching from Britain to Mesopotamia. Expansion brought immense prestige, but also exposed the empire to the cost of defending long, diverse frontiers.',
+      'Around 100 AD the empire was already pressing toward its maximum reach, with Trajan\'s reign opening a final phase of expansion. The map projected unmatched confidence, even as the cost of defending distant borders kept rising.',
   },
   [200]: {
     era: 'Severan Dynasty',
@@ -177,10 +191,8 @@ function enrichSnapshots(
     const enrichment = enrichments[row.year];
 
     if (!enrichment) {
-      throw new AppError(
-        `No territorial snapshot enrichment for empire ${empireId} year ${row.year}`,
-        'TERRITORIAL_SNAPSHOT_MISSING',
-        500
+      console.warn(
+        `[territorial] Missing snapshot enrichment for empire ${empireId} year ${row.year}; using generic fallback.`
       );
     }
 
@@ -188,7 +200,7 @@ function enrichSnapshots(
       year: row.year,
       label: formatYearLabel(row.year),
       areaKm2: row.area_km2,
-      ...enrichment,
+      ...(enrichment ?? getGenericEnrichment(row.year)),
     };
   });
 }
