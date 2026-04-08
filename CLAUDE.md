@@ -39,6 +39,10 @@ Current empire pages:
 - /[empire]/chapters — Storytelling chapters
 - /[empire]/analytics — Analytics dashboard (Phase 3)
 - /[empire]/territorial — Territorial timeline (Phase 3)
+- /[empire]/quiz — Knowledge quiz (Phase 3)
+
+API routes:
+- /api/quiz/questions — POST, fetches random questions by empire+difficulty+category
 
 ## Branching — CRITICAL
 
@@ -65,6 +69,25 @@ Key convention: negative integers for BC dates (-117 = 117 BC)
 ### empire_extent actual years (Roman, empire_id=1):
 -500, -200, -1, 100, 200, 400
 (NOT -27 and 117 — enrichment mappings must match these exact DB values)
+
+### quiz_questions.difficulty levels:
+- 1 = Plebs (basic common knowledge) — ~1,091 questions (25%)
+- 2 = Legionarius (requires Roman history knowledge) — ~1,756 questions (40%)
+- 3 = Senator (specific dates/details/context) — ~1,092 questions (25%)
+- 4 = Imperator (obscure, specialist-level) — ~438 questions (10%)
+
+Difficulty was reclassified from all-2 to 4-tier distribution via heuristic classifier + SQL batch update. Constraint updated: `CHECK (difficulty BETWEEN 1 AND 4)`.
+
+### quiz_questions.category values (Roman Empire):
+- culture: 2,889
+- politics: 383
+- rulers: 376
+- religion: 301
+- geography: 236
+- battles: 192
+
+### quiz_questions.correct column:
+CHAR(1) — values 'A', 'B', 'C', 'D'. Maps to option index: A=0, B=1, C=2, D=3.
 
 ## Security — CRITICAL
 
@@ -103,11 +126,13 @@ Key convention: negative integers for BC dates (-117 = 117 BC)
 ## Fetch Caching Policy
 
 - Static data (empire configs, rulers): `revalidate: 86400` (24h)
-- Semi-static (events, places, empire_extent): `revalidate: 3600` (1h)
-- Dynamic (quiz results, analytics): `cache: 'no-store'` or `dynamic = 'force-dynamic'`
+- Semi-static (events, places, empire_extent, quiz config): `revalidate: 3600` (1h)
+- Dynamic (quiz questions, quiz results, analytics): `cache: 'no-store'` or `dynamic = 'force-dynamic'`
 
-**Note:** Analytics dashboard uses `force-dynamic` (data changes on import).
-Territorial timeline uses `revalidate: 3600` (semi-static empire_extent data).
+**Per-page caching:**
+- Analytics dashboard: `force-dynamic`
+- Territorial timeline: `revalidate: 3600`
+- Quiz page: `revalidate: 3600` (config/category counts), API route `no-store` (questions)
 
 ## GeoJSON
 
@@ -127,7 +152,7 @@ Files (Roman Empire):
 ## Current Phase
 
 Phase 3 — Roman Empire Complete (Week 9-11)
-Status: IN PROGRESS — 2 of 5 features complete
+Status: IN PROGRESS — 3 of 5 features complete
 
 ## What is complete
 
@@ -190,9 +215,28 @@ Status: IN PROGRESS — 2 of 5 features complete
 - "Territorial" link added to EmpireSectionNav
 - lib/empires/config.ts extended: nativeName, capital, startYear, endYear fields
 
-#### ⬜ feature/quiz-module — NOT STARTED
-- Quiz flow, timer, score
-- 4,377 questions ready in DB
+#### ✓ feature/quiz-module (PR to develop)
+- 4-tier difficulty system: Plebs (30s, ×1), Legionarius (20s, ×1.5), Senator (15s, ×2), Imperator (10s, ×3)
+- 6 categories from DB: culture, politics, rulers, religion, geography, battles
+- Difficulty select → Category select → Loading → Playing → Score Card flow
+- lib/types/quiz.ts: QuizDifficultyLevel, QuizCategory, QuizQuestion, QuizConfig
+- lib/config/quiz-difficulties.ts: static gameplay config (timer, multiplier per level)
+- lib/config/quiz-ranks.ts: rank calculation (Tiro → Miles → Centurion → Praetor → Triumphator)
+- lib/services/quiz.ts: getQuizConfig (semi-static) + getQuizQuestions (dynamic, Fisher-Yates shuffle)
+- app/api/quiz/questions/route.ts: POST, Zod validated, returns bare QuizQuestion[] array, no-store
+- app/[empire]/quiz/page.tsx: server component, revalidate 3600
+- QuizGame.tsx: state machine with ref-guarded timer (prevents double-reveal, double-advance, stale closures)
+- QuestionScreen.tsx: presentational only, all game logic in QuizGame
+- QuizTimer.tsx: SVG circular countdown, empireColor danger state at <20%
+- QuizProgress.tsx: progress bar with empireColor gradient
+- ScoreCard.tsx: animated score ring, Roman rank, weighted + raw stats, formatScore helper
+- Replay: "Play Again" reuses existing fetch, "Change Arena" keeps difficulty, "Change Rank" resets all
+- PostHog quiz_completed event with ref guard (fires exactly once per completion)
+- Framer Motion: page-load entrance + ScoreCard stagger sequence (self-contained)
+- Keyboard support: A/B/C/D and 1/2/3/4 keys
+- Error handling: fetch failure returns to category screen with inline error message
+- "Quiz" link added to EmpireSectionNav
+- quiz_questions.difficulty reclassified: all-2 → 4-tier (25/40/25/10% distribution)
 
 #### ⬜ feature/seo-performance — NOT STARTED
 - Sitemap, JSON-LD, OG
@@ -209,7 +253,7 @@ All Supabase access goes through `lib/services/*.ts`. API routes and page.tsx se
 Current services:
 - lib/services/rulers.ts
 - lib/services/places.ts
-- lib/services/quiz.ts
+- lib/services/quiz.ts (updated Phase 3: getQuizConfig + getQuizQuestions)
 - lib/services/stats.ts
 - lib/services/analytics.ts (Phase 3)
 - lib/services/territorial.ts (Phase 3)
@@ -227,6 +271,31 @@ export async function getSomething(empireId: number) {
 }
 ```
 
+## Quiz Module Architecture
+
+### State Machine
+`QuizGame.tsx` is the orchestrator: difficulty → category → loading → playing → score.
+All timer, reveal, advance, and score logic lives in QuizGame (NOT in child components).
+Child components (QuestionScreen, QuizTimer, QuizProgress, ScoreCard) are presentational only.
+
+### Timer Safety Pattern
+- `isRevealedRef` prevents double-reveal (user answer + timer expiry same frame)
+- `advanceTimeoutRef` stored and cleared on question change/unmount
+- `timerIntervalRef` stored and cleared on reveal/unmount/screen change
+- Functional state updates avoid stale closures in setTimeout callbacks
+- Game state reset happens inline in fetch success handler, NOT in useEffect([screen])
+
+### Question Fetching
+- Config (category counts) fetched server-side in page.tsx (semi-static, revalidate 3600)
+- Questions fetched client-side via POST /api/quiz/questions (dynamic, user selects difficulty+category)
+- API returns bare QuizQuestion[] array (not wrapped in object)
+- Fisher-Yates shuffle for unbiased randomness (NOT array.sort(random))
+
+### Difficulty → DB Mapping
+```typescript
+{ plebs: 1, legionarius: 2, senator: 3, imperator: 4 }
+```
+
 ## Charting — D3.js
 
 All charts use D3.js + Observable Plot. Recharts is NOT used.
@@ -240,7 +309,7 @@ D3 + React integration pattern:
 ## Navigation
 
 Empire section nav (`EmpireSectionNav.tsx`) links:
-Overview, Rulers, Map, Timeline, Territorial, Chapters, Analytics
+Overview, Rulers, Map, Timeline, Territorial, Chapters, Analytics, Quiz
 
 ## Data completeness — Roman Empire
 
@@ -254,17 +323,18 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Analytics
 | events         | 98    | year, category, significance (1-5), ruler_id (62/98)    |
 | chapters       | 7     | slug, title, content_md (Markdown), period_start/end    |
 | empire_extent  | 6     | year, geojson_url, area_km2, notes                      |
-| quiz_questions | 4,377 | (full set for Roman Empire)                             |
+| quiz_questions | 4,377 | difficulty 1-4 (reclassified), 6 categories             |
 
 ## Known technical debt
 
 - iOS Safari test deferred (not yet verified)
 - SEO score 60 — to be addressed in Phase 3 feature/seo-performance
-- Playwright quiz test deferred (quiz module not yet built)
-- Server-side PostHog capture deferred (quiz_completed, share_clicked events)
+- Playwright quiz E2E test needed (quiz module now exists)
+- Server-side PostHog capture deferred (share_clicked event; quiz_completed now fires client-side)
 - CI env vars use mock values — consider GitHub Secrets for real keys
 - Province polygon boundaries deferred (nearest-centroid used for MVP)
 - 2 pre-existing lint warnings in app/page.tsx and app/[empire]/timeline/page.tsx (custom font usage)
+- Quiz difficulty classification is heuristic-based — spot-check recommended for quality
 
 ## Key decisions & why
 
@@ -282,6 +352,12 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Analytics
 - Client components must never import lib/env.ts: Zod validates server-only env vars
 - React hooks must be declared before any conditional returns
 - Codex prompts split into 3-4 focused steps: reduces errors, enables incremental verification
+- Quiz questions fetched via API route (not page-level): user selects difficulty+category client-side
+- Fisher-Yates shuffle (not sort(random)): unbiased randomness for quiz question selection
+- Quiz difficulty 4-tier reclassification: heuristic batch classifier, 25/40/25/10 distribution target
+- Quiz timer safety: ref guards prevent double-reveal/advance, cleanup on unmount/question change
+- Quiz ScoreCard owns its own Framer Motion entrance: separation of animation concerns
+- PostHog quiz_completed uses ref guard: fires exactly once per completed run, not on re-render
 
 ## Do NOT change without consultation
 
@@ -292,3 +368,6 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Analytics
 - GeoJSON max size limit of 200KB
 - D3.js as the charting library (do not introduce Recharts)
 - Service layer pattern (all DB access through lib/services/)
+- quiz_questions difficulty mapping (1=Plebs, 2=Legionarius, 3=Senator, 4=Imperator)
+- Quiz API route response shape (bare QuizQuestion[] array)
+- Quiz timer ref-guard pattern in QuizGame.tsx
