@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { label: 'Map', suffix: '/map' },
   { label: 'Timeline', suffix: '/timeline' },
   { label: 'Chapters', suffix: '/chapters' },
+  { label: 'Quiz', suffix: '/quiz' },
 ];
 
 export function EmpireSectionNav({ empire }: EmpireSectionNavProps) {
