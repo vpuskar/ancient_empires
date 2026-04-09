@@ -1,8 +1,8 @@
 ﻿@import 'tailwindcss';
 
 @theme {
-  --font-display: var(--font-playfair, 'Playfair Display', serif);
-  --font-body: var(--font-dm-sans, 'DM Sans', sans-serif);
+  --font-display: var(--font-cinzel, 'Cinzel', serif);
+  --font-body: var(--font-cormorant, 'Cormorant Garamond', serif);
 
   --color-empire: var(--empire-color, #c9a84c);
   --color-empire-light: var(--empire-color-light, #e8c547);

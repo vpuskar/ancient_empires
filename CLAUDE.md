@@ -17,21 +17,44 @@ empire_id mapping:
 - 3 = Japanese Empire (slug: 'japanese', #BC002D, 660 BC – 1945 AD)
 - 4 = Ottoman Empire (slug: 'ottoman', #1A6B3A, 1299 – 1922 AD)
 
+## Empire Config — Extended Fields
+
+`lib/empires/config.ts` exports `EMPIRE_CONFIGS` with these fields per empire:
+id, name, nativeName, capital, slug, color, start, end, startYear, endYear
+
+- `nativeName`: display name in native language (e.g. "Imperium Romanum")
+- `capital`: primary capital city name (e.g. "ROMA", "CHANG'AN")
+- `startYear` / `endYear`: same as start/end, added for semantic clarity
+
 ## Routing
 
 All pages under /[empire]/ dynamic segment.
 Compare page: /compare/personality (cross-empire quiz)
 
+Current empire pages:
+- /[empire]/ — Overview (landing)
+- /[empire]/rulers — Rulers encyclopaedia
+- /[empire]/map — Interactive Leaflet map
+- /[empire]/timeline — Horizontal events timeline
+- /[empire]/chapters — Storytelling chapters
+- /[empire]/analytics — Analytics dashboard (Phase 3)
+- /[empire]/territorial — Territorial timeline (Phase 3)
+- /[empire]/quiz — Knowledge quiz (Phase 3)
+
+API routes:
+- /api/quiz/questions — POST, fetches random questions by empire+difficulty+category
+
 ## Branching — CRITICAL
 
-main → develop → feature/_
+main → develop → feature/*
 NEVER merge directly into main.
-feature/_ → develop (test on Vercel preview) → main → auto Vercel deploy
+feature/* → develop (test on Vercel preview) → main → auto Vercel deploy
 
 ## AI Tools (v1.4)
 
+- Claude (chat): architecture, specs, prompts, code review, SQL
+- OpenAI Codex (gpt-5.4): primary coding agent, uses AGENTS.md
 - Claude Code (terminal): import scripts, SEO, i18n, format transformation
-- Lovable: UI components
 - Claude Haiku API: batch content (quiz questions, ruler bios)
 - Dependabot: dependency updates weekly (npm + GitHub Actions), PRs target develop
 
@@ -43,9 +66,32 @@ Materialised view: search_index
 
 Key convention: negative integers for BC dates (-117 = 117 BC)
 
+### empire_extent actual years (Roman, empire_id=1):
+-500, -200, -1, 100, 200, 400
+(NOT -27 and 117 — enrichment mappings must match these exact DB values)
+
+### quiz_questions.difficulty levels:
+- 1 = Plebs (basic common knowledge) — ~1,091 questions (25%)
+- 2 = Legionarius (requires Roman history knowledge) — ~1,756 questions (40%)
+- 3 = Senator (specific dates/details/context) — ~1,092 questions (25%)
+- 4 = Imperator (obscure, specialist-level) — ~438 questions (10%)
+
+Difficulty was reclassified from all-2 to 4-tier distribution via heuristic classifier + SQL batch update. Constraint updated: `CHECK (difficulty BETWEEN 1 AND 4)`.
+
+### quiz_questions.category values (Roman Empire):
+- culture: 2,889
+- politics: 383
+- rulers: 376
+- religion: 301
+- geography: 236
+- battles: 192
+
+### quiz_questions.correct column:
+CHAR(1) — values 'A', 'B', 'C', 'D'. Maps to option index: A=0, B=1, C=2, D=3.
+
 ## Security — CRITICAL
 
-- SUPABASE*SERVICE_ROLE_KEY → server-side only, never NEXT_PUBLIC*
+- SUPABASE_SERVICE_ROLE_KEY → server-side only, never NEXT_PUBLIC_
 - NEXT_PUBLIC_SUPABASE_ANON_KEY → client-safe (RLS enforces access)
 - Rate limiting: active from Phase 0 (proxy.ts — Upstash Redis tiered)
 - RLS enabled on ALL tables before any data import
@@ -63,7 +109,7 @@ Key convention: negative integers for BC dates (-117 = 117 BC)
 ## Infrastructure
 
 - Rate limiting: Upstash Redis, sliding window, two tiers:
-  - standard /api/\*: 100 req/60s per IP
+  - standard /api/*: 100 req/60s per IP
   - expensive /api/personality/og + /api/quiz/calculate: 15 req/60s per IP
 - Supabase CLI: installed, project linked (ref: fvjbjnehupqdcwlodkpq)
 - Migrations: supabase/migrations/ — run `supabase db push` to apply
@@ -75,13 +121,18 @@ Key convention: negative integers for BC dates (-117 = 117 BC)
 
 - Vitest (environment: node), `npm run test` → `vitest run`
 - tests/smoke.test.ts: env validation (4 tests — valid, missing var, bad URL, short secret)
-- Playwright: planned for Phase 2 (E2E)
+- Playwright: 4 critical path E2E tests passing
 
 ## Fetch Caching Policy
 
 - Static data (empire configs, rulers): `revalidate: 86400` (24h)
-- Semi-static (events, places): `revalidate: 3600` (1h)
-- Dynamic (quiz results, analytics): `cache: 'no-store'`
+- Semi-static (events, places, empire_extent, quiz config): `revalidate: 3600` (1h)
+- Dynamic (quiz questions, quiz results, analytics): `cache: 'no-store'` or `dynamic = 'force-dynamic'`
+
+**Per-page caching:**
+- Analytics dashboard: `force-dynamic`
+- Territorial timeline: `revalidate: 3600`
+- Quiz page: `revalidate: 3600` (config/category counts), API route `no-store` (questions)
 
 ## GeoJSON
 
@@ -100,8 +151,8 @@ Files (Roman Empire):
 
 ## Current Phase
 
-Phase 2 — Roman Empire MVP (Week 5-8)
-Status: COMPLETE — Phase 2 DoD satisfied (Lighthouse > 85 achieved)
+Phase 3 — Roman Empire Complete (Week 9-11)
+Status: IN PROGRESS — 3 of 5 features complete
 
 ## What is complete
 
@@ -117,102 +168,196 @@ Status: COMPLETE — Phase 2 DoD satisfied (Lighthouse > 85 achieved)
 - Vercel production deployment live at ancient-empires.vercel.app
 - GitHub: main, develop branches; branch protection on main
 
-### Phase 2 shared work ✓
+### Phase 1 — Data Foundation (Week 3-4) ✓
 
-- lib/fonts.ts: font configuration
-- components/ui/: EmptyState, EraLabel, GoldDivider, RevealOnScroll shared UI components
-- lib/services/stats.ts: stats service
-- PostHog live with autocapture enabled (US Cloud region)
+- 68 rulers, 7,608 places, 101 battles, 52 provinces
+- 4,377 quiz questions, 6 GeoJSON territorial snapshots
+- 6 empire_extent rows, 98 events (62 with ruler_id)
+- 7 Markdown chapters (mid-detail)
 
 ### Phase 2 — Roman Empire MVP (Week 5-8) ✓
 
-- All 7 feature branches merged to develop
-- PostHog configured and live (US Cloud, autocapture enabled)
-- GitHub Issue labels configured (bug, data-error, empire:roman, empire:chinese, empire:japanese, empire:ottoman, ui-issue, map, quiz, user-reported)
-- Global error boundary (app/error.tsx) + reusable ErrorBoundary component
-- Per-module error boundaries on map and timeline pages
-- Cache-Control headers on API routes
-- Leaflet dynamic import verified
-- Playwright E2E tests: 4 critical paths passing
+- Empire selector landing page
+- Rulers encyclopaedia
+- Interactive Leaflet map (dynamic import, Positron tiles)
+- Horizontal timeline (autoplay, category filters)
+- Storytelling chapters (scroll-driven, useReveal hook)
+- PostHog analytics (US Cloud, autocapture enabled)
+- Error reporting (ReportError → GitHub Issues)
 - Lighthouse: Performance 89, Accessibility 100, Best Practices 100, SEO 60
 
-### Phase 0 v1.4 additions ✓
+### Phase 3 — Roman Empire Complete (Week 9-11) — IN PROGRESS
 
-- proxy.ts: Upstash Redis tiered rate limiting
-- lib/env.ts: Zod validation for all env vars, throws at startup
-- lib/errors.ts: AppError class with code/statusCode + toApiError()
-- lib/services/rulers.ts, places.ts, quiz.ts: CRUD filtered by empire_id
-- ESLint v9 + Prettier + husky pre-commit hook
-- Vitest + tests/smoke.test.ts (4 passing)
-- GitHub Issue labels configured: bug, data-error, empire:roman, empire:chinese, empire:japanese, empire:ottoman, ui-issue, map, quiz, user-reported
-- GitHub Actions CI: .github/workflows/ci.yml
-- Dependabot: .github/dependabot.yml (npm + Actions, weekly, Monday)
-- GitHub Issue labels configured for error reporting triage
-- Sentry: sentry.client.config.ts + sentry.server.config.ts + app/error.tsx
-- OG fallback: public/og-fallback.png + public/og-fallback.svg
-- Supabase CLI linked, migration placeholder committed
-- vercel.json: weekly backup cron (Monday 03:00 UTC)
-- app/api/admin/backup/route.ts: Bearer CRON_SECRET auth
+#### ✓ feature/analytics-charts (merged to develop)
+- 6 D3.js charts: Dynasty bar, Events donut, Battle outcomes, Activity by century, Territorial extent, Places treemap
+- lib/services/analytics.ts: server-side data fetch + transformation + typed DTOs
+- lib/types/analytics.ts: full TypeScript interfaces
+- app/[empire]/analytics/page.tsx: server component, `force-dynamic`
+- All charts use empire.color from config (multi-tenant ready)
+- Null/unknown handling for dynasty, category, outcome, place type
+- Places chart uses actual DB schema values: city, fort, temple, battle_site, road, port, palace, other
+- Framer Motion stagger entrance animation
+- "Analytics" link added to EmpireSectionNav
 
-### Phase 1 — Data Foundation: Roman Empire (Week 3-4) ✓
+#### ✓ feature/territorial-timeline (merged to develop)
+- Radial concentric circle visualization (D3, animated rings)
+- lib/services/territorial.ts: server-side fetch from empire_extent + curated enrichment data
+- lib/types/territorial.ts: TimelineSnapshot, TimelineMarker, TerritorialTimelineData
+- Enrichment mapping keyed by actual DB years (-500, -200, -1, 100, 200, 400)
+- Generic fallback for unmatched years (no crash on missing enrichment)
+- Timeline scrubber with snapshot dots, marker pips, ruler pills, active track
+- Story strip with narrative per snapshot
+- Adaptive context panel: era info, territory bar, provinces list (expand/collapse)
+- Desktop: radial + sidebar layout. Mobile: stacked with accordion panel
+- Autoplay (2500ms interval), keyboard navigation (arrows + space)
+- Framer Motion page-load entrance, CSS transitions for snapshot changes
+- `revalidate: 3600` (semi-static)
+- "Territorial" link added to EmpireSectionNav
+- lib/empires/config.ts extended: nativeName, capital, startYear, endYear fields
 
-- 68 rulers imported
-- 7608 places imported (founded_year backfilled, province_id mapped via nearest-centroid)
-- 101 battles imported (with outcome + opposing_force populated)
-- 52 provinces imported (Roman administrative divisions, centroid lat/lng added)
-- 6 GeoJSON territorial snapshots
-- 4377 quiz questions imported
-- 6 empire_extent rows imported (linking GeoJSON files to years + area_km2 estimates)
-- 98 events imported (62 with ruler_id mapped — 51 manual, 11 auto by reign period; 36 Republic-era without ruler)
-- 7 chapters imported (Markdown, mid-detail level, ~300-450 words each)
-- battles.place_id backfilled for all 101 battles (nearest-place matching from 7608 places)
+#### ✓ feature/quiz-module (PR to develop)
+- 4-tier difficulty system: Plebs (30s, ×1), Legionarius (20s, ×1.5), Senator (15s, ×2), Imperator (10s, ×3)
+- 6 categories from DB: culture, politics, rulers, religion, geography, battles
+- Difficulty select → Category select → Loading → Playing → Score Card flow
+- lib/types/quiz.ts: QuizDifficultyLevel, QuizCategory, QuizQuestion, QuizConfig
+- lib/config/quiz-difficulties.ts: static gameplay config (timer, multiplier per level)
+- lib/config/quiz-ranks.ts: rank calculation (Tiro → Miles → Centurion → Praetor → Triumphator)
+- lib/services/quiz.ts: getQuizConfig (semi-static) + getQuizQuestions (dynamic, Fisher-Yates shuffle)
+- app/api/quiz/questions/route.ts: POST, Zod validated, returns bare QuizQuestion[] array, no-store
+- app/[empire]/quiz/page.tsx: server component, revalidate 3600
+- QuizGame.tsx: state machine with ref-guarded timer (prevents double-reveal, double-advance, stale closures)
+- QuestionScreen.tsx: presentational only, all game logic in QuizGame
+- QuizTimer.tsx: SVG circular countdown, empireColor danger state at <20%
+- QuizProgress.tsx: progress bar with empireColor gradient
+- ScoreCard.tsx: animated score ring, Roman rank, weighted + raw stats, formatScore helper
+- Replay: "Play Again" reuses existing fetch, "Change Arena" keeps difficulty, "Change Rank" resets all
+- PostHog quiz_completed event with ref guard (fires exactly once per completion)
+- Framer Motion: page-load entrance + ScoreCard stagger sequence (self-contained)
+- Keyboard support: A/B/C/D and 1/2/3/4 keys
+- Error handling: fetch failure returns to category screen with inline error message
+- "Quiz" link added to EmpireSectionNav
+- quiz_questions.difficulty reclassified: all-2 → 4-tier (25/40/25/10% distribution)
 
-### Data completeness — Roman Empire
+#### ⬜ feature/seo-performance — NOT STARTED
+- Sitemap, JSON-LD, OG
+- Target: SEO 60 → 90+
+
+#### ⬜ feature/personality-quiz-roman — NOT STARTED
+- Personality quiz UI + cosine similarity
+- 6 rulers: Augustus, Julius Caesar, Marcus Aurelius, Trajan, Nero, Caligula
+
+## Service Layer Pattern
+
+All Supabase access goes through `lib/services/*.ts`. API routes and page.tsx server components import services, never call Supabase directly.
+
+Current services:
+- lib/services/rulers.ts
+- lib/services/places.ts
+- lib/services/quiz.ts (updated Phase 3: getQuizConfig + getQuizQuestions)
+- lib/services/stats.ts
+- lib/services/analytics.ts (Phase 3)
+- lib/services/territorial.ts (Phase 3)
+
+Pattern:
+```typescript
+import { createClient } from '@/lib/supabase/server';
+import { AppError } from '@/lib/errors';
+
+export async function getSomething(empireId: number) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('table').select('*').eq('empire_id', empireId);
+  if (error) throw new AppError('CODE', error.message);
+  return data;
+}
+```
+
+## Quiz Module Architecture
+
+### State Machine
+`QuizGame.tsx` is the orchestrator: difficulty → category → loading → playing → score.
+All timer, reveal, advance, and score logic lives in QuizGame (NOT in child components).
+Child components (QuestionScreen, QuizTimer, QuizProgress, ScoreCard) are presentational only.
+
+### Timer Safety Pattern
+- `isRevealedRef` prevents double-reveal (user answer + timer expiry same frame)
+- `advanceTimeoutRef` stored and cleared on question change/unmount
+- `timerIntervalRef` stored and cleared on reveal/unmount/screen change
+- Functional state updates avoid stale closures in setTimeout callbacks
+- Game state reset happens inline in fetch success handler, NOT in useEffect([screen])
+
+### Question Fetching
+- Config (category counts) fetched server-side in page.tsx (semi-static, revalidate 3600)
+- Questions fetched client-side via POST /api/quiz/questions (dynamic, user selects difficulty+category)
+- API returns bare QuizQuestion[] array (not wrapped in object)
+- Fisher-Yates shuffle for unbiased randomness (NOT array.sort(random))
+
+### Difficulty → DB Mapping
+```typescript
+{ plebs: 1, legionarius: 2, senator: 3, imperator: 4 }
+```
+
+## Charting — D3.js
+
+All charts use D3.js + Observable Plot. Recharts is NOT used.
+D3 + React integration pattern:
+- `'use client'` components
+- `useRef<SVGSVGElement>` for container
+- `useEffect` with `svg.selectAll('*').remove()` cleanup before re-render
+- Responsive via SVG `viewBox`, never fixed pixel dimensions
+- `empire.color` passed as prop, never hardcoded
+
+## Navigation
+
+Empire section nav (`EmpireSectionNav.tsx`) links:
+Overview, Rulers, Map, Timeline, Territorial, Chapters, Analytics, Quiz
+
+## Data completeness — Roman Empire
 
 | Table          | Rows  | Key fields populated                                   |
 | -------------- | ----- | ------------------------------------------------------ |
 | empires        | 4     | all 4 empires seeded                                   |
 | rulers         | 68    | name, dynasty, reign_start/end, bio_short, image_url   |
-| provinces      | 52    | name, centroid lat/lng                                 |
-| places         | 7,608 | lat/lng, type, province_id, founded_year               |
-| battles        | 101   | lat/lng, outcome, opposing_force, place_id, casualties |
-| events         | 98    | year, category, significance (1-5), ruler_id (62/98)   |
-| chapters       | 7     | slug, title, content_md (Markdown), period_start/end   |
-| empire_extent  | 6     | year, geojson_url, area_km2, notes                     |
-| quiz_questions | 4,377 | (full set for Roman Empire)                            |
-
-## Content Design Vision (received, deferred to Phase 3+)
-
-Three-mode content system planned:
-
-- Story Mode: linear narrative, scroll-driven
-- Explore Mode: non-linear, linked topics/maps/timelines
-- Learn Mode: quizzes, flashcards, glossary, tiered detail levels
-
-Three detail levels per chapter: Beginner / Intermediate / Expert
-Gamification layer: achievements, badges, collection system, quest chains
-AI chatbot layer: context-sensitive help at three detail levels
-
-Current chapters are single-level (intermediate). Multi-level content and
-mode system will require either schema extension or 3x content generation.
+| provinces      | 52    | name, centroid lat/lng                                  |
+| places         | 7,608 | lat/lng, type, province_id, founded_year                |
+| battles        | 101   | lat/lng, outcome, opposing_force, place_id, casualties  |
+| events         | 98    | year, category, significance (1-5), ruler_id (62/98)    |
+| chapters       | 7     | slug, title, content_md (Markdown), period_start/end    |
+| empire_extent  | 6     | year, geojson_url, area_km2, notes                      |
+| quiz_questions | 4,377 | difficulty 1-4 (reclassified), 6 categories             |
 
 ## Known technical debt
 
 - iOS Safari test deferred (not yet verified)
-- SEO score 60 — to be addressed in Phase 3 (sitemap, JSON-LD, OG)
-- Playwright quiz test deferred to Phase 3 (quiz module does not exist yet)
-- Server-side PostHog capture deferred to Phase 3 (quiz_completed, share_clicked events)
-- CI env vars use mock values — consider GitHub Secrets for real keys in future
+- SEO score 60 — to be addressed in Phase 3 feature/seo-performance
+- Playwright quiz E2E test needed (quiz module now exists)
+- Server-side PostHog capture deferred (share_clicked event; quiz_completed now fires client-side)
+- CI env vars use mock values — consider GitHub Secrets for real keys
+- Province polygon boundaries deferred (nearest-centroid used for MVP)
+- 2 pre-existing lint warnings in app/page.tsx and app/[empire]/timeline/page.tsx (custom font usage)
+- Quiz difficulty classification is heuristic-based — spot-check recommended for quality
 
-## Phase 2 feature branches
+## Key decisions & why
 
-- feature/empire-selector-landing — Landing page with 4 empires
-- feature/rulers-encyclopaedia — Rulers list + filter + detail
-- feature/interactive-map — Leaflet map (dynamic import!)
-- feature/storytelling-chapters — Scroll-driven narrative
-- feature/horizontal-timeline — Events timeline
-- feature/posthog-analytics — PostHog init + events
-- feature/error-reporting — 'Report an error' link
+- Manual CSV import preferred over scripts: simpler for sources with Export buttons
+- OG image cache (Supabase Storage) mandatory: prevents 2s render on every share
+- Rate limiting from Phase 0: prevents Supabase free tier exhaustion
+- Upstash Redis for rate limiting: in-memory Map resets on Vercel cold starts
+- proxy.ts (not middleware.ts): Next.js 16 renamed the file convention
+- ESLint v9 flat config: v9 dropped legacy .eslintrc support
+- lib/services/* pattern: routes never call Supabase directly
+- D3.js for all charts (NOT Recharts): matches spec, single charting library
+- Analytics page: force-dynamic (data changes on import, not suitable for ISR)
+- Territorial page: revalidate 3600 (semi-static empire_extent data)
+- Territorial enrichment keyed by actual DB years: -500, -200, -1, 100, 200, 400
+- Client components must never import lib/env.ts: Zod validates server-only env vars
+- React hooks must be declared before any conditional returns
+- Codex prompts split into 3-4 focused steps: reduces errors, enables incremental verification
+- Quiz questions fetched via API route (not page-level): user selects difficulty+category client-side
+- Fisher-Yates shuffle (not sort(random)): unbiased randomness for quiz question selection
+- Quiz difficulty 4-tier reclassification: heuristic batch classifier, 25/40/25/10 distribution target
+- Quiz timer safety: ref guards prevent double-reveal/advance, cleanup on unmount/question change
+- Quiz ScoreCard owns its own Framer Motion entrance: separation of animation concerns
+- PostHog quiz_completed uses ref guard: fires exactly once per completed run, not on re-render
 
 ## Do NOT change without consultation
 
@@ -221,22 +366,8 @@ mode system will require either schema extension or 3x content generation.
 - EMPIRE_CONFIGS in lib/empires/config.ts
 - RLS policies on all tables
 - GeoJSON max size limit of 200KB
-
-## Key decisions & why
-
-- Manual CSV import preferred over scripts: simpler, no Node.js needed for sources with Export buttons
-- OG image cache (Supabase Storage) mandatory: prevents 2s render on every Twitter/WhatsApp share
-- Rate limiting from Phase 0: single Reddit post can exhaust Supabase free tier without it
-- Upstash Redis for rate limiting: in-memory Map resets on Vercel cold starts; Redis is persistent
-- proxy.ts (not middleware.ts): Next.js 16 renamed the file convention
-- ESLint v9 flat config (eslint.config.mjs): v9 dropped legacy .eslintrc support; .eslintrc.json kept as placeholder
-- @typescript-eslint/strict: no-non-null-assertion resolved via env validation (lib/env.ts), not eslint-disable
-- lib/services/\* pattern: API routes must never call Supabase directly
-- Next.js 16 installed (not 15) — same App Router architecture
-- Tailwind v4 installed — no tailwind.config.ts needed, config in CSS
-- NEXT*PUBLIC_SENTRY_DSN added alongside SENTRY_DSN: DSN is not secret, browser needs NEXT_PUBLIC* prefix
-- places.province_id: DONE — nearest-centroid mapping (centroid lat/lng added to provinces table, 7608 places mapped to 52 provinces)
-- places.founded_year: DONE — backfilled manually
-- battles.place_id: DONE — nearest-place matching (all 101 battles linked to closest place from 7608)
-- events.ruler_id: DONE — hybrid mapping (51 manual + 11 auto by reign period; 36 Republic-era events correctly NULL)
-- Province polygon boundaries (ST_Contains): deferred — existing 6 GeoJSON files are territorial snapshots of the whole empire, not per-province boundaries. DARE Atlas or AWMC have province polygons. Nearest-centroid covers 90%+ accuracy for MVP; upgrade to ST_Contains if precision needed later
+- D3.js as the charting library (do not introduce Recharts)
+- Service layer pattern (all DB access through lib/services/)
+- quiz_questions difficulty mapping (1=Plebs, 2=Legionarius, 3=Senator, 4=Imperator)
+- Quiz API route response shape (bare QuizQuestion[] array)
+- Quiz timer ref-guard pattern in QuizGame.tsx
