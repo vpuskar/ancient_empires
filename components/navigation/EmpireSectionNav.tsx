@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { label: 'Timeline', suffix: '/timeline' },
   { label: 'Territorial', suffix: '/territorial' },
   { label: 'Chapters', suffix: '/chapters' },
+  { label: 'Personality', suffix: '/personality' },
   { label: 'Quiz', suffix: '/quiz' },
   { label: 'Analytics', suffix: '/analytics' },
 ];
