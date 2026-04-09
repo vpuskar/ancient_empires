@@ -13,8 +13,10 @@ const NAV_ITEMS = [
   { label: 'Rulers', suffix: '/rulers' },
   { label: 'Map', suffix: '/map' },
   { label: 'Timeline', suffix: '/timeline' },
+  { label: 'Territorial', suffix: '/territorial' },
   { label: 'Chapters', suffix: '/chapters' },
   { label: 'Quiz', suffix: '/quiz' },
+  { label: 'Analytics', suffix: '/analytics' },
 ];
 
 export function EmpireSectionNav({ empire }: EmpireSectionNavProps) {
