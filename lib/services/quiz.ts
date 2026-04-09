@@ -1,139 +1,135 @@
-// lib/services/quiz.ts
-// All DB access for the `quiz_questions` table goes through here.
-
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { QUIZ_DIFFICULTIES } from '@/lib/config/quiz-difficulties';
 import { AppError } from '@/lib/errors';
+import { createClient } from '@/lib/supabase/server';
+import type { QuizCategory, QuizConfig, QuizQuestion } from '@/lib/types/quiz';
 
-export type Difficulty = 1 | 2 | 3;
+const CATEGORY_DISPLAY: Record<
+  string,
+  { name: string; icon: string; description: string }
+> = {
+  culture: {
+    name: 'Culture',
+    icon: '',
+    description: 'Art, philosophy, and daily life',
+  },
+  politics: {
+    name: 'Politics',
+    icon: '',
+    description: 'Senate, laws, and governance',
+  },
+  rulers: {
+    name: 'Rulers',
+    icon: '',
+    description: 'Emperors, dynasties, and succession',
+  },
+  religion: {
+    name: 'Religion',
+    icon: '\u26EA',
+    description: 'Gods, cults, and Christianity',
+  },
+  geography: {
+    name: 'Geography',
+    icon: '',
+    description: 'Provinces, cities, and roads',
+  },
+  battles: {
+    name: 'Battles',
+    icon: '\u2694',
+    description: 'Wars, legions, and conquests',
+  },
+};
 
-export interface QuizQuestion {
-  id: number;
-  empire_id: number;
-  question: string;
-  options: string[];
-  correct_answer: number; // index into options[]
-  difficulty: Difficulty;
-  category: string;
+const CORRECT_MAP: Record<string, number> = { A: 0, B: 1, C: 2, D: 3 };
+
+/** Fisher-Yates shuffle - unbiased random permutation */
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
-export type QuizQuestionInsert = Omit<QuizQuestion, 'id'>;
-export type QuizQuestionUpdate = Partial<QuizQuestionInsert>;
+export async function getQuizConfig(empireId: number): Promise<QuizConfig> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('quiz_questions')
+    .select('category')
+    .eq('empire_id', empireId);
+
+  if (error) {
+    throw new AppError(error.message, 'QUIZ_CONFIG', 500);
+  }
+
+  const counts = new Map<string, number>();
+
+  for (const row of data ?? []) {
+    const category = row.category;
+
+    if (typeof category !== 'string' || !(category in CATEGORY_DISPLAY)) {
+      continue;
+    }
+
+    counts.set(category, (counts.get(category) ?? 0) + 1);
+  }
+
+  const allCategories: QuizCategory[] = Array.from(counts.entries())
+    .map(([id, count]) => ({
+      id,
+      count,
+      ...CATEGORY_DISPLAY[id],
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  return {
+    difficulties: QUIZ_DIFFICULTIES,
+    allCategories,
+  };
+}
 
 export async function getQuizQuestions(
-  client: SupabaseClient,
-  empireId: number
-): Promise<QuizQuestion[]> {
-  const { data, error } = await client
-    .from('quiz_questions')
-    .select('*')
-    .eq('empire_id', empireId)
-    .order('difficulty', { ascending: true });
-
-  if (error) throw AppError.internal(error.message);
-  return data ?? [];
-}
-
-export async function getQuizQuestionsByDifficulty(
-  client: SupabaseClient,
   empireId: number,
-  difficulty: Difficulty
+  difficultyValue: number,
+  category: string,
+  count: number
 ): Promise<QuizQuestion[]> {
-  const { data, error } = await client
+  const supabase = await createClient();
+
+  let query = supabase
     .from('quiz_questions')
-    .select('*')
+    .select(
+      'id, question, option_a, option_b, option_c, option_d, correct, explanation, category'
+    )
     .eq('empire_id', empireId)
-    .eq('difficulty', difficulty);
+    .eq('difficulty', difficultyValue);
 
-  if (error) throw AppError.internal(error.message);
-  return data ?? [];
-}
-
-/** Returns `count` random questions for a given empire, optionally filtered by difficulty. */
-export async function getRandomQuizQuestions(
-  client: SupabaseClient,
-  empireId: number,
-  count: number,
-  difficulty?: Difficulty
-): Promise<QuizQuestion[]> {
-  let query = client
-    .from('quiz_questions')
-    .select('*')
-    .eq('empire_id', empireId);
-
-  if (difficulty !== undefined) {
-    query = query.eq('difficulty', difficulty);
+  if (category !== 'all') {
+    query = query.eq('category', category);
   }
 
-  const { data, error } = await query;
-  if (error) throw AppError.internal(error.message);
+  const { data, error } = await query.limit(count * 3);
 
-  const pool = data ?? [];
-  // Fisher-Yates shuffle, then slice
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
+  if (error) {
+    throw new AppError(error.message, 'QUIZ_QUESTIONS', 500);
   }
-  return pool.slice(0, count);
-}
 
-export async function getQuizQuestion(
-  client: SupabaseClient,
-  id: number,
-  empireId: number
-): Promise<QuizQuestion> {
-  const { data, error } = await client
-    .from('quiz_questions')
-    .select('*')
-    .eq('id', id)
-    .eq('empire_id', empireId)
-    .single();
+  if (!data || data.length === 0) {
+    throw new AppError(
+      `No questions found for empire=${empireId}, difficulty=${difficultyValue}, category=${category}`,
+      'QUIZ_NO_QUESTIONS',
+      404
+    );
+  }
 
-  if (error || !data) throw AppError.notFound('QuizQuestion');
-  return data;
-}
+  const selected = shuffle(data).slice(0, Math.min(count, data.length));
 
-export async function createQuizQuestion(
-  client: SupabaseClient,
-  question: QuizQuestionInsert
-): Promise<QuizQuestion> {
-  const { data, error } = await client
-    .from('quiz_questions')
-    .insert(question)
-    .select()
-    .single();
-
-  if (error || !data) throw AppError.internal(error?.message);
-  return data;
-}
-
-export async function updateQuizQuestion(
-  client: SupabaseClient,
-  id: number,
-  empireId: number,
-  patch: QuizQuestionUpdate
-): Promise<QuizQuestion> {
-  const { data, error } = await client
-    .from('quiz_questions')
-    .update(patch)
-    .eq('id', id)
-    .eq('empire_id', empireId)
-    .select()
-    .single();
-
-  if (error || !data) throw AppError.notFound('QuizQuestion');
-  return data;
-}
-
-export async function deleteQuizQuestion(
-  client: SupabaseClient,
-  id: number,
-  empireId: number
-): Promise<void> {
-  const { error } = await client
-    .from('quiz_questions')
-    .delete()
-    .eq('id', id)
-    .eq('empire_id', empireId);
-
-  if (error) throw AppError.internal(error.message);
+  return selected.map((row) => ({
+    id: row.id,
+    question: row.question,
+    options: [row.option_a, row.option_b, row.option_c, row.option_d],
+    correctIndex: CORRECT_MAP[row.correct] ?? 0,
+    explanation: row.explanation ?? null,
+    category: row.category ?? 'unknown',
+  }));
 }
