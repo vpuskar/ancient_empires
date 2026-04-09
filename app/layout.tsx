@@ -1,18 +1,26 @@
-﻿import type { Metadata } from 'next';
-import { fontDisplay, fontBody } from '@/lib/fonts';
+import type { Metadata, Viewport } from 'next';
 import { PostHogProvider } from '@/components/analytics/PostHogProvider';
+import { fontBody, fontDisplay } from '@/lib/fonts';
+import {
+  DEFAULT_DESCRIPTION,
+  SITE_NAME,
+  SITE_URL,
+} from '@/lib/seo/metadata';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Ancient Empires - Interactive History Platform',
-  description:
-    "Explore four of history's greatest civilisations through interactive maps, animated timelines, and immersive storytelling.",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_NAME,
+  description: DEFAULT_DESCRIPTION,
   openGraph: {
-    title: 'Ancient Empires',
-    description:
-      'Interactive maps, timelines, and stories of the Roman, Chinese, Japanese, and Ottoman Empires.',
-    images: ['/og-fallback.png'],
+    siteName: SITE_NAME,
+    type: 'website',
   },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({
