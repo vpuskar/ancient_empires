@@ -1,9 +1,13 @@
 import { notFound } from 'next/navigation';
-import { getEmpireBySlug } from '@/lib/empires/config';
-import { getChapterBySlug } from '@/lib/services/chapters';
-import { createClient } from '@/lib/supabase/server';
 import { ChapterReader } from '@/components/chapters/ChapterReader';
 import { ReportError } from '@/components/shared/ReportError';
+import { getEmpireBySlug } from '@/lib/empires/config';
+import { JsonLd } from '@/lib/seo/json-ld-script';
+import { buildArticleJsonLd, buildBreadcrumbJsonLd } from '@/lib/seo/jsonld';
+import { buildMetadata } from '@/lib/seo/metadata';
+import { SITE_URL } from '@/lib/seo/metadata';
+import { getChapterBySlug } from '@/lib/services/chapters';
+import { createClient } from '@/lib/supabase/server';
 
 export const revalidate = 3600;
 
@@ -19,16 +23,23 @@ export async function generateMetadata({
 }) {
   const { empire: empireSlug, slug } = await params;
   const empire = getEmpireBySlug(empireSlug);
-  if (!empire) return {};
+
+  if (!empire) {
+    return {};
+  }
 
   const supabase = await createClient();
   const chapter = await getChapterBySlug(supabase, empire.id, slug);
-  if (!chapter) return {};
 
-  return {
+  if (!chapter) {
+    return {};
+  }
+
+  return buildMetadata({
     title: `${chapter.title} — ${empire.name}`,
-    description: `${chapter.title}: a chapter in the history of the ${empire.name}.`,
-  };
+    description: `${chapter.title}: a narrative chapter from the history of the ${empire.name}, tracing major turning points across the empire.`,
+    path: `/${empire.slug}/chapters/${slug}`,
+  });
 }
 
 export default async function ChapterPage({
@@ -52,50 +63,70 @@ export default async function ChapterPage({
 
   const periodRange =
     chapter.period_start !== null && chapter.period_end !== null
-      ? `${formatYear(chapter.period_start)} – ${formatYear(chapter.period_end)}`
+      ? `${formatYear(chapter.period_start)} - ${formatYear(chapter.period_end)}`
       : null;
 
   return (
-    <main className="min-h-screen bg-[#0C0B09] text-[#F0ECE2]">
-      <header className="px-6 py-6">
-        <div className="border-l-4 pl-6" style={{ borderColor: empire.color }}>
-          <p className="text-xs tracking-widest text-[#8B7355] uppercase">
-            Chapter {chapter.sort_order}
-          </p>
-          <h1 className="mt-1 font-display text-3xl font-bold tracking-wide">
-            {chapter.title}
-          </h1>
-          {periodRange && (
-            <p
-              className="mt-2 inline-block rounded-full px-3 py-1 text-xs font-medium"
-              style={{
-                backgroundColor: `${empire.color}15`,
-                color: empire.color,
-                border: `1px solid ${empire.color}30`,
-              }}
-            >
-              {periodRange}
+    <>
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: 'Home', url: SITE_URL },
+          { name: empire.name, url: `${SITE_URL}/${empire.slug}` },
+          { name: 'Chapters', url: `${SITE_URL}/${empire.slug}/chapters` },
+          {
+            name: chapter.title,
+            url: `${SITE_URL}/${empire.slug}/chapters/${chapter.slug}`,
+          },
+        ])}
+      />
+      <JsonLd
+        data={buildArticleJsonLd(
+          chapter.title,
+          `${chapter.title}: a narrative chapter from the history of the ${empire.name}, tracing major turning points across the empire.`,
+          `${SITE_URL}/${empire.slug}/chapters/${chapter.slug}`
+        )}
+      />
+      <main className="min-h-screen bg-[#0C0B09] text-[#F0ECE2]">
+        <header className="px-6 py-6">
+          <div className="border-l-4 pl-6" style={{ borderColor: empire.color }}>
+            <p className="text-xs tracking-widest text-[#8B7355] uppercase">
+              Chapter {chapter.sort_order}
             </p>
-          )}
-        </div>
-      </header>
+            <h1 className="mt-1 font-display text-3xl font-bold tracking-wide">
+              {chapter.title}
+            </h1>
+            {periodRange && (
+              <p
+                className="mt-2 inline-block rounded-full px-3 py-1 text-xs font-medium"
+                style={{
+                  backgroundColor: `${empire.color}15`,
+                  color: empire.color,
+                  border: `1px solid ${empire.color}30`,
+                }}
+              >
+                {periodRange}
+              </p>
+            )}
+          </div>
+        </header>
 
-      <div className="mx-auto max-w-3xl px-6 pb-16">
-        <article className="rounded-xl border border-[#8B7355]/20 bg-[#1a1815]/60 p-6 md:p-8">
-          <ChapterReader content={chapter.content_md} />
-        </article>
+        <div className="mx-auto max-w-3xl px-6 pb-16">
+          <article className="rounded-xl border border-[#8B7355]/20 bg-[#1a1815]/60 p-6 md:p-8">
+            <ChapterReader content={chapter.content_md} />
+          </article>
 
-        <div className="mt-12 flex justify-center border-t border-[#2A2520] pt-6">
-          <ReportError
-            empire={empire.name}
-            page="Chapter"
-            context={{
-              chapter_slug: chapter.slug,
-              chapter_title: chapter.title,
-            }}
-          />
+          <div className="mt-12 flex justify-center border-t border-[#2A2520] pt-6">
+            <ReportError
+              empire={empire.name}
+              page="Chapter"
+              context={{
+                chapter_slug: chapter.slug,
+                chapter_title: chapter.title,
+              }}
+            />
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
