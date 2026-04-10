@@ -267,6 +267,8 @@ Status: ✅ COMPLETE — All 5 features done. Ready for develop → main merge.
 - Title ownership: buildMetadata returns final title, layout template does not double-append
 - NEXT_PUBLIC_SITE_URL with fallback to production URL (not in Zod schema — optional)
 - Target: Lighthouse SEO 90+ (up from 60)
+- Home page Lighthouse recovery merged on develop: server-rendered hero, immediate visible `<h1>`, priority hero image, root `next/font` swap loading, and home-page metadata cleanup
+- `AGENTS.md` now exists at repo root and should stay in sync with `CLAUDE.md`
 
 ## Service Layer Pattern
 
@@ -372,7 +374,7 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 - Province polygon boundaries deferred (nearest-centroid used for MVP)
 - 2 pre-existing lint warnings in app/page.tsx and app/[empire]/timeline/page.tsx (custom font usage)
 - Quiz difficulty classification is heuristic-based — spot-check recommended
-- Lighthouse SEO score needs verification after develop → main merge
+- Re-run Lighthouse on the deployed home page after the latest develop deploy to confirm recovered Performance / Accessibility / SEO scores
 
 ## Key decisions & why
 
