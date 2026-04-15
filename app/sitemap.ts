@@ -3,7 +3,7 @@ import type { MetadataRoute } from 'next';
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || 'https://ancient-empires.vercel.app';
 
-const FULL_CONTENT_SLUGS = ['roman'];
+const FULL_CONTENT_SLUGS = ['roman', 'ottoman'];
 const ALL_SLUGS = ['roman', 'ottoman', 'chinese', 'japanese'];
 
 const EMPIRE_SUB_PAGES = ['/rulers', '/map', '/timeline', '/chapters'];

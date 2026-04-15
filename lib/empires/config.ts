@@ -51,8 +51,8 @@ export const EMPIRE_CONFIGS: EmpireConfig[] = [
   {
     id: 4,
     name: 'Ottoman Empire',
-    nativeName: 'Devlet-i Aliyye-i Osmaniye',
-    capital: 'KOSTANTINIYYE',
+    nativeName: 'Devlet-i Aliyye-i Osmâniyye',
+    capital: 'ISTANBUL',
     slug: 'ottoman',
     color: '#1A6B3A',
     start: 1299,
