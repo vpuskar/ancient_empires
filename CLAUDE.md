@@ -32,6 +32,7 @@ All pages under /[empire]/ dynamic segment.
 Compare page: /compare/personality (cross-empire quiz)
 
 Current empire pages:
+
 - /[empire]/ — Overview (landing)
 - /[empire]/rulers — Rulers encyclopaedia
 - /[empire]/map — Interactive Leaflet map
@@ -43,17 +44,19 @@ Current empire pages:
 - /[empire]/personality — Personality quiz (Phase 3)
 
 API routes:
+
 - /api/quiz/questions — POST, fetches random questions by empire+difficulty+category
 
 Auto-generated routes:
+
 - /sitemap.xml — dynamic sitemap (all empire pages)
 - /robots.txt — crawler rules (allow all, disallow /api/)
 
 ## Branching — CRITICAL
 
-main → develop → feature/*
+main → develop → feature/_
 NEVER merge directly into main.
-feature/* → develop (test on Vercel preview) → main → auto Vercel deploy
+feature/_ → develop (test on Vercel preview) → main → auto Vercel deploy
 
 ## AI Tools (v1.4)
 
@@ -72,16 +75,19 @@ Materialised view: search_index
 Key convention: negative integers for BC dates (-117 = 117 BC)
 
 ### empire_extent actual years (Roman, empire_id=1):
+
 -500, -200, -1, 100, 200, 400
 (NOT -27 and 117 — enrichment mappings must match these exact DB values)
 
 ### quiz_questions.difficulty levels:
+
 - 1 = Plebs (basic common knowledge) — ~1,091 questions (25%)
 - 2 = Legionarius (requires Roman history knowledge) — ~1,756 questions (40%)
 - 3 = Senator (specific dates/details/context) — ~1,092 questions (25%)
 - 4 = Imperator (obscure, specialist-level) — ~438 questions (10%)
 
 ### quiz_questions.category values (Roman Empire):
+
 - culture: 2,889
 - politics: 383
 - rulers: 376
@@ -90,11 +96,12 @@ Key convention: negative integers for BC dates (-117 = 117 BC)
 - battles: 192
 
 ### quiz_questions.correct column:
+
 CHAR(1) — values 'A', 'B', 'C', 'D'. Maps to option index: A=0, B=1, C=2, D=3.
 
 ## Security — CRITICAL
 
-- SUPABASE_SERVICE_ROLE_KEY → server-side only, never NEXT_PUBLIC_
+- SUPABASE*SERVICE_ROLE_KEY → server-side only, never NEXT_PUBLIC*
 - NEXT_PUBLIC_SUPABASE_ANON_KEY → client-safe (RLS enforces access)
 - Rate limiting: active from Phase 0 (proxy.ts — Upstash Redis tiered)
 - RLS enabled on ALL tables before any data import
@@ -112,7 +119,7 @@ CHAR(1) — values 'A', 'B', 'C', 'D'. Maps to option index: A=0, B=1, C=2, D=3.
 ## Infrastructure
 
 - Rate limiting: Upstash Redis, sliding window, two tiers:
-  - standard /api/*: 100 req/60s per IP
+  - standard /api/\*: 100 req/60s per IP
   - expensive /api/personality/og + /api/quiz/calculate: 15 req/60s per IP
 - Supabase CLI: installed, project linked (ref: fvjbjnehupqdcwlodkpq)
 - Migrations: supabase/migrations/ — run `supabase db push` to apply
@@ -133,6 +140,7 @@ CHAR(1) — values 'A', 'B', 'C', 'D'. Maps to option index: A=0, B=1, C=2, D=3.
 - Dynamic (quiz questions, quiz results, analytics): `cache: 'no-store'` or `dynamic = 'force-dynamic'`
 
 **Per-page caching:**
+
 - Analytics dashboard: `force-dynamic`
 - Territorial timeline: `revalidate: 3600`
 - Quiz page: `revalidate: 3600` (config), API route `no-store` (questions)
@@ -145,6 +153,7 @@ Location: /public/geojson/
 Max size: 200KB per file (simplify at mapshaper.org before saving)
 
 Files (Roman Empire):
+
 - roman_bc500.geojson — 500 BC, early Kingdom
 - roman_bc200.geojson — 200 BC, after Second Punic War
 - roman_bc1.geojson — 1 BC, late Republic
@@ -160,6 +169,7 @@ Status: ✅ COMPLETE — All 5 features done. Ready for develop → main merge.
 ## What is complete
 
 ### Phase 0 — Foundation (Week 1-2) ✓
+
 - Supabase project created with full schema (10 tables + RLS + user_roles)
 - All 4 empires seeded in empires table
 - Next.js 16 project initialized (TypeScript strict, Tailwind v4)
@@ -171,12 +181,14 @@ Status: ✅ COMPLETE — All 5 features done. Ready for develop → main merge.
 - GitHub: main, develop branches; branch protection on main
 
 ### Phase 1 — Data Foundation (Week 3-4) ✓
+
 - 68 rulers, 7,608 places, 101 battles, 52 provinces
 - 4,377 quiz questions, 6 GeoJSON territorial snapshots
 - 6 empire_extent rows, 98 events (62 with ruler_id)
 - 7 Markdown chapters (mid-detail)
 
 ### Phase 2 — Roman Empire MVP (Week 5-8) ✓
+
 - Empire selector landing page
 - Rulers encyclopaedia
 - Interactive Leaflet map (dynamic import, Positron tiles)
@@ -189,6 +201,7 @@ Status: ✅ COMPLETE — All 5 features done. Ready for develop → main merge.
 ### Phase 3 — Roman Empire Complete (Week 9-11) ✓
 
 #### ✓ feature/analytics-charts (merged to develop)
+
 - 6 D3.js charts: Dynasty bar, Events donut, Battle outcomes, Activity by century, Territorial extent, Places treemap
 - lib/services/analytics.ts: server-side data fetch + transformation + typed DTOs
 - lib/types/analytics.ts: full TypeScript interfaces
@@ -200,6 +213,7 @@ Status: ✅ COMPLETE — All 5 features done. Ready for develop → main merge.
 - "Analytics" link added to EmpireSectionNav
 
 #### ✓ feature/territorial-timeline (merged to develop)
+
 - Radial concentric circle visualization (D3, animated rings)
 - lib/services/territorial.ts: server-side fetch from empire_extent + curated enrichment data
 - lib/types/territorial.ts: TimelineSnapshot, TimelineMarker, TerritorialTimelineData
@@ -216,6 +230,7 @@ Status: ✅ COMPLETE — All 5 features done. Ready for develop → main merge.
 - lib/empires/config.ts extended: nativeName, capital, startYear, endYear fields
 
 #### ✓ feature/quiz-module (merged to develop)
+
 - 4-tier difficulty system: Plebs (30s, ×1), Legionarius (20s, ×1.5), Senator (15s, ×2), Imperator (10s, ×3)
 - 6 categories from DB: culture, politics, rulers, religion, geography, battles
 - Difficulty select → Category select → Loading → Playing → Score Card flow
@@ -233,6 +248,7 @@ Status: ✅ COMPLETE — All 5 features done. Ready for develop → main merge.
 - quiz_questions.difficulty reclassified: all-2 → 4-tier (25/40/25/10% distribution)
 
 #### ✓ feature/personality-quiz-roman (merged to develop)
+
 - "Which Roman Ruler Are You?" — 8 questions, cosine similarity, 6 ruler results
 - lib/types/personality.ts: PersonalityVector, PersonalityQuestion, RulerProfile, PersonalityConfig, PersonalityResult
 - lib/config/personality/algorithm.ts: buildUserVector, cosineSimilarity (zero-vector guard), calculateResult
@@ -252,6 +268,7 @@ Status: ✅ COMPLETE — All 5 features done. Ready for develop → main merge.
 - Static config (not DB) — no Supabase queries, no API routes
 
 #### ✓ feature/seo-performance (merged to develop)
+
 - lib/seo/metadata.ts: buildMetadata + buildEmpirePageMetadata helpers (title, description, canonical, OG, Twitter)
 - lib/seo/jsonld.ts: Organization, WebSite, BreadcrumbList, Quiz, Article JSON-LD builders
 - lib/seo/json-ld-script.tsx: reusable server component for `<script type="application/ld+json">`
@@ -275,6 +292,7 @@ Status: ✅ COMPLETE — All 5 features done. Ready for develop → main merge.
 All Supabase access goes through `lib/services/*.ts`. API routes and page.tsx server components import services, never call Supabase directly.
 
 Current services:
+
 - lib/services/rulers.ts
 - lib/services/places.ts
 - lib/services/quiz.ts (Phase 3: getQuizConfig + getQuizQuestions)
@@ -287,11 +305,13 @@ Note: personality quiz does NOT use services — all data is static config in li
 ## Quiz Module Architecture
 
 ### State Machine
+
 `QuizGame.tsx` is the orchestrator: difficulty → category → loading → playing → score.
 All timer, reveal, advance, and score logic lives in QuizGame (NOT in child components).
 Child components (QuestionScreen, QuizTimer, QuizProgress, ScoreCard) are presentational only.
 
 ### Timer Safety Pattern
+
 - `isRevealedRef` prevents double-reveal
 - `advanceTimeoutRef` stored and cleared on question change/unmount
 - `timerIntervalRef` stored and cleared on reveal/unmount/screen change
@@ -299,6 +319,7 @@ Child components (QuestionScreen, QuizTimer, QuizProgress, ScoreCard) are presen
 - Game state reset happens inline in fetch success handler, NOT in useEffect([screen])
 
 ### Question Fetching
+
 - Config (category counts) fetched server-side in page.tsx (semi-static, revalidate 3600)
 - Questions fetched client-side via POST /api/quiz/questions (dynamic)
 - API returns bare QuizQuestion[] array (not wrapped)
@@ -307,16 +328,19 @@ Child components (QuestionScreen, QuizTimer, QuizProgress, ScoreCard) are presen
 ## Personality Quiz Architecture
 
 ### Static Config (not DB)
+
 - Questions + ruler profiles live in lib/config/personality/roman.ts
 - Multi-empire keying via lib/config/personality/index.ts
 - No Supabase queries, no API routes — pure client-side calculation
 
 ### Cosine Similarity
+
 - 8 dimensions: power_style, conflict, legacy, innovation, people_focus, risk, moral_framework, charisma
 - Normalized to 0-100: `((similarity + 1) / 2) * 100` — NEVER negative
 - Zero-vector guard returns first ruler with 0% match
 
 ### DisplayName Pattern
+
 - PersonalityConfig.displayName = "Roman" (not "Roman Empire")
 - Used in titles and metadata for clean user-facing copy
 - Does NOT modify global EmpireConfig
@@ -324,12 +348,14 @@ Child components (QuestionScreen, QuizTimer, QuizProgress, ScoreCard) are presen
 ## SEO Architecture
 
 ### Metadata
+
 - lib/seo/metadata.ts: centralized helpers, all pages import from here
 - buildMetadata returns FINAL title (no double-suffix from layout template)
 - Every page has: unique description, canonical URL, OG image, Twitter card
 - NEXT_PUBLIC_SITE_URL optional, fallback to hardcoded production URL
 
 ### Structured Data
+
 - JSON-LD injected via server component (no 'use client')
 - Organization + WebSite on home only
 - BreadcrumbList on all empire sub-pages
@@ -337,6 +363,7 @@ Child components (QuestionScreen, QuizTimer, QuizProgress, ScoreCard) are presen
 - Article schema on chapters
 
 ### Sitemap
+
 - Static generation via app/sitemap.ts
 - Only includes pages with actual shipped content
 - FULL_CONTENT_SLUGS controls which empires get sub-page entries
@@ -357,13 +384,13 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 | -------------- | ----- | ------------------------------------------------------ |
 | empires        | 4     | all 4 empires seeded                                   |
 | rulers         | 68    | name, dynasty, reign_start/end, bio_short, image_url   |
-| provinces      | 52    | name, centroid lat/lng                                  |
-| places         | 7,608 | lat/lng, type, province_id, founded_year                |
-| battles        | 101   | lat/lng, outcome, opposing_force, place_id, casualties  |
-| events         | 98    | year, category, significance (1-5), ruler_id (62/98)    |
-| chapters       | 7     | slug, title, content_md (Markdown), period_start/end    |
-| empire_extent  | 6     | year, geojson_url, area_km2, notes                      |
-| quiz_questions | 4,377 | difficulty 1-4 (reclassified), 6 categories             |
+| provinces      | 52    | name, centroid lat/lng                                 |
+| places         | 7,608 | lat/lng, type, province_id, founded_year               |
+| battles        | 101   | lat/lng, outcome, opposing_force, place_id, casualties |
+| events         | 98    | year, category, significance (1-5), ruler_id (62/98)   |
+| chapters       | 7     | slug, title, content_md (Markdown), period_start/end   |
+| empire_extent  | 6     | year, geojson_url, area_km2, notes                     |
+| quiz_questions | 4,377 | difficulty 1-4 (reclassified), 6 categories            |
 
 ## Known technical debt
 
@@ -383,7 +410,7 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 - Rate limiting from Phase 0: prevents Supabase free tier exhaustion
 - Upstash Redis for rate limiting: in-memory Map resets on Vercel cold starts
 - proxy.ts (not middleware.ts): Next.js 16 renamed the file convention
-- lib/services/* pattern: routes never call Supabase directly
+- lib/services/\* pattern: routes never call Supabase directly
 - D3.js for all charts (NOT Recharts): matches spec, single charting library
 - Territorial enrichment keyed by actual DB years: -500, -200, -1, 100, 200, 400
 - Client components must never import lib/env.ts
