@@ -33,7 +33,7 @@ const CHART_SECTIONS = [
   {
     number: 'II',
     title: 'Event Categories',
-    subtitle: 'Political, military, and cultural patterns in the archive.',
+    subtitle: 'Recorded category patterns across the historical archive.',
   },
   {
     number: 'III',
@@ -70,10 +70,7 @@ interface AnalyticsDashboardProps {
   data: AnalyticsSummary;
 }
 
-export function AnalyticsDashboard({
-  empire,
-  data,
-}: AnalyticsDashboardProps) {
+export function AnalyticsDashboard({ empire, data }: AnalyticsDashboardProps) {
   const statPills = [
     { label: 'Rulers', value: data.totals.rulers },
     { label: 'Places', value: data.totals.places },
@@ -121,7 +118,10 @@ export function AnalyticsDashboard({
               key={pill.label}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: statPills.indexOf(pill) * 0.05 }}
+              transition={{
+                duration: 0.4,
+                delay: statPills.indexOf(pill) * 0.05,
+              }}
               className="min-w-[150px] flex-1 rounded-full px-5 py-4"
               style={{
                 background: 'rgba(19, 14, 12, 0.86)',
@@ -129,7 +129,10 @@ export function AnalyticsDashboard({
                 boxShadow: `inset 0 1px 0 ${empire.color}15`,
               }}
             >
-              <p className="text-3xl font-semibold" style={{ color: '#D4AF37' }}>
+              <p
+                className="text-3xl font-semibold"
+                style={{ color: '#D4AF37' }}
+              >
                 {formatNumber(pill.value)}
               </p>
               <p className="mt-1 text-xs uppercase tracking-[0.24em] text-[#8C8379]">
@@ -144,7 +147,8 @@ export function AnalyticsDashboard({
         <section
           className="grid gap-6"
           style={{
-            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 440px), 1fr))',
+            gridTemplateColumns:
+              'repeat(auto-fit, minmax(min(100%, 440px), 1fr))',
           }}
         >
           {CHART_SECTIONS.map((section, index) => (

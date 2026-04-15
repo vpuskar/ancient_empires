@@ -9,13 +9,22 @@ const CATEGORY_COLORS: Record<string, string> = {
   political: '#C9A84C',
   military: '#8B0000',
   cultural: '#9370DB',
+  religious: '#6B4C8A',
 };
 
 const CATEGORY_ICONS: Record<string, string> = {
-  political: '🏛',
-  military: '⚔',
-  cultural: '🎭',
+  political: 'C',
+  military: 'M',
+  cultural: 'A',
+  religious: 'R',
 };
+
+function formatCategoryLabel(category: string): string {
+  return category
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
 
 function formatYear(year: number): string {
   if (year < 0) return `${Math.abs(year)} BC`;
@@ -51,10 +60,8 @@ export function EventDetailCard({ event, onClose }: Props) {
         className="fixed inset-0 z-50 flex items-center justify-center p-4"
         onClick={onClose}
       >
-        {/* Backdrop */}
         <div className="absolute inset-0 bg-black/60" />
 
-        {/* Card */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -63,32 +70,30 @@ export function EventDetailCard({ event, onClose }: Props) {
           onClick={(e) => e.stopPropagation()}
           className="relative z-10 w-full max-w-lg rounded-xl border border-[#8B7355] bg-[#0C0B09]/95 p-6 shadow-2xl backdrop-blur-lg max-md:max-h-[90vh] max-md:overflow-y-auto"
         >
-          {/* Close button */}
           <button
             onClick={onClose}
             className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-[#8B7355] transition hover:bg-[#8B7355]/20 hover:text-[#F0ECE2]"
           >
-            ✕
+            x
           </button>
 
-          {/* Category badge */}
           <div className="mb-4 flex items-center gap-2">
             <span
-              className="rounded-full px-3 py-1 text-xs font-medium capitalize"
+              className="rounded-full px-3 py-1 text-xs font-medium"
               style={{
                 backgroundColor: `${color}22`,
                 color: color,
                 border: `1px solid ${color}`,
               }}
             >
-              {CATEGORY_ICONS[event.category]} {event.category}
+              {CATEGORY_ICONS[event.category] ?? '•'}{' '}
+              {formatCategoryLabel(event.category)}
             </span>
             <span className="text-sm text-[#8B7355]">
               {formatYear(event.year)}
             </span>
           </div>
 
-          {/* Event name */}
           <h2
             className="font-display text-2xl font-bold leading-tight"
             style={{ color }}
@@ -96,14 +101,12 @@ export function EventDetailCard({ event, onClose }: Props) {
             {event.name}
           </h2>
 
-          {/* Description */}
           {event.description && (
             <p className="mt-3 leading-relaxed text-[#F0ECE2]/80">
               {event.description}
             </p>
           )}
 
-          {/* Ruler info */}
           {event.ruler && (
             <div className="mt-4 flex items-center gap-3 rounded-lg border border-[#8B7355]/40 bg-[#1a1815] p-3">
               {event.ruler.image_url ? (
@@ -128,7 +131,6 @@ export function EventDetailCard({ event, onClose }: Props) {
             </div>
           )}
 
-          {/* Significance stars */}
           <div className="mt-4 flex items-center gap-1">
             <span className="mr-2 text-xs text-[#8B7355]">Significance</span>
             {Array.from({ length: 5 }).map((_, i) => (
@@ -140,7 +142,7 @@ export function EventDetailCard({ event, onClose }: Props) {
                   opacity: i < event.significance ? 1 : 0.3,
                 }}
               >
-                ★
+                *
               </span>
             ))}
           </div>

@@ -7,14 +7,15 @@ import { ReportError } from '@/components/shared/ReportError';
 import { HorizontalTimeline } from './HorizontalTimeline';
 import TimelineErrorBoundary from './TimelineErrorBoundary';
 
-type CategoryFilter = 'all' | 'political' | 'military' | 'cultural';
+type CategoryFilter = 'all' | string;
+type CategoryOption = { value: CategoryFilter; label: string };
 
-const FILTERS: { value: CategoryFilter; label: string }[] = [
-  { value: 'all', label: 'All Events' },
-  { value: 'political', label: 'Political' },
-  { value: 'military', label: 'Military' },
-  { value: 'cultural', label: 'Cultural' },
-];
+function formatCategoryLabel(category: string): string {
+  return category
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
 
 interface Props {
   empire: EmpireConfig;
@@ -23,6 +24,20 @@ interface Props {
 
 export function TimelineContainer({ empire, events = [] }: Props) {
   const [activeFilter, setActiveFilter] = useState<CategoryFilter>('all');
+
+  const filters = useMemo<CategoryOption[]>(() => {
+    const categories = Array.from(
+      new Set(events.map((event) => event.category).filter(Boolean))
+    ).sort((left, right) => left.localeCompare(right));
+
+    return [
+      { value: 'all', label: 'All Events' },
+      ...categories.map((category) => ({
+        value: category,
+        label: formatCategoryLabel(category),
+      })),
+    ];
+  }, [events]);
 
   const filteredEvents = useMemo(() => {
     if (!events?.length) return [];
@@ -34,7 +49,7 @@ export function TimelineContainer({ empire, events = [] }: Props) {
     <div className="px-6 pb-12">
       {/* Filter buttons */}
       <div className="mb-8 flex flex-wrap gap-3">
-        {FILTERS.map((filter) => {
+        {filters.map((filter) => {
           const isActive = activeFilter === filter.value;
           return (
             <button
@@ -71,7 +86,11 @@ export function TimelineContainer({ empire, events = [] }: Props) {
       {filteredEvents.length === 0 ? (
         <div className="flex h-[400px] items-center justify-center rounded-lg border border-[#8B7355] bg-[#1a1815]">
           <p className="text-[#8B7355]">
-            No {activeFilter === 'all' ? '' : activeFilter} events found
+            No{' '}
+            {activeFilter === 'all'
+              ? ''
+              : `${formatCategoryLabel(activeFilter)} `}{' '}
+            events found
           </p>
         </div>
       ) : (

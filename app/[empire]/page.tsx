@@ -6,6 +6,7 @@ import { JsonLd } from '@/lib/seo/json-ld-script';
 import { buildBreadcrumbJsonLd } from '@/lib/seo/jsonld';
 import { buildEmpirePageMetadata } from '@/lib/seo/metadata';
 import { SITE_URL } from '@/lib/seo/metadata';
+import { getEmpireStats } from '@/lib/services/stats';
 
 function formatYear(year: number): string {
   return year < 0 ? `${Math.abs(year)} BC` : `${year} AD`;
@@ -44,6 +45,8 @@ export default async function EmpirePage({
     notFound();
   }
 
+  const stats = await getEmpireStats(empire.id);
+
   return (
     <>
       <JsonLd
@@ -59,6 +62,9 @@ export default async function EmpirePage({
             style={{ borderColor: empire.color }}
           >
             <h1 className="mb-2 text-4xl font-bold">{empire.name}</h1>
+            <p className="mb-2 text-sm uppercase tracking-[0.2em] text-zinc-500">
+              {empire.nativeName}
+            </p>
             <p className="text-lg text-zinc-400">
               {formatYear(empire.start)} - {formatYear(empire.end)}
             </p>
@@ -66,7 +72,7 @@ export default async function EmpirePage({
 
           <EmpireSectionNav empire={empire} />
 
-          <EmpireOverview empire={empire} />
+          <EmpireOverview empire={empire} stats={stats} />
         </div>
       </main>
     </>

@@ -62,7 +62,7 @@ export function IntroScreen({
             Which {displayName} Ruler Are You?
           </h1>
           <p className="mx-auto mt-4 max-w-[380px] font-body text-[16px] italic leading-[1.6] text-[#9A8B70]">
-            Answer 8 questions and reveal how you would rule Rome.
+            Answer 8 questions and reveal how you would rule the empire.
           </p>
         </div>
 

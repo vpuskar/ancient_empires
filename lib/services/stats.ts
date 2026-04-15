@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 import { AppError } from '@/lib/errors';
 
 export interface EmpireStats {
@@ -10,7 +10,7 @@ export interface EmpireStats {
 }
 
 export async function getEmpireStats(empireId: number): Promise<EmpireStats> {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const [rulers, places, battles, quiz, events] = await Promise.all([
     supabase
@@ -53,7 +53,7 @@ export async function getEmpireStats(empireId: number): Promise<EmpireStats> {
 export async function getGlobalStats(): Promise<
   EmpireStats & { empires: number }
 > {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const [empires, rulers, places, battles, quiz, events] = await Promise.all([
     supabase.from('empires').select('id', { count: 'exact', head: true }),

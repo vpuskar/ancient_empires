@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import type { EmpireConfig } from '@/lib/empires/config';
+import type { EmpireStats } from '@/lib/services/stats';
 
 /* ================================================================
    TYPES
@@ -44,7 +45,7 @@ interface MapConfig {
 }
 interface EmpireContent {
   hook: string;
-  stats: Stat[];
+  stats?: Stat[];
   rulers: Ruler[];
   timeline: TimelineEvent[];
   chapters: ChapterPreview[];
@@ -261,6 +262,197 @@ const CONTENT: Record<string, EmpireContent> = {
     },
     closingQuote:
       'All roads lead to Rome \u2014 and every road begins with a single step.',
+  },
+  ottoman: {
+    hook: "From a frontier beylik in northwestern Anatolia to a transcontinental empire spanning the Balkans, the Arab provinces, and the eastern Mediterranean, the Ottoman state fused conquest, law, faith, and commerce into one of the early modern world's most durable imperial systems.",
+    rulers: [
+      {
+        name: 'Osman I',
+        reign: 'c. 1299 \u2013 1324 AD',
+        title: 'Dynasty Founder',
+        desc: 'Forged a small frontier principality into the nucleus of a dynasty that would endure for more than six centuries.',
+        color: '#6B4F2A',
+      },
+      {
+        name: 'Mehmed II',
+        reign: '1451 \u2013 1481 AD',
+        title: 'Conqueror of Constantinople',
+        desc: 'Seized Constantinople in 1453 and transformed it into Istanbul, the imperial heart of Ottoman power.',
+        color: '#1A6B3A',
+      },
+      {
+        name: 'Selim I',
+        reign: '1512 \u2013 1520 AD',
+        title: 'Empire Doubler',
+        desc: 'Overwhelmed the Mamluk Sultanate and brought Syria, Egypt, and the holy cities under Ottoman rule.',
+        color: '#5B1F1F',
+      },
+      {
+        name: 'Suleiman I',
+        reign: '1520 \u2013 1566 AD',
+        title: 'The Lawgiver',
+        desc: 'Led the empire to its zenith through campaigns, legal reform, architecture, and courtly magnificence.',
+        color: '#C9A227',
+      },
+      {
+        name: 'Abdulhamid II',
+        reign: '1876 \u2013 1909 AD',
+        title: 'Sultan in the Final Decades',
+        desc: "Ruled during an age of reform, railways, surveillance, and mounting pressure on the empire's remaining frontiers.",
+        color: '#3E4E88',
+      },
+    ],
+    timeline: [
+      {
+        year: '1299 AD',
+        label: 'Ottoman dynasty emerges in Bithynia',
+        era: 'Frontier Beylik',
+        pos: 0,
+      },
+      {
+        year: '1362 AD',
+        label: 'Murad I takes Adrianople',
+        era: 'Balkan Expansion',
+        pos: 12,
+      },
+      {
+        year: '1402 AD',
+        label: 'Defeat at Ankara',
+        era: 'Interregnum',
+        pos: 22,
+      },
+      {
+        year: '1453 AD',
+        label: 'Constantinople falls',
+        era: 'Imperial Capital',
+        pos: 34,
+      },
+      {
+        year: '1517 AD',
+        label: 'Mamluk Sultanate annexed',
+        era: 'Middle Eastern Expansion',
+        pos: 46,
+      },
+      {
+        year: '1566 AD',
+        label: 'Death of Suleiman I',
+        era: 'Imperial Zenith',
+        pos: 58,
+      },
+      {
+        year: '1699 AD',
+        label: 'Treaty of Karlowitz',
+        era: 'Territorial Retrenchment',
+        pos: 70,
+      },
+      {
+        year: '1839 AD',
+        label: 'Tanzimat reforms begin',
+        era: 'Reform Era',
+        pos: 82,
+      },
+      {
+        year: '1908 AD',
+        label: 'Young Turk Revolution',
+        era: 'Constitutional Crisis',
+        pos: 90,
+      },
+    ],
+    chapters: [
+      {
+        num: 'I',
+        title: 'From Frontier March to Dynasty',
+        era: '1299 \u2013 1362 AD',
+        teaser:
+          'Osman and Orhan built a frontier polity whose flexibility made expansion possible.',
+      },
+      {
+        num: 'II',
+        title: 'Across the Straits',
+        era: '1362 \u2013 1402 AD',
+        teaser:
+          'The Ottomans crossed decisively into Europe and reshaped the balance of power in the Balkans.',
+      },
+      {
+        num: 'III',
+        title: 'Interregnum and Recovery',
+        era: '1402 \u2013 1451 AD',
+        teaser:
+          'After Ankara, the dynasty nearly fractured before rebuilding its authority.',
+      },
+      {
+        num: 'IV',
+        title: "The Conqueror's City",
+        era: '1451 \u2013 1481 AD',
+        teaser:
+          'Mehmed II made Constantinople the new imperial center of an Ottoman world.',
+      },
+      {
+        num: 'V',
+        title: 'Empire of Three Continents',
+        era: '1512 \u2013 1566 AD',
+        teaser:
+          'Selim and Suleiman carried Ottoman rule from Hungary to Yemen and from Algiers to Iraq.',
+      },
+      {
+        num: 'VI',
+        title: 'Power, Reform, and Retrenchment',
+        era: '1566 \u2013 1792 AD',
+        teaser:
+          "Court politics, military change, and great-power rivalry tested the empire's resilience.",
+      },
+      {
+        num: 'VII',
+        title: 'Tanzimat to the End',
+        era: '1792 \u2013 1924 AD',
+        teaser:
+          'Reform, nationalism, and global war carried the Ottoman order into its final transformation.',
+      },
+    ],
+    map: {
+      viewBox: '170 55 290 205',
+      caption:
+        'At its sixteenth-century height, Ottoman rule linked the Balkans, Anatolia, the Arab provinces, and North Africa through one imperial center at Istanbul.',
+      capitalA: { cx: 338, cy: 150, label: 'Istanbul' },
+      provinces: [
+        {
+          name: 'Rumelia',
+          d: 'M270,110 L320,100 L340,118 L335,145 L305,155 L280,145 L265,128 Z',
+          primary: true,
+        },
+        {
+          name: 'Anatolia',
+          d: 'M335,138 L390,130 L412,142 L408,164 L372,174 L338,165 L330,150 Z',
+          primary: true,
+        },
+        {
+          name: 'Egypt',
+          d: 'M350,192 L365,190 L372,210 L376,236 L365,242 L354,226 L346,208 Z',
+        },
+        {
+          name: 'Syria',
+          d: 'M388,164 L404,160 L410,180 L402,196 L388,190 L382,176 Z',
+        },
+        {
+          name: 'Iraq',
+          d: 'M408,160 L430,154 L438,170 L434,188 L414,186 L402,172 Z',
+        },
+        {
+          name: 'Arabia',
+          d: 'M394,188 L420,196 L428,228 L408,246 L384,224 L386,198 Z',
+        },
+        {
+          name: 'Algeria',
+          d: 'M196,188 L234,186 L258,194 L250,206 L212,208 L190,198 Z',
+        },
+        {
+          name: 'Hungary',
+          d: 'M304,92 L330,88 L346,102 L342,118 L320,122 L298,110 Z',
+        },
+      ],
+    },
+    closingQuote:
+      'To rule an empire was to hold together many languages, laws, and frontiers under a single imperial horizon.',
   },
 };
 
@@ -953,7 +1145,111 @@ function SectionHeading({
 /* ================================================================
    MAIN EXPORT
    ================================================================ */
-export function EmpireOverview({ empire }: { empire: EmpireConfig }) {
+function formatOverviewRange(start: number, end: number): string {
+  const format = (year: number) =>
+    year < 0 ? `${Math.abs(year)} BC` : `${year} AD`;
+
+  return `${format(start)} - ${format(end)}`;
+}
+
+function buildDefaultStats(empire: EmpireConfig, stats: EmpireStats): Stat[] {
+  return [
+    {
+      label: 'Duration',
+      value: `${empire.endYear - empire.startYear}`,
+      unit: 'years',
+    },
+    { label: 'Capital', value: empire.capital, unit: 'seat of rule' },
+    { label: 'Rulers', value: `${stats.rulers}`, unit: 'recorded' },
+    { label: 'Events', value: `${stats.events}`, unit: 'key moments' },
+    { label: 'Battles', value: `${stats.battles}`, unit: 'recorded' },
+    { label: 'Places', value: `${stats.places}`, unit: 'mapped' },
+  ];
+}
+
+function GenericEmpireOverview({
+  empire,
+  stats,
+}: {
+  empire: EmpireConfig;
+  stats: EmpireStats;
+}) {
+  const genericStats = buildDefaultStats(empire, stats);
+
+  const [statsRef, statsVis] = useReveal(0.2);
+
+  return (
+    <div style={{ position: 'relative', fontFamily: "'DM Sans', sans-serif" }}>
+      <p
+        style={{
+          fontSize: '16px',
+          lineHeight: 1.75,
+          color: 'rgba(240,236,226,0.55)',
+          maxWidth: '780px',
+          margin: '0 0 48px',
+          fontWeight: 300,
+        }}
+      >
+        {empire.name} ({empire.nativeName}) spanned{' '}
+        {formatOverviewRange(empire.startYear, empire.endYear)}. The sections
+        above already contain live data for this empire, and the overview now
+        reflects the records currently available in the database.
+      </p>
+
+      <section ref={statsRef} style={{ marginBottom: '40px' }}>
+        <SectionHeading label="At a glance" title={`${empire.name} Overview`} />
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+          {genericStats.map((stat, i) => (
+            <StatCard key={i} stat={stat} index={i} visible={statsVis} />
+          ))}
+        </div>
+      </section>
+
+      <section
+        style={{
+          padding: '28px 24px',
+          background: 'rgba(255,255,255,0.01)',
+          border: '1px solid rgba(240,236,226,0.04)',
+          borderRadius: '8px',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '10px',
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            color: 'rgba(201,168,76,0.4)',
+            fontWeight: 500,
+            marginBottom: '12px',
+          }}
+        >
+          Current Data Coverage
+        </div>
+        <p
+          style={{
+            fontSize: '14px',
+            lineHeight: 1.75,
+            color: 'rgba(240,236,226,0.45)',
+            margin: 0,
+          }}
+        >
+          Explore rulers, timeline, map, territorial snapshots, chapters, quiz,
+          analytics, and personality results for the {empire.name}. This
+          overview falls back to live empire statistics whenever a curated
+          long-form overview has not yet been authored.
+        </p>
+      </section>
+    </div>
+  );
+}
+
+export function EmpireOverview({
+  empire,
+  stats,
+}: {
+  empire: EmpireConfig;
+  stats: EmpireStats;
+}) {
   const content = CONTENT[empire.slug];
 
   const [statsRef, statsVis] = useReveal(0.2);
@@ -961,15 +1257,12 @@ export function EmpireOverview({ empire }: { empire: EmpireConfig }) {
   const [mapRef, mapVis] = useReveal(0.15);
   const [timelineRef, timelineVis] = useReveal(0.15);
   const [chaptersRef, chaptersVis] = useReveal(0.1);
+  const displayStats = content?.stats ?? buildDefaultStats(empire, stats);
+  const chapterTitle = `${content?.chapters.length ?? 0} Chapters`;
 
   // Fallback for empires without content yet
   if (!content) {
-    return (
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 text-zinc-300">
-        Overview content for the {empire.name} is coming soon. Use the sections
-        above to explore rulers, places, events, and chapters.
-      </section>
-    );
+    return <GenericEmpireOverview empire={empire} stats={stats} />;
   }
 
   return (
@@ -999,7 +1292,7 @@ export function EmpireOverview({ empire }: { empire: EmpireConfig }) {
       <section ref={statsRef} style={{ marginBottom: '80px' }}>
         <SectionHeading label="At a glance" title="Empire by the Numbers" />
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-          {content.stats.map((stat, i) => (
+          {displayStats.map((stat, i) => (
             <StatCard key={i} stat={stat} index={i} visible={statsVis} />
           ))}
         </div>
@@ -1116,7 +1409,7 @@ export function EmpireOverview({ empire }: { empire: EmpireConfig }) {
               gap: '12px',
             }}
           >
-            <SectionHeading label="Read the story" title="Seven Chapters" />
+            <SectionHeading label="Read the story" title={chapterTitle} />
             <a
               href={`/${empire.slug}/chapters`}
               style={{

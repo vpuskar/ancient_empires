@@ -25,7 +25,7 @@ function getGenericEnrichment(year: number): SnapshotEnrichment {
     provinces: ['Core Territory'],
     storyTitle: 'Territorial Transition',
     storySummary:
-      'The frontier changed at this point in ways that shaped the empire\'s long-term position. Curated narrative details can be added later without changing the data contract.',
+      "The frontier changed at this point in ways that shaped the empire's long-term position. Curated narrative details can be added later without changing the data contract.",
   };
 }
 
@@ -100,7 +100,7 @@ const ROMAN_SNAPSHOTS: Record<number, SnapshotEnrichment> = {
     ],
     storyTitle: 'Near the Summit',
     storySummary:
-      'Around 100 AD the empire was already pressing toward its maximum reach, with Trajan\'s reign opening a final phase of expansion. The map projected unmatched confidence, even as the cost of defending distant borders kept rising.',
+      "Around 100 AD the empire was already pressing toward its maximum reach, with Trajan's reign opening a final phase of expansion. The map projected unmatched confidence, even as the cost of defending distant borders kept rising.",
   },
   [200]: {
     era: 'Severan Dynasty',
@@ -123,7 +123,7 @@ const ROMAN_SNAPSHOTS: Record<number, SnapshotEnrichment> = {
     ],
     storyTitle: 'Stable Maximum',
     storySummary:
-      'Even after Trajan\'s eastern retreat, the empire remained enormous and impressively intact. Severan rule shows Rome at near-maximum scale, but maintaining that scale depended increasingly on army loyalty and relentless revenue.',
+      "Even after Trajan's eastern retreat, the empire remained enormous and impressively intact. Severan rule shows Rome at near-maximum scale, but maintaining that scale depended increasingly on army loyalty and relentless revenue.",
   },
   [400]: {
     era: 'Post-Division',
@@ -148,8 +148,129 @@ const ROMAN_SNAPSHOTS: Record<number, SnapshotEnrichment> = {
   },
 };
 
-const SNAPSHOT_ENRICHMENTS: Record<number, Record<number, SnapshotEnrichment>> = {
+const OTTOMAN_SNAPSHOTS: Record<number, SnapshotEnrichment> = {
+  1400: {
+    era: 'Early Expansion',
+    eraDesc:
+      "The Ottoman state had expanded deep into the Balkans while consolidating Anatolia, just before the shock of Timur's victory at Ankara reshaped its momentum.",
+    eraRange: 'c. 1389 - 1402 AD',
+    ruler: 'Bayezid I',
+    provinces: [
+      'Rumelia',
+      'Bulgaria',
+      'Macedonia',
+      'Thrace',
+      'Western Anatolia',
+      'Central Anatolia',
+    ],
+    storyTitle: 'Before the Interregnum',
+    storySummary:
+      'By 1400 the Ottomans had become a major Balkan and Anatolian power. Their frontier was still flexible, but the dynasty had already built the military and political foundations of an empire that would recover even after the disaster at Ankara.',
+  },
+  1500: {
+    era: 'Post-Constantinople',
+    eraDesc:
+      'After the conquest of Constantinople in 1453, Ottoman rule centered on a new imperial capital while Bayezid II consolidated the gains of rapid fifteenth-century expansion.',
+    eraRange: '1453 - 1512 AD',
+    ruler: 'Bayezid II',
+    provinces: [
+      'Rumelia',
+      'Bosnia',
+      'Albania',
+      'Thrace',
+      'Anatolia',
+      'Karaman',
+      'Constantinople',
+    ],
+    storyTitle: 'Imperial Consolidation',
+    storySummary:
+      'The fall of Constantinople transformed the Ottoman polity into a visibly imperial state. By 1500 the priority was not just conquest, but consolidation: binding the Balkans and Anatolia to an increasingly centralized court at Istanbul.',
+  },
+  1600: {
+    era: 'Imperial Zenith',
+    eraDesc:
+      'The empire stood near its greatest scale after the conquests of the sixteenth century, with authority stretching across the Balkans, Anatolia, the Arab provinces, and North Africa.',
+    eraRange: 'c. 1566 - 1617 AD',
+    ruler: 'Ahmed I',
+    provinces: [
+      'Rumelia',
+      'Hungary',
+      'Anatolia',
+      'Syria',
+      'Egypt',
+      'Iraq',
+      'Arabia',
+      'Algeria',
+    ],
+    storyTitle: 'At the Imperial Summit',
+    storySummary:
+      "Even after Suleiman's reign, the Ottoman world remained one of the largest and most formidable political systems on earth. In 1600, the challenge was not reaching greatness, but governing and defending a realm of continental scale.",
+  },
+  1700: {
+    era: 'Post-Vienna Contraction',
+    eraDesc:
+      'The failed siege of Vienna and the Treaty of Karlowitz marked a strategic turning point, forcing the empire to adjust to sustained territorial losses in Europe.',
+    eraRange: '1683 - 1703 AD',
+    ruler: 'Mustafa II',
+    provinces: [
+      'Rumelia',
+      'Thrace',
+      'Bosnia',
+      'Anatolia',
+      'Syria',
+      'Egypt',
+      'Iraq',
+    ],
+    storyTitle: 'After Karlowitz',
+    storySummary:
+      'By 1700 the Ottomans were no longer expanding steadily into Europe. The post-Vienna settlements exposed military and diplomatic limits, inaugurating a century in which recovery, reform, and retrenchment became central themes.',
+  },
+  1800: {
+    era: 'Reform Era',
+    eraDesc:
+      'Modernization pressures intensified as the empire faced Russian expansion, fiscal strain, and separatist movements, prompting ambitious but contested reform programs.',
+    eraRange: '1789 - 1807 AD',
+    ruler: 'Selim III',
+    provinces: [
+      'Rumelia',
+      'Anatolia',
+      'Syria',
+      'Egypt',
+      'Iraq',
+      'Arabia',
+      'Tripolitania',
+    ],
+    storyTitle: 'Reform Under Pressure',
+    storySummary:
+      "Around 1800 the Ottoman state still controlled immense territory, but every frontier carried new risks. Selim III's reign illustrates the empire's attempt to modernize institutions quickly enough to survive a far harsher geopolitical age.",
+  },
+  1900: {
+    era: 'Final Decades',
+    eraDesc:
+      'The late empire struggled to preserve cohesion as European intervention, nationalist revolt, and administrative strain fed the image of the Ottomans as the "Sick Man of Europe."',
+    eraRange: '1876 - 1909 AD',
+    ruler: 'Abdulhamid II',
+    provinces: [
+      'Anatolia',
+      'Thrace',
+      'Syria',
+      'Iraq',
+      'Arabia',
+      'Palestine',
+      'Hejaz',
+    ],
+    storyTitle: 'Holding the Center',
+    storySummary:
+      'By 1900 the empire had lost much of its former European and North African reach, yet it remained a major state spanning key routes between Europe, Asia, and the Arab world. Its final decades were defined by preservation, centralization, and mounting crisis.',
+  },
+};
+
+const SNAPSHOT_ENRICHMENTS: Record<
+  number,
+  Record<number, SnapshotEnrichment>
+> = {
   1: ROMAN_SNAPSHOTS,
+  4: OTTOMAN_SNAPSHOTS,
 };
 
 const ROMAN_MARKERS: TimelineMarker[] = [
@@ -167,6 +288,18 @@ const ROMAN_MARKERS: TimelineMarker[] = [
 
 const TIMELINE_MARKERS: Record<number, TimelineMarker[]> = {
   1: ROMAN_MARKERS,
+  4: [
+    { year: 1402, label: '1402 AD', title: 'Battle of Ankara' },
+    { year: 1453, label: '1453 AD', title: 'Constantinople Falls' },
+    { year: 1517, label: '1517 AD', title: 'Mamluk Sultanate Conquered' },
+    { year: 1566, label: '1566 AD', title: 'Death of Suleiman I' },
+    { year: 1683, label: '1683 AD', title: 'Second Siege of Vienna Fails' },
+    { year: 1699, label: '1699 AD', title: 'Treaty of Karlowitz' },
+    { year: 1789, label: '1789 AD', title: 'Selim III Begins Reforms' },
+    { year: 1876, label: '1876 AD', title: 'Abdulhamid II Ascends' },
+    { year: 1908, label: '1908 AD', title: 'Young Turk Revolution' },
+    { year: 1922, label: '1922 AD', title: 'Sultanate Abolished' },
+  ],
 };
 
 function formatYearLabel(year: number): string {
@@ -179,16 +312,8 @@ function enrichSnapshots(
 ): TimelineSnapshot[] {
   const enrichments = SNAPSHOT_ENRICHMENTS[empireId];
 
-  if (!enrichments) {
-    throw new AppError(
-      `No territorial enrichment mapping for empire ${empireId}`,
-      'TERRITORIAL_ENRICHMENT_MISSING',
-      500
-    );
-  }
-
   return rows.map((row) => {
-    const enrichment = enrichments[row.year];
+    const enrichment = enrichments?.[row.year];
 
     if (!enrichment) {
       console.warn(
