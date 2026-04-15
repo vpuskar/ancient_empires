@@ -215,7 +215,7 @@ const rulers: RulerProfile[] = [
     title: 'The Conqueror',
     years: '1451 - 1481',
     portrait: '',
-    color: '#8B0000',
+    color: '#1A6B3A',
     description:
       'You are driven by ambition and grand vision. Like Mehmed, you see possibilities where others see impossibilities and reshape the world around you.',
     traits: ['Conqueror', 'Visionary', 'City Builder'],

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import type { EmpireConfig } from '@/lib/empires/config';
+import type { EmpireStats } from '@/lib/services/stats';
 
 /* ================================================================
    TYPES
@@ -953,7 +954,107 @@ function SectionHeading({
 /* ================================================================
    MAIN EXPORT
    ================================================================ */
-export function EmpireOverview({ empire }: { empire: EmpireConfig }) {
+function formatOverviewRange(start: number, end: number): string {
+  const format = (year: number) =>
+    year < 0 ? `${Math.abs(year)} BC` : `${year} AD`;
+
+  return `${format(start)} - ${format(end)}`;
+}
+
+function GenericEmpireOverview({
+  empire,
+  stats,
+}: {
+  empire: EmpireConfig;
+  stats: EmpireStats;
+}) {
+  const genericStats: Stat[] = [
+    {
+      label: 'Duration',
+      value: `${empire.endYear - empire.startYear}`,
+      unit: 'years',
+    },
+    { label: 'Rulers', value: `${stats.rulers}`, unit: 'recorded' },
+    { label: 'Events', value: `${stats.events}`, unit: 'key moments' },
+    { label: 'Battles', value: `${stats.battles}`, unit: 'recorded' },
+    { label: 'Places', value: `${stats.places}`, unit: 'mapped' },
+    { label: 'Quiz Bank', value: `${stats.quizQuestions}`, unit: 'questions' },
+  ];
+
+  const [statsRef, statsVis] = useReveal(0.2);
+
+  return (
+    <div style={{ position: 'relative', fontFamily: "'DM Sans', sans-serif" }}>
+      <p
+        style={{
+          fontSize: '16px',
+          lineHeight: 1.75,
+          color: 'rgba(240,236,226,0.55)',
+          maxWidth: '780px',
+          margin: '0 0 48px',
+          fontWeight: 300,
+        }}
+      >
+        {empire.name} ({empire.nativeName}) spanned{' '}
+        {formatOverviewRange(empire.startYear, empire.endYear)}. The sections
+        above already contain live data for this empire, and the overview now
+        reflects the records currently available in the database.
+      </p>
+
+      <section ref={statsRef} style={{ marginBottom: '40px' }}>
+        <SectionHeading label="At a glance" title={`${empire.name} Overview`} />
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+          {genericStats.map((stat, i) => (
+            <StatCard key={i} stat={stat} index={i} visible={statsVis} />
+          ))}
+        </div>
+      </section>
+
+      <section
+        style={{
+          padding: '28px 24px',
+          background: 'rgba(255,255,255,0.01)',
+          border: '1px solid rgba(240,236,226,0.04)',
+          borderRadius: '8px',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '10px',
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            color: 'rgba(201,168,76,0.4)',
+            fontWeight: 500,
+            marginBottom: '12px',
+          }}
+        >
+          Current Data Coverage
+        </div>
+        <p
+          style={{
+            fontSize: '14px',
+            lineHeight: 1.75,
+            color: 'rgba(240,236,226,0.45)',
+            margin: 0,
+          }}
+        >
+          Explore rulers, timeline, map, territorial snapshots, chapters, quiz,
+          analytics, and personality results for the {empire.name}. This
+          overview falls back to live empire statistics whenever a curated
+          long-form overview has not yet been authored.
+        </p>
+      </section>
+    </div>
+  );
+}
+
+export function EmpireOverview({
+  empire,
+  stats,
+}: {
+  empire: EmpireConfig;
+  stats: EmpireStats;
+}) {
   const content = CONTENT[empire.slug];
 
   const [statsRef, statsVis] = useReveal(0.2);
@@ -964,12 +1065,7 @@ export function EmpireOverview({ empire }: { empire: EmpireConfig }) {
 
   // Fallback for empires without content yet
   if (!content) {
-    return (
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 text-zinc-300">
-        Overview content for the {empire.name} is coming soon. Use the sections
-        above to explore rulers, places, events, and chapters.
-      </section>
-    );
+    return <GenericEmpireOverview empire={empire} stats={stats} />;
   }
 
   return (

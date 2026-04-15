@@ -11,7 +11,7 @@ export interface TimelineEvent {
   name: string;
   year: number;
   description: string | null;
-  category: 'political' | 'military' | 'cultural';
+  category: 'political' | 'military' | 'cultural' | 'religious';
   significance: number;
   ruler_id: number | null;
   ruler: {

@@ -1,4 +1,4 @@
-import { QUIZ_DIFFICULTIES } from '@/lib/config/quiz-difficulties';
+import { getQuizDifficulties } from '@/lib/config/quiz-difficulties';
 import { AppError } from '@/lib/errors';
 import { createClient } from '@/lib/supabase/server';
 import type { QuizCategory, QuizConfig, QuizQuestion } from '@/lib/types/quiz';
@@ -83,7 +83,7 @@ export async function getQuizConfig(empireId: number): Promise<QuizConfig> {
     .sort((a, b) => b.count - a.count);
 
   return {
-    difficulties: QUIZ_DIFFICULTIES,
+    difficulties: getQuizDifficulties(empireId),
     allCategories,
   };
 }

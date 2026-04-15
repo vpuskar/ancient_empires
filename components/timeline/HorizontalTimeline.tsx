@@ -10,6 +10,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   political: '#C9A84C',
   military: '#8B0000',
   cultural: '#9370DB',
+  religious: '#6B4C8A',
 };
 
 function getCategoryColor(category: string, empireColor: string): string {

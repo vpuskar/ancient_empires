@@ -2,10 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { JsonLd } from '@/lib/seo/json-ld-script';
 import { buildMetadata } from '@/lib/seo/metadata';
-import {
-  buildOrganizationJsonLd,
-  buildWebSiteJsonLd,
-} from '@/lib/seo/jsonld';
+import { buildOrganizationJsonLd, buildWebSiteJsonLd } from '@/lib/seo/jsonld';
 
 type Empire = {
   id: number;
@@ -85,6 +82,7 @@ const empires: Empire[] = [
       'Explore a transcontinental empire shaped by sultans, trade routes, military reform, and layered cultural exchange.',
     statLabel: 'Sultans',
     statValue: '36',
+    href: '/ottoman',
     accent: '#7fd7a7',
     accentSoft: '#b9f1ce',
     border: 'rgba(127, 215, 167, 0.24)',
@@ -94,11 +92,11 @@ const empires: Empire[] = [
 ];
 
 const stats = [
-  { label: 'Rulers profiled', value: '68' },
-  { label: 'Historical places', value: '7,608+' },
-  { label: 'Battles mapped', value: '101' },
-  { label: 'Quiz questions', value: '4,377+' },
-  { label: 'Key events', value: '98' },
+  { label: 'Rulers profiled', value: '105' },
+  { label: 'Historical places', value: '7,682' },
+  { label: 'Battles mapped', value: '161' },
+  { label: 'Quiz questions', value: '9,377' },
+  { label: 'Key events', value: '216' },
 ];
 
 export function generateMetadata() {

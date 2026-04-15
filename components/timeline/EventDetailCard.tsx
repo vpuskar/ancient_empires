@@ -9,12 +9,14 @@ const CATEGORY_COLORS: Record<string, string> = {
   political: '#C9A84C',
   military: '#8B0000',
   cultural: '#9370DB',
+  religious: '#6B4C8A',
 };
 
 const CATEGORY_ICONS: Record<string, string> = {
   political: 'C',
   military: 'M',
   cultural: 'A',
+  religious: 'R',
 };
 
 function formatCategoryLabel(category: string): string {
