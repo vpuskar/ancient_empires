@@ -103,7 +103,8 @@ export function HorizontalTimeline({ events, empire }: Props) {
       {/* Autoplay toggle */}
       <button
         onClick={() => setIsPlaying((p) => !p)}
-        className="absolute right-0 top-0 z-10 rounded-lg border border-[#8B7355] bg-[#1a1815] px-3 py-1.5 text-xs text-[#F0ECE2] transition hover:border-[#C9A84C]"
+        className="absolute right-0 top-0 z-10 rounded-lg border bg-[#1a1815] px-3 py-1.5 text-xs text-[#F0ECE2] transition"
+        style={{ borderColor: `${empire.color}66` }}
       >
         {isPlaying ? '⏸ Pause' : '▶ Play'}
       </button>
@@ -133,8 +134,9 @@ export function HorizontalTimeline({ events, empire }: Props) {
             y1={AXIS_Y}
             x2={totalWidth - PADDING}
             y2={AXIS_Y}
-            stroke="#8B7355"
+            stroke={empire.color}
             strokeWidth={2}
+            opacity={0.45}
           />
 
           {/* Era ticks at start and end */}

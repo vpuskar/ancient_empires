@@ -62,6 +62,9 @@ export default async function EmpirePage({
             style={{ borderColor: empire.color }}
           >
             <h1 className="mb-2 text-4xl font-bold">{empire.name}</h1>
+            <p className="mb-2 text-sm uppercase tracking-[0.2em] text-zinc-500">
+              {empire.nativeName}
+            </p>
             <p className="text-lg text-zinc-400">
               {formatYear(empire.start)} - {formatYear(empire.end)}
             </p>

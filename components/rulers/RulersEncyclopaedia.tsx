@@ -37,6 +37,41 @@ function matchesSearch(ruler: Ruler, query: string): boolean {
   );
 }
 
+function RulerAvatar({ ruler, size = 56 }: { ruler: Ruler; size?: number }) {
+  const [hasError, setHasError] = useState(false);
+  const initials = ruler.name
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
+  if (ruler.image_url && !hasError) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={ruler.image_url}
+        alt={ruler.name}
+        width={size}
+        height={size}
+        onError={() => setHasError(true)}
+        className="rounded-xl border border-zinc-700 bg-zinc-900 object-cover"
+        style={{ width: size, height: size }}
+      />
+    );
+  }
+
+  return (
+    <div
+      className="flex items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900 font-semibold text-zinc-300"
+      style={{ width: size, height: size }}
+      aria-hidden="true"
+    >
+      {initials}
+    </div>
+  );
+}
+
 export function RulersEncyclopaedia({
   empire,
   rulers,
@@ -78,9 +113,11 @@ export function RulersEncyclopaedia({
   }, [rulers, search, selectedDynasty, sortBy]);
 
   const selectedRuler =
-    selectedRulerId === null
+    (selectedRulerId === null
       ? null
-      : (filteredRulers.find((ruler) => ruler.id === selectedRulerId) ?? null);
+      : filteredRulers.find((ruler) => ruler.id === selectedRulerId)) ??
+    filteredRulers[0] ??
+    null;
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] px-4 py-12 text-white">
@@ -189,8 +226,9 @@ export function RulersEncyclopaedia({
                         : undefined
                     }
                   >
-                    <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-                      <div>
+                    <div className="flex gap-4">
+                      <RulerAvatar ruler={ruler} />
+                      <div className="min-w-0 flex-1">
                         <h2 className="text-xl font-semibold text-white">
                           {ruler.name}
                         </h2>
@@ -199,18 +237,17 @@ export function RulersEncyclopaedia({
                             {ruler.native_name}
                           </p>
                         ) : null}
+                        <p className="mt-3 text-sm font-medium text-zinc-300">
+                          {formatReign(ruler.reign_start, ruler.reign_end)}
+                        </p>
+
+                        {ruler.dynasty ? (
+                          <p className="mt-2 text-sm text-zinc-400">
+                            {ruler.dynasty}
+                          </p>
+                        ) : null}
                       </div>
-
-                      <p className="text-sm font-medium text-zinc-300">
-                        {formatReign(ruler.reign_start, ruler.reign_end)}
-                      </p>
                     </div>
-
-                    {ruler.dynasty ? (
-                      <p className="mt-3 text-sm text-zinc-400">
-                        {ruler.dynasty}
-                      </p>
-                    ) : null}
                   </button>
                 );
               })
@@ -222,15 +259,21 @@ export function RulersEncyclopaedia({
               <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">
                 Selected ruler
               </p>
-              <h2 className="mt-3 text-3xl font-bold text-white">
-                {selectedRuler.name}
-              </h2>
 
-              {selectedRuler.native_name ? (
-                <p className="mt-2 text-base italic text-zinc-400">
-                  {selectedRuler.native_name}
-                </p>
-              ) : null}
+              <div className="mt-4 flex items-start gap-4">
+                <RulerAvatar ruler={selectedRuler} size={88} />
+                <div>
+                  <h2 className="text-3xl font-bold text-white">
+                    {selectedRuler.name}
+                  </h2>
+
+                  {selectedRuler.native_name ? (
+                    <p className="mt-2 text-base italic text-zinc-400">
+                      {selectedRuler.native_name}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
 
               <div className="mt-5 space-y-3 text-sm text-zinc-300">
                 <p>
