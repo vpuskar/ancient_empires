@@ -161,10 +161,18 @@ Files (Roman Empire):
 - roman_200.geojson — 200 AD, Severan stable maximum
 - roman_400.geojson — 400 AD, post-division
 
+Files (Ottoman Empire):
+- ottoman_1400.geojson — 1400, early Bayezid I expansion
+- ottoman_1500.geojson — 1500, post-Constantinople consolidation
+- ottoman_1600.geojson — 1600, near peak after Suleiman
+- ottoman_1700.geojson — 1700, post-Vienna contraction
+- ottoman_1800.geojson — 1800, reform era decline
+- ottoman_1900.geojson — 1900, pre-collapse final decades
+
 ## Current Phase
 
-Phase 3 — Roman Empire Complete (Week 9-11)
-Status: ✅ COMPLETE — All 5 features done. Ready for develop → main merge.
+Phase 4 — Ottoman Empire (Week 12-14)
+Status:  COMPLETE — All data imported, all pages functional, personality quiz live.
 
 ## What is complete
 
@@ -287,6 +295,62 @@ Status: ✅ COMPLETE — All 5 features done. Ready for develop → main merge.
 - Home page Lighthouse recovery merged on develop: server-rendered hero, immediate visible `<h1>`, priority hero image, root `next/font` swap loading, and home-page metadata cleanup
 - `AGENTS.md` now exists at repo root and should stay in sync with `CLAUDE.md`
 
+### Phase 4 — Ottoman Empire (Week 12-14) ✓
+
+#### ✓ Ottoman Data Import (complete)
+- 37 sultans imported (Osman I through Abdulmejid II, empire_id=4)
+- Name splitting: English name + Turkish native_name (Latin script, no RTL needed)
+- death_cause mapped to DB enum: natural, assassination, illness, unknown
+- bio_short smart-truncated to 300 chars at sentence boundaries
+- Split reign periods resolved (Murad II, Mehmed II, Mustafa I): first start, last end
+- 118 events with ruler_id mapping (86/87 original + expanded by Codex)
+- Event categories mapped to DB CHECK constraint: political, military, cultural, religious
+- 60 battles with lat/lng coordinates, outcomes, casualties, opposing forces
+- 74 places: 34 cities, 12 forts, 12 mosques (temple), 7 ports, 6 palaces, 3 battle_sites
+- 41 provinces (eyalets and vilayets) with established/dissolved years
+- Province backfill: nearest-centroid SQL matching places to provinces
+- 10 narrative chapters covering 1299-1924 (dollar-quoted SQL insert)
+- 5,000 quiz questions imported
+- 6 GeoJSON territorial snapshots (1400-1900) extracted from historical-basemaps
+- 6 empire_extent rows with area_km2 estimates
+
+#### ✓ Ottoman Personality Quiz (static config)
+- lib/config/personality/ottoman.ts: 8 Ottoman-themed questions + 6 sultan profiles
+- 6 results: Suleiman I, Mehmed II, Selim I, Bayezid II, Osman I, Murad I
+- 8 dimensions: power_style, conflict, legacy, innovation, people_focus, risk, moral_framework, charisma
+- Registered in lib/config/personality/index.ts (empire_id=4)
+- displayName: "Ottoman"
+
+#### ✓ Ottoman Integration (code)
+- Ottoman added to EMPIRE_CONFIGS: id=4, slug='ottoman', color=#1A6B3A, 1299-1922
+- nativeName: "Devlet-i Aliyye-i Osmâniyye", capital: "ISTANBUL"
+- 'ottoman' added to FULL_CONTENT_SLUGS in app/sitemap.ts
+- GeoJSON files committed to /public/geojson/ (ottoman_1400 through ottoman_1900)
+
+#### ✓ Legacy Component Fix (multi-empire)
+- LegacyRulersPage.tsx replaced with data-driven wrapper using getRulers(empire_id)
+- LegacyTimelinePage.tsx replaced with data-driven wrapper using getEventsWithRulers(empire_id)
+- Timeline category filters now derived from actual DB data (not hardcoded Roman categories)
+- EventDetailCard.tsx recognizes 'religious' as first-class category
+- AnalyticsDashboard category-neutral
+- IntroScreen.tsx personality quiz uses empire-agnostic copy
+
+#### ✓ Ottoman Territorial Enrichment
+- lib/services/territorial.ts: Ottoman enrichment keyed by years 1400, 1500, 1600, 1700, 1800, 1900
+- Each snapshot has era name, ruler, narrative
+- Generic fallback still works for unmatched years
+
+#### ✓ All Ottoman Pages Verified Working
+- /ottoman — Overview with empire stats
+- /ottoman/rulers — 37 sultans from DB
+- /ottoman/map — Ottoman places on Leaflet map
+- /ottoman/timeline — 118 events, data-driven category filters
+- /ottoman/territorial — 6 snapshots with enrichment
+- /ottoman/chapters — 10 chapters
+- /ottoman/quiz — Ottoman questions from API
+- /ottoman/personality — 6 sultan results
+- /ottoman/analytics — Charts using empire.color #1A6B3A
+
 ## Service Layer Pattern
 
 All Supabase access goes through `lib/services/*.ts`. API routes and page.tsx server components import services, never call Supabase directly.
@@ -392,6 +456,21 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 | empire_extent  | 6     | year, geojson_url, area_km2, notes                     |
 | quiz_questions | 4,377 | difficulty 1-4 (reclassified), 6 categories            |
 
+## Data completeness — Ottoman Empire
+
+| Table          | Rows  | Key fields populated                                    |
+| -------------- | ----- | ------------------------------------------------------- |
+| rulers         | 37    | name, native_name, dynasty, reign_start/end, bio_short  |
+| events         | 118   | year, category, significance, ruler_id                  |
+| battles        | 60    | lat/lng, outcome, opposing_force, casualties            |
+| places         | 74    | lat/lng, type, province_id, founded_year                |
+| provinces      | 41    | name, native_name, established, dissolved               |
+| chapters       | 10    | slug, title, content_md (Markdown), period_start/end    |
+| empire_extent  | 6     | year (1400-1900), geojson_url, area_km2                 |
+| quiz_questions | 5,000 | difficulty 1-4, categories                              |
+| GeoJSON files  | 6     | ottoman_1400 through ottoman_1900                       |
+| personality    | 6     | sultan profiles, static config (not DB)                 |
+
 ## Known technical debt
 
 - iOS Safari test deferred (not yet verified)
@@ -402,6 +481,11 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 - 2 pre-existing lint warnings in app/page.tsx and app/[empire]/timeline/page.tsx (custom font usage)
 - Quiz difficulty classification is heuristic-based — spot-check recommended
 - Re-run Lighthouse on the deployed home page after the latest develop deploy to confirm recovered Performance / Accessibility / SEO scores
+- Pre-existing D3 typing issues (Cannot find module 'd3' + implicit any) — not introduced by Phase 4
+- .codex-worktrees/.next files cause repo-wide lint failures — gitignore recommended
+- Landing page counters still hardcoded (Roman-only numbers) — should be data-driven or updated
+- Quiz difficulty labels still Roman-themed for Ottoman (Plebs/Legionarius) — empire-aware labels deferred
+- Home page Ottoman card may still show "Coming soon" — verify after merge to main
 
 ## Key decisions & why
 
@@ -426,10 +510,23 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 - SEO title ownership: helpers return final title, layout does not double-append
 - JSON-LD as server components: no client JS overhead for structured data
 - Sitemap only includes shipped content: FULL_CONTENT_SLUGS prevents empty page indexing
+- Ottoman native names use Latin script (not Arabic) — no RTL handling needed
+- Ottoman GeoJSON extracted from aourednik/historical-basemaps world files — single Ottoman polygon per year
+- Death cause mapped: detailed causes (Typhus, Cirrhosis, etc.) → DB enum (illness, natural, assassination, unknown)
+- Split reign sultans: first reign_start, last reign_end stored (Murad II: 1421-1451)
+- Chapters via SQL INSERT with dollar-quoting ($$) — avoids apostrophe escaping issues in Markdown content
+- Events category CHECK constraint: political/military/cultural/religious/economic/natural (different from quiz categories)
+- Province backfill via nearest-centroid SQL (same pattern as Roman)
+- Legacy components (LegacyRulersPage, LegacyTimelinePage) replaced with data-driven wrappers — multi-empire compatible
 
-## On the Horizon — Phase 4+
+## Lighthouse scores (production — ancient-empires.vercel.app)
+- Phase 3 final: Performance 96, Accessibility 100, Best Practices 96, SEO 100
+- Fixed from Phase 2: NO_LCP error resolved (server-rendered hero, priority image, font display swap)
+- SEO 100 achieved after adding app/robots.ts + app/sitemap.ts (were missing from repo)
+- Note: Vercel preview URLs always show SEO 66-69 due to x-robots-tag: noindex header — always test on production URL
 
-Phase 4 — Ottoman Empire (Week 12-14): data import, theme config, personality quiz
+## On the Horizon — Phase 5+
+
 Phase 5 — Chinese Empire (Week 15-17): CHGIS data, dynasty switcher
 Phase 6 — Japanese Empire (Week 18-20): Rekichizu roads, gengo era conversion
 Phase 7 — Compare + Polish (Week 21-24): cross-empire D3 widgets, OG image generation, i18n, admin UI
