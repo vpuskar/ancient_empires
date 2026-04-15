@@ -5,6 +5,8 @@ import { JsonLd } from '@/lib/seo/json-ld-script';
 import { buildBreadcrumbJsonLd } from '@/lib/seo/jsonld';
 import { buildEmpirePageMetadata } from '@/lib/seo/metadata';
 import { SITE_URL } from '@/lib/seo/metadata';
+import { getEventsWithRulers } from '@/lib/services/events';
+import { createClient } from '@/lib/supabase/server';
 
 export async function generateMetadata({
   params,
@@ -39,6 +41,9 @@ export default async function TimelinePage({
     notFound();
   }
 
+  const supabase = await createClient();
+  const events = await getEventsWithRulers(supabase, empire.id);
+
   return (
     <>
       <JsonLd
@@ -48,7 +53,7 @@ export default async function TimelinePage({
           { name: 'Timeline', url: `${SITE_URL}/${slug}/timeline` },
         ])}
       />
-      <LegacyTimelinePage />
+      <LegacyTimelinePage empire={empire} events={events} />
     </>
   );
 }

@@ -5,6 +5,8 @@ import { JsonLd } from '@/lib/seo/json-ld-script';
 import { buildBreadcrumbJsonLd } from '@/lib/seo/jsonld';
 import { buildEmpirePageMetadata } from '@/lib/seo/metadata';
 import { SITE_URL } from '@/lib/seo/metadata';
+import { getRulers } from '@/lib/services/rulers';
+import { createClient } from '@/lib/supabase/server';
 
 export async function generateMetadata({
   params,
@@ -39,6 +41,9 @@ export default async function RulersPage({
     notFound();
   }
 
+  const supabase = await createClient();
+  const rulers = await getRulers(supabase, empire.id);
+
   return (
     <>
       <JsonLd
@@ -48,7 +53,7 @@ export default async function RulersPage({
           { name: 'Rulers', url: `${SITE_URL}/${slug}/rulers` },
         ])}
       />
-      <LegacyRulersPage />
+      <LegacyRulersPage empire={empire} rulers={rulers} />
     </>
   );
 }

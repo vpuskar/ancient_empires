@@ -12,6 +12,17 @@ const CATEGORY_COLORS: Record<string, string> = {
   cultural: '#9370DB',
 };
 
+function getCategoryColor(category: string, empireColor: string): string {
+  return CATEGORY_COLORS[category] ?? empireColor;
+}
+
+function formatCategoryLabel(category: string): string {
+  return category
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
 function getMarkerRadius(significance: number): number {
   if (significance >= 5) return 12;
   if (significance >= 3) return 9;
@@ -150,7 +161,7 @@ export function HorizontalTimeline({ events, empire }: Props) {
             const cx = PADDING + i * SPACING;
             const cy = AXIS_Y;
             const r = getMarkerRadius(event.significance);
-            const color = CATEGORY_COLORS[event.category] ?? '#C9A84C';
+            const color = getCategoryColor(event.category, empire.color);
             const isHovered = hoveredId === event.id;
 
             return (
@@ -244,15 +255,19 @@ export function HorizontalTimeline({ events, empire }: Props) {
 
       {/* Category legend */}
       <div className="mt-4 flex flex-wrap gap-4 text-xs text-[#8B7355]">
-        {Object.entries(CATEGORY_COLORS).map(([cat, color]) => (
-          <div key={cat} className="flex items-center gap-1.5">
-            <span
-              className="inline-block h-3 w-3 rounded-full"
-              style={{ backgroundColor: color }}
-            />
-            <span className="capitalize">{cat}</span>
-          </div>
-        ))}
+        {Array.from(new Set(events.map((event) => event.category))).map(
+          (category) => (
+            <div key={category} className="flex items-center gap-1.5">
+              <span
+                className="inline-block h-3 w-3 rounded-full"
+                style={{
+                  backgroundColor: getCategoryColor(category, empire.color),
+                }}
+              />
+              <span>{formatCategoryLabel(category)}</span>
+            </div>
+          )
+        )}
         <div className="ml-4 flex items-center gap-3">
           <span className="flex items-center gap-1">
             <span className="inline-block h-2 w-2 rounded-full bg-[#8B7355]" />
