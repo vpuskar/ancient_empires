@@ -375,10 +375,11 @@ Status: 🔄 IN PROGRESS — Data import underway. GeoJSON and DB records comple
   - Absolute claims softened per historiographic standards
 - 6 GeoJSON territorial snapshots (-1, 500, 700, 1100, 1500, 1800)
 - 6 empire_extent rows
+- - Quiz questions (5,000)
 
 #### ⏳ Chinese (remaining)
 
-- Quiz questions (5,000) — pending
+
 - Personality quiz — 6 emperor profiles + 8 questions — pending
 - EMPIRE_CONFIGS code update — pending
 - Sitemap FULL_CONTENT_SLUGS — pending
