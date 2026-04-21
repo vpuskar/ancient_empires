@@ -1,7 +1,7 @@
 import type { PersonalityConfig } from '@/lib/types/personality';
+import { CHINESE_PERSONALITY } from './chinese';
 import { OTTOMAN_PERSONALITY } from './ottoman';
 import { ROMAN_PERSONALITY } from './roman';
-import { chinesePersonalityConfig as CHINESE_PERSONALITY } from './chinese';
 
 const PERSONALITY_CONFIGS: Record<number, PersonalityConfig> = {
   1: ROMAN_PERSONALITY,

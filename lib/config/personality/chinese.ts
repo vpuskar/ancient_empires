@@ -1,4 +1,3 @@
-// lib/config/personality/chinese.ts
 import type {
   PersonalityConfig,
   PersonalityQuestion,
@@ -7,7 +6,7 @@ import type {
 
 const questions: PersonalityQuestion[] = [
   {
-    id: '1',
+    id: 1,
     text: 'When facing a rival power, you typically:',
     options: [
       {
@@ -33,7 +32,7 @@ const questions: PersonalityQuestion[] = [
     ],
   },
   {
-    id: '2',
+    id: 2,
     text: 'Your greatest strength as a leader is:',
     options: [
       {
@@ -59,7 +58,7 @@ const questions: PersonalityQuestion[] = [
     ],
   },
   {
-    id: '3',
+    id: 3,
     text: 'When encountering a challenge to your rule:',
     options: [
       {
@@ -85,7 +84,7 @@ const questions: PersonalityQuestion[] = [
     ],
   },
   {
-    id: '4',
+    id: 4,
     text: 'Your vision for your empire centers on:',
     options: [
       {
@@ -111,7 +110,7 @@ const questions: PersonalityQuestion[] = [
     ],
   },
   {
-    id: '5',
+    id: 5,
     text: 'When it comes to loyalty and trust:',
     options: [
       {
@@ -137,7 +136,7 @@ const questions: PersonalityQuestion[] = [
     ],
   },
   {
-    id: '6',
+    id: 6,
     text: 'In times of prosperity, you are most likely to:',
     options: [
       {
@@ -163,7 +162,7 @@ const questions: PersonalityQuestion[] = [
     ],
   },
   {
-    id: '7',
+    id: 7,
     text: 'How do you handle dissent within your empire?',
     options: [
       {
@@ -189,7 +188,7 @@ const questions: PersonalityQuestion[] = [
     ],
   },
   {
-    id: '8',
+    id: 8,
     text: 'Your legacy will be remembered for:',
     options: [
       {
@@ -308,7 +307,7 @@ const rulerProfiles: RulerProfile[] = [
     },
   },
   {
-    id: 'kangxi-2',
+    id: 'tang-era',
     name: 'Xuanzang (Tang Monk)',
     title: 'The Visionary',
     description:
@@ -327,7 +326,7 @@ const rulerProfiles: RulerProfile[] = [
   },
 ];
 
-export const chinesePersonalityConfig: PersonalityConfig = {
+export const CHINESE_PERSONALITY: PersonalityConfig = {
   empireId: 2,
   displayName: 'Chinese',
   questions,
