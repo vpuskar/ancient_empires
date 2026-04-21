@@ -109,7 +109,7 @@ CHAR(1) — values 'A', 'B', 'C', 'D'. Maps to option index: A=0, B=1, C=2, D=3.
 
 ## Security — CRITICAL
 
-- SUPABASE*SERVICE_ROLE_KEY → server-side only, never NEXT_PUBLIC*
+- SUPABASE_SERVICE_ROLE_KEY → server-side only, never NEXT_PUBLIC_
 - NEXT_PUBLIC_SUPABASE_ANON_KEY → client-safe (RLS enforces access)
 - Rate limiting: active from Phase 0 (proxy.ts — Upstash Redis tiered)
 - RLS enabled on ALL tables before any data import
@@ -519,6 +519,21 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 | quiz_questions | 0    | pending import                                         |
 | GeoJSON files  | 6    | chinese_bc1 through chinese_1800                       |
 | personality    | 0    | pending creation                                       |
+
+## Data completeness — Chinese Empire
+
+| Table          | Rows  | Key fields populated                                    |
+| -------------- | ----- | ------------------------------------------------------- |
+| rulers         | 101   | name, native_name, dynasty, reign_start/end, bio_short  |
+| events         | 111   | year, category, significance, ruler_id (all 111)        |
+| battles        | 52    | lat/lng, outcome, opposing_force, casualties            |
+| places         | 56    | lat/lng, type, province_id, founded_year                |
+| provinces      | 24    | name, native_name, established, dissolved (IDs 94-117)  |
+| chapters       | 10    | slug, title, content_md (Markdown), period_start/end    |
+| empire_extent  | 6     | year (-1, 500, 700, 1100, 1500, 1800), geojson_url      |
+| quiz_questions | 0     | pending import                                          |
+| GeoJSON files  | 6     | chinese_bc1 through chinese_1800                        |
+| personality    | 0     | pending creation                                        |
 
 ## Known technical debt
 
