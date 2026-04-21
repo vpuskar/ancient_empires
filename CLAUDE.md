@@ -23,7 +23,7 @@ empire_id mapping:
 id, name, nativeName, capital, slug, color, start, end, startYear, endYear
 
 - `nativeName`: display name in native language (e.g. "Imperium Romanum")
-- `capital`: primary capital city name (e.g. "ROMA", "CHANG'AN")
+- `capital`: primary capital city name (e.g. "ROMA", "CHANGAN")
 - `startYear` / `endYear`: same as start/end, added for semantic clarity
 
 ## Routing
@@ -94,6 +94,13 @@ Key convention: negative integers for BC dates (-117 = 117 BC)
 - 3 = Senator (specific dates/details/context) — ~25%
 - 4 = Imperator (obscure, specialist-level) — ~10%
 
+### quiz_questions.difficulty labels per empire:
+
+- Roman: Plebs / Legionarius / Senator / Imperator
+- Chinese: Xiucai (秀才) / Juren (举人) / Jinshi (进士) / Zhuangyuan (状元)
+- Ottoman: Reaya / Sipahi / Pasha / Vizier
+- Labels defined in lib/config/quiz-difficulties.ts → EMPIRE_DIFFICULTY_LABELS
+
 ### quiz_questions.category values (Roman Empire):
 
 - culture: 2,889
@@ -102,6 +109,15 @@ Key convention: negative integers for BC dates (-117 = 117 BC)
 - religion: 301
 - geography: 236
 - battles: 192
+
+### quiz_questions.category values (Chinese Empire):
+
+- culture: 834
+- politics: 834
+- rulers: 834
+- religion: 833
+- geography: 833
+- battles: 832
 
 ### quiz_questions.correct column:
 
@@ -191,7 +207,7 @@ Files (Chinese Empire):
 ## Current Phase
 
 Phase 5 — Chinese Empire (Week 15-17)
-Status: 🔄 IN PROGRESS — Data import underway. GeoJSON and DB records complete.
+Status: ✅ COMPLETE — All data imported, all pages functional, personality quiz live.
 
 ## What is complete
 
@@ -354,7 +370,7 @@ Status: 🔄 IN PROGRESS — Data import underway. GeoJSON and DB records comple
 - /ottoman/personality — 6 sultan results
 - /ottoman/analytics — Charts using empire.color #1A6B3A
 
-### Phase 5 — Chinese Empire (Week 15-17) 🔄
+### Phase 5 — Chinese Empire (Week 15-17) ✓
 
 #### ✓ Chinese Data Import (complete)
 
@@ -376,14 +392,68 @@ Status: 🔄 IN PROGRESS — Data import underway. GeoJSON and DB records comple
 - 6 GeoJSON territorial snapshots (-1, 500, 700, 1100, 1500, 1800)
 - 6 empire_extent rows
 
-#### ⏳ Chinese (remaining)
+#### ✓ Chinese Quiz Questions (5,000 imported)
 
-- Quiz questions (5,000) — pending
-- Personality quiz — 6 emperor profiles + 8 questions — pending
-- EMPIRE_CONFIGS code update — pending
-- Sitemap FULL_CONTENT_SLUGS — pending
-- Territorial enrichment in lib/services/territorial.ts — pending
-- Page verification — pending
+- 5,000 questions generated via Python script with hand-crafted base questions
+- 6 categories evenly distributed: culture 834, politics 834, rulers 834, religion 833, geography 833, battles 832
+- Difficulty distribution: 1→1,297, 2→1,374, 3→1,289, 4→1,040
+- Correct answer balanced: A=24.5%, B=24.9%, C=25.2%, D=25.4%
+- All questions include explanation field; verified=FALSE
+- Imported via Supabase Table Editor (6 CSV files, one per category)
+
+#### ✓ Chinese Personality Quiz (static config)
+
+- lib/config/personality/chinese.ts: 8 Chinese-themed questions + 6 emperor profiles
+- Question structure matches Ottoman/Roman: `question`, `dimension`, `delta` (8-number array)
+- Ruler structure matches Ottoman/Roman: `id`, `name`, `title`, `years`, `portrait`, `color`, `description`, `traits`, `vector`
+- 6 results: Qin Shi Huang, Kangxi Emperor, Wu Zetian, Yongzheng Emperor, Hongwu Emperor, Tang Xuanzong
+- Registered in lib/config/personality/index.ts (empire_id=2)
+- Export: `CHINESE_PERSONALITY` (matches `ROMAN_PERSONALITY`, `OTTOMAN_PERSONALITY` naming pattern)
+- displayName: "Chinese"
+
+#### ✓ Chinese Integration (code)
+
+- Chinese already in EMPIRE_CONFIGS: id=2, slug='chinese', color=#DE2910, -221 to 1912
+- nativeName: '中華帝國', capital: 'CHANGAN'
+- 'chinese' added to FULL_CONTENT_SLUGS in app/sitemap.ts
+- GeoJSON files committed to /public/geojson/ (chinese_bc1 through chinese_1800)
+- Landing page (app/page.tsx): href='/chinese' added, "Coming soon" → "Explore"
+- Landing page stats updated: 206 rulers, 7,738 places, 213 battles, 14,377 quiz questions, 327 events
+
+#### ✓ Chinese Territorial Enrichment
+
+- lib/services/territorial.ts: CHINESE_SNAPSHOTS constant with 6 curated snapshots
+  - -1: Han Dynasty (Peak) — Emperor Wu of Han
+  - 500: Period of Division — Multiple rulers (Northern Wei / Southern Dynasties)
+  - 700: Tang Dynasty (Golden Age) — Emperor Xuanzong
+  - 1100: Northern Song Dynasty — Song Emperors
+  - 1500: Ming Dynasty — Yongle / Xuande Era
+  - 1800: Qing Dynasty (Zenith) — Qianlong Emperor legacy
+- CHINESE_SNAPSHOTS registered in SNAPSHOT_ENRICHMENTS (key 2)
+- Chinese timeline markers added to TIMELINE_MARKERS (10 events: Qin unification through empire end)
+- Generic fallback still works for unmatched years
+
+#### ✓ Chinese Quiz Difficulty Labels
+
+- lib/config/quiz-difficulties.ts: Chinese labels added under empire_id=2
+- Xiucai (秀才) — Cultivated Talent (difficulty 1)
+- Juren (举人) — Recommended Man (difficulty 2)
+- Jinshi (进士) — Presented Scholar (difficulty 3)
+- Zhuangyuan (状元) — Top Scholar of the Realm (difficulty 4)
+- Based on imperial examination ranks (keju system)
+
+#### ✓ Chinese Bug Fixes
+
+- lib/empires/config.ts: removed duplicate return line in getEmpireBySlug()
+- chinese.ts personality: fixed question id type (string→number), removed invalid option id field, matched exact PersonalityQuestion/RulerProfile type structure
+
+#### ✓ Chinese Overview Page Content
+
+- /chinese renders curated long-form overview via CONTENT.chinese in components/empires/EmpireOverview.tsx
+- Same shared component path as /roman and /ottoman: app/[empire]/page.tsx → <EmpireOverview empire={empire} stats={stats} />
+- Stats panel remains DB/service-driven (no hardcoded counts)
+- Intro, 7 dynastic periods, and 5 featured rulers defined as static curated content
+- Merged via feature/chinese-overview-content → develop (commit 50938c2)
 
 ## Service Layer Pattern
 
@@ -430,6 +500,9 @@ Child components (QuestionScreen, QuizTimer, QuizProgress, ScoreCard) are presen
 - Questions + ruler profiles live in lib/config/personality/[empire].ts
 - Multi-empire keying via lib/config/personality/index.ts
 - No Supabase queries, no API routes — pure client-side calculation
+- PersonalityQuestion uses: id (number), question (string), dimension (string), options with delta (number[8])
+- RulerProfile uses: id, name, title, years, portrait, color, description, traits (string[]), vector (number[8])
+- PersonalityConfig uses: displayName, questions, rulers (NOT empireId, NOT rulerProfiles)
 
 ### Cosine Similarity
 
@@ -439,7 +512,7 @@ Child components (QuestionScreen, QuizTimer, QuizProgress, ScoreCard) are presen
 
 ### DisplayName Pattern
 
-- PersonalityConfig.displayName = "Roman" / "Ottoman" (not "Roman Empire")
+- PersonalityConfig.displayName = "Roman" / "Ottoman" / "Chinese" (not "X Empire")
 - Used in titles and metadata for clean user-facing copy
 - Does NOT modify global EmpireConfig
 
@@ -465,6 +538,7 @@ Child components (QuestionScreen, QuizTimer, QuizProgress, ScoreCard) are presen
 - Static generation via app/sitemap.ts
 - Only includes pages with actual shipped content
 - FULL_CONTENT_SLUGS controls which empires get sub-page entries
+- Current: ['roman', 'ottoman', 'chinese']
 
 ## Charting — D3.js
 
@@ -516,9 +590,9 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 | provinces      | 24    | name, native_name, established, dissolved (IDs 94-117)  |
 | chapters       | 10    | slug, title, content_md (Markdown), period_start/end    |
 | empire_extent  | 6     | year (-1, 500, 700, 1100, 1500, 1800), geojson_url      |
-| quiz_questions | 0     | pending import                                          |
+| quiz_questions | 5,000 | difficulty 1-4, 6 categories evenly distributed         |
 | GeoJSON files  | 6     | chinese_bc1 through chinese_1800                        |
-| personality    | 0     | pending creation                                        |
+| personality    | 6     | emperor profiles, static config (not DB)                |
 
 ## Known technical debt
 
@@ -530,9 +604,7 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 - 2 pre-existing lint warnings in app/page.tsx and app/[empire]/timeline/page.tsx (custom font usage)
 - Pre-existing D3 typing issues (Cannot find module 'd3' + implicit any) — not introduced by Phase 4/5
 - .codex-worktrees/.next files cause repo-wide lint failures — gitignore recommended
-- Landing page counters still hardcoded (Roman-only numbers) — should be data-driven or updated
-- Quiz difficulty labels still Roman-themed for Ottoman/Chinese (Plebs/Legionarius) — empire-aware labels deferred
-- Chinese territorial enrichment not yet added to lib/services/territorial.ts
+
 
 ## Key decisions & why
 
@@ -573,6 +645,9 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
   (Guanzhong, Jiangnan-as-region, Liaodong removed to avoid overlap)
 - Chinese GeoJSON year -1: DB convention uses exact snapshot years; bc1 source maps to year -1
 - Chinese 500 AD snapshot uses two polygons (Toba Wei + Jin Empire) for the divided empire
+- Chinese quiz difficulty labels: Xiucai/Juren/Jinshi/Zhuangyuan (imperial examination ranks)
+- Chinese personality quiz structure: delta arrays + vector arrays matching Ottoman/Roman pattern exactly
+- Landing page stats updated to include all 3 active empires (Roman + Ottoman + Chinese)
 - Vitest personality test: uses empire_id 99 (not 4) for unsupported empire case — Ottoman now registered
 
 ## Lighthouse scores (production — ancient-empires.vercel.app)
@@ -583,9 +658,8 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 - Note: Vercel preview URLs always show SEO 66-69 due to x-robots-tag: noindex header — always test on production URL
 - Ottoman production Lighthouse (ancient-empires.vercel.app/ottoman): Performance 96, matches Roman
 
-## On the Horizon — Phase 5+ (remaining)
+## On the Horizon — Phase 6+
 
-Phase 5 remaining: quiz questions; personality quiz; EMPIRE_CONFIGS; sitemap; territorial enrichment; page verification
 Phase 6 — Japanese Empire (Week 18-20): Rekichizu roads, gengo era conversion
 Phase 7 — Compare + Polish (Week 21-24): cross-empire D3 widgets, OG image generation, i18n, admin UI
 
@@ -602,5 +676,6 @@ Phase 7 — Compare + Polish (Week 21-24): cross-empire D3 widgets, OG image gen
 - Quiz API route response shape (bare QuizQuestion[] array)
 - Quiz timer ref-guard pattern in QuizGame.tsx
 - Personality cosine similarity normalization formula
+- Personality quiz type structure (question/dimension/delta, not text/dimensions object)
 - SEO title ownership model (helpers return final title)
 - lib/seo/metadata.ts as single source for metadata helpers
