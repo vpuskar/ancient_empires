@@ -90,6 +90,24 @@ const EMPIRE_DIFFICULTY_LABELS: Record<
       subtitle: 'Master of the Known World',
     },
   },
+  2: {
+    1: {
+      name: 'Xiucai',
+      subtitle: 'Cultivated Talent',
+    },
+    2: {
+      name: 'Juren',
+      subtitle: 'Recommended Man',
+    },
+    3: {
+      name: 'Jinshi',
+      subtitle: 'Presented Scholar',
+    },
+    4: {
+      name: 'Zhuangyuan',
+      subtitle: 'Top Scholar of the Realm',
+    },
+  },
   4: {
     1: {
       name: 'Reaya',
