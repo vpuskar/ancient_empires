@@ -263,6 +263,202 @@ const CONTENT: Record<string, EmpireContent> = {
     closingQuote:
       'All roads lead to Rome \u2014 and every road begins with a single step.',
   },
+  chinese: {
+    hook: "From the first unification under Qin Shi Huang in 221 BC to the fall of the Qing Dynasty in 1912, Chinese imperial history spans over two millennia of dynastic rise and fall. This is the story of the world's longest continuous political tradition \u2014 shaped by Confucian philosophy, technological innovation, and the rhythms of the Mandate of Heaven.",
+    rulers: [
+      {
+        name: 'Qin Shi Huang',
+        reign: '221 \u2013 210 BC',
+        title: 'First Emperor',
+        desc: 'United the Warring States, standardized script and measures, and began the first imperial order in China.',
+        color: '#DE2910',
+      },
+      {
+        name: 'Emperor Wu of Han',
+        reign: '141 \u2013 87 BC',
+        title: 'Han Expansionist',
+        desc: 'Extended Han power deep into Inner Asia, opened the Silk Road, and elevated Confucian statecraft.',
+        color: '#C9A84C',
+      },
+      {
+        name: 'Wu Zetian',
+        reign: '690 \u2013 705 AD',
+        title: 'Only Woman Emperor',
+        desc: 'Ruled in her own name, strengthened the examination system, and presided over a confident Tang court.',
+        color: '#7B6B8A',
+      },
+      {
+        name: 'Kangxi Emperor',
+        reign: '1661 \u2013 1722 AD',
+        title: 'Qing Consolidator',
+        desc: 'Stabilized the Qing dynasty, expanded imperial frontiers, and sponsored scholarship on a vast scale.',
+        color: '#3E4E88',
+      },
+      {
+        name: 'Qianlong Emperor',
+        reign: '1735 \u2013 1796 AD',
+        title: 'High Qing Zenith',
+        desc: 'Oversaw the empire at its greatest territorial extent while projecting courtly grandeur and cultural confidence.',
+        color: '#6B7B3A',
+      },
+    ],
+    timeline: [
+      {
+        year: '221 BC',
+        label: 'Qin unification of China',
+        era: 'Qin',
+        pos: 0,
+      },
+      {
+        year: '141 BC',
+        label: 'Emperor Wu of Han begins his reign',
+        era: 'Han',
+        pos: 12,
+      },
+      {
+        year: '618 AD',
+        label: 'Tang dynasty founded',
+        era: 'Tang',
+        pos: 34,
+      },
+      {
+        year: '960 AD',
+        label: 'Song dynasty begins',
+        era: 'Song',
+        pos: 48,
+      },
+      {
+        year: '1271 AD',
+        label: 'Kublai Khan proclaims the Yuan',
+        era: 'Yuan',
+        pos: 62,
+      },
+      {
+        year: '1368 AD',
+        label: 'Ming dynasty established',
+        era: 'Ming',
+        pos: 70,
+      },
+      {
+        year: '1644 AD',
+        label: 'Qing enters Beijing',
+        era: 'Qing',
+        pos: 80,
+      },
+      {
+        year: '1796 AD',
+        label: 'End of the Qianlong era',
+        era: 'High Qing',
+        pos: 88,
+      },
+      {
+        year: '1912 AD',
+        label: 'Last emperor abdicates',
+        era: 'End of Empire',
+        pos: 90,
+      },
+    ],
+    chapters: [
+      {
+        num: 'I',
+        title: 'Qin Unification',
+        era: '221 \u2013 206 BC',
+        teaser:
+          'The first empire welded rival states into one realm through law, roads, walls, and a shared written order.',
+      },
+      {
+        num: 'II',
+        title: 'The Han World',
+        era: '206 BC \u2013 220 AD',
+        teaser:
+          'Silk Road exchange, Confucian governance, and early imperial institutions gave Chinese rule enduring form.',
+      },
+      {
+        num: 'III',
+        title: 'The Tang Golden Age',
+        era: '618 \u2013 907 AD',
+        teaser:
+          "Chang'an became the cosmopolitan center of a dynasty famed for poetry, Buddhism, and aristocratic brilliance.",
+      },
+      {
+        num: 'IV',
+        title: 'Song Innovation',
+        era: '960 \u2013 1279 AD',
+        teaser:
+          'Commerce, cities, gunpowder, printing, and paper money transformed the empire into a powerhouse of invention.',
+      },
+      {
+        num: 'V',
+        title: 'Under the Yuan',
+        era: '1271 \u2013 1368 AD',
+        teaser:
+          'Kublai Khan ruled China from a Mongol court that linked East Asia to the wider Eurasian world.',
+      },
+      {
+        num: 'VI',
+        title: 'Ming Restoration',
+        era: '1368 \u2013 1644 AD',
+        teaser:
+          'The Forbidden City, Zheng He voyages, and rebuilt frontier defenses marked a confident return of native rule.',
+      },
+      {
+        num: 'VII',
+        title: 'The Qing Century and Crisis',
+        era: '1644 \u2013 1912 AD',
+        teaser:
+          'High Qing prosperity gave way to rebellion, foreign pressure, and the final collapse of the dynastic order.',
+      },
+    ],
+    map: {
+      viewBox: '170 55 290 205',
+      caption:
+        'At its Qing height, imperial China stretched from Manchuria to Xinjiang and from the Mongolian steppe to the South China coast under a single dynastic state.',
+      capitalA: { cx: 392, cy: 118, label: "Chang'an" },
+      capitalB: { cx: 430, cy: 98, label: 'Beijing' },
+      provinces: [
+        {
+          name: 'North China Plain',
+          d: 'M378,106 L420,96 L446,108 L448,132 L420,144 L384,138 L370,122 Z',
+          primary: true,
+        },
+        {
+          name: 'Guanzhong',
+          d: 'M350,116 L378,108 L390,122 L380,142 L352,140 L340,128 Z',
+          primary: true,
+        },
+        {
+          name: 'Manchuria',
+          d: 'M422,76 L458,68 L482,82 L476,106 L446,112 L420,98 Z',
+        },
+        {
+          name: 'Mongolia',
+          d: 'M350,82 L414,72 L438,86 L430,102 L390,110 L352,100 L338,90 Z',
+        },
+        {
+          name: 'Xinjiang',
+          d: 'M238,100 L302,90 L336,102 L324,126 L274,132 L232,118 Z',
+        },
+        {
+          name: 'Tibet',
+          d: 'M274,130 L334,122 L356,142 L340,164 L290,166 L262,148 Z',
+        },
+        {
+          name: 'Sichuan',
+          d: 'M328,138 L360,132 L378,146 L370,170 L338,176 L318,160 Z',
+        },
+        {
+          name: 'Yangtze Valley',
+          d: 'M360,142 L414,136 L438,150 L432,176 L396,184 L364,176 Z',
+        },
+        {
+          name: 'South China',
+          d: 'M350,176 L408,180 L428,196 L414,224 L370,228 L340,206 Z',
+        },
+      ],
+    },
+    closingQuote:
+      'Dynasties rose and fell, but the imperial idea endured through ritual, learning, and the conviction that order under Heaven could be renewed.',
+  },
   ottoman: {
     hook: "From a frontier beylik in northwestern Anatolia to a transcontinental empire spanning the Balkans, the Arab provinces, and the eastern Mediterranean, the Ottoman state fused conquest, law, faith, and commerce into one of the early modern world's most durable imperial systems.",
     rulers: [
