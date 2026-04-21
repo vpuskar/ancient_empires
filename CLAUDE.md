@@ -181,9 +181,9 @@ Files (Ottoman Empire):
 
 Files (Chinese Empire):
 
-- chinese_bc1.geojson  — 1 BC, Han dynasty at peak
-- chinese_500.geojson  — 500 AD, Period of Division (Toba Wei + Jin Empire)
-- chinese_700.geojson  — 700 AD, early Tang era
+- chinese_bc1.geojson — 1 BC, Han dynasty at peak
+- chinese_500.geojson — 500 AD, Period of Division (Toba Wei + Jin Empire)
+- chinese_700.geojson — 700 AD, early Tang era
 - chinese_1100.geojson — 1100 AD, Northern Song
 - chinese_1500.geojson — 1500 AD, Ming dynasty
 - chinese_1800.geojson — 1800 AD, Qing dynasty at zenith
@@ -493,18 +493,33 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 
 ## Data completeness — Ottoman Empire
 
-| Table          | Rows  | Key fields populated                                    |
-| -------------- | ----- | ------------------------------------------------------- |
-| rulers         | 37    | name, native_name, dynasty, reign_start/end, bio_short  |
-| events         | 118   | year, category, significance, ruler_id                  |
-| battles        | 60    | lat/lng, outcome, opposing_force, casualties            |
-| places         | 74    | lat/lng, type, province_id, founded_year                |
-| provinces      | 41    | name, native_name, established, dissolved               |
-| chapters       | 10    | slug, title, content_md (Markdown), period_start/end    |
-| empire_extent  | 6     | year (1400-1900), geojson_url, area_km2                 |
-| quiz_questions | 5,000 | difficulty 1-4, categories                              |
-| GeoJSON files  | 6     | ottoman_1400 through ottoman_1900                       |
-| personality    | 6     | sultan profiles, static config (not DB)                 |
+| Table          | Rows  | Key fields populated                                   |
+| -------------- | ----- | ------------------------------------------------------ |
+| rulers         | 37    | name, native_name, dynasty, reign_start/end, bio_short |
+| events         | 118   | year, category, significance, ruler_id                 |
+| battles        | 60    | lat/lng, outcome, opposing_force, casualties           |
+| places         | 74    | lat/lng, type, province_id, founded_year               |
+| provinces      | 41    | name, native_name, established, dissolved              |
+| chapters       | 10    | slug, title, content_md (Markdown), period_start/end   |
+| empire_extent  | 6     | year (1400-1900), geojson_url, area_km2                |
+| quiz_questions | 5,000 | difficulty 1-4, categories                             |
+| GeoJSON files  | 6     | ottoman_1400 through ottoman_1900                      |
+| personality    | 6     | sultan profiles, static config (not DB)                |
+
+## Data completeness — Chinese Empire
+
+| Table          | Rows | Key fields populated                                   |
+| -------------- | ---- | ------------------------------------------------------ |
+| rulers         | 101  | name, native_name, dynasty, reign_start/end, bio_short |
+| events         | 111  | year, category, significance, ruler_id (all 111)       |
+| battles        | 52   | lat/lng, outcome, opposing_force, casualties           |
+| places         | 56   | lat/lng, type, province_id, founded_year               |
+| provinces      | 24   | name, native_name, established, dissolved (IDs 94-117) |
+| chapters       | 10   | slug, title, content_md (Markdown), period_start/end   |
+| empire_extent  | 6    | year (-1, 500, 700, 1100, 1500, 1800), geojson_url     |
+| quiz_questions | 0    | pending import                                         |
+| GeoJSON files  | 6    | chinese_bc1 through chinese_1800                       |
+| personality    | 0    | pending creation                                       |
 
 ## Data completeness — Chinese Empire
 
