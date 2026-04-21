@@ -49,6 +49,7 @@ const empires: Empire[] = [
       "Survey dynastic change, imperial expansion, and the continuity of one of the world's longest historical traditions.",
     statLabel: 'Dynasties',
     statValue: '13 major',
+    href: '/chinese',
     accent: '#f8df82',
     accentSoft: '#fff0b3',
     border: 'rgba(248, 223, 130, 0.24)',
@@ -92,11 +93,11 @@ const empires: Empire[] = [
 ];
 
 const stats = [
-  { label: 'Rulers profiled', value: '105' },
-  { label: 'Historical places', value: '7,682' },
-  { label: 'Battles mapped', value: '161' },
-  { label: 'Quiz questions', value: '9,377' },
-  { label: 'Key events', value: '216' },
+  { label: 'Rulers profiled', value: '206' },
+  { label: 'Historical places', value: '7,738' },
+  { label: 'Battles mapped', value: '213' },
+  { label: 'Quiz questions', value: '14,377' },
+  { label: 'Key events', value: '327' },
 ];
 
 export function generateMetadata() {
