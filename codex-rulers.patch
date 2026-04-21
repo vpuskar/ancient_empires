@@ -1,0 +1,746 @@
+﻿diff --git a/app/[empire]/rulers/page.tsx b/app/[empire]/rulers/page.tsx
+index dbd3e9c..70714eb 100644
+--- a/app/[empire]/rulers/page.tsx
++++ b/app/[empire]/rulers/page.tsx
+@@ -1,25 +1,720 @@
+-import { notFound } from 'next/navigation';
+-import { RulersEncyclopaedia } from '@/components/rulers/RulersEncyclopaedia';
+-import { getEmpireBySlug } from '@/lib/empires/config';
+-import { getRulers } from '@/lib/services/rulers';
+-import { createClient } from '@/lib/supabase/server';
+-
+-export const revalidate = 86400;
+-
+-export default async function RulersPage({
+-  params,
+-}: {
+-  params: Promise<{ empire: string }>;
+-}) {
+-  const { empire: slug } = await params;
+-  const empire = getEmpireBySlug(slug);
+-
+-  if (!empire) {
+-    notFound();
++'use client';
++
++/* eslint-disable @next/next/no-page-custom-font */
++
++import { useEffect, useState } from "react";
++import type { ChangeEvent, CSSProperties } from "react";
++
++interface Ruler {
++  id: number;
++  name: string;
++  native_name: string;
++  dynasty: string;
++  reign_start: number;
++  reign_end: number;
++  birth_year: number;
++  death_year: number;
++  death_cause: string;
++  bio_short: string;
++  latin_title: string;
++  quote: string | null;
++}
++
++interface Era {
++  name: string;
++  color: string;
++}
++
++interface DeathIconInfo {
++  symbol: string;
++  color: string;
++  label: string;
++}
++
++interface RulerRowProps {
++  ruler: Ruler;
++  isSelected: boolean;
++  onClick: () => void;
++  style?: CSSProperties;
++}
++
++interface RulerDetailProps {
++  ruler: Ruler;
++  onClose: () => void;
++}
++
++const RULERS: Ruler[] = [
++  { id: 22, name: "Julius Caesar", native_name: "Gaius Julius Caesar", dynasty: "None", reign_start: -49, reign_end: -44, birth_year: -100, death_year: -44, death_cause: "assassination", bio_short: "Dictator perpetuo. Conquered Gaul, crossed the Rubicon, and reformed the Republic before his assassination on the Ides of March.", latin_title: "Dictator Perpetuo", quote: "Veni, vidi, vici." },
++  { id: 1, name: "Augustus", native_name: "Gaius Octavius", dynasty: "Julio-Claudian", reign_start: -27, reign_end: 14, birth_year: -63, death_year: 14, death_cause: "natural", bio_short: "First Roman Emperor. Transformed the Republic into an Empire and inaugurated the Pax Romana, two centuries of relative peace and prosperity.", latin_title: "Imperator Caesar Divi Filius Augustus", quote: "I found Rome a city of bricks and left it a city of marble." },
++  { id: 2, name: "Tiberius", native_name: "Tiberius Julius Caesar", dynasty: "Julio-Claudian", reign_start: 14, reign_end: 37, birth_year: -42, death_year: 37, death_cause: "natural", bio_short: "Competent but reclusive ruler who withdrew to Capri. Stabilised finances and borders but grew increasingly paranoid.", latin_title: "Tiberius Caesar Divi Augusti Filius Augustus", quote: null },
++  { id: 3, name: "Caligula", native_name: "Gaius Julius Caesar Germanicus", dynasty: "Julio-Claudian", reign_start: 37, reign_end: 41, birth_year: 12, death_year: 41, death_cause: "assassination", bio_short: "Began promisingly but descended into tyranny and extravagance. Assassinated by the Praetorian Guard after just four years.", latin_title: "Gaius Caesar Augustus Germanicus", quote: "Oderint dum metuant." },
++  { id: 4, name: "Claudius", native_name: "Tiberius Claudius Drusus", dynasty: "Julio-Claudian", reign_start: 41, reign_end: 54, birth_year: -10, death_year: 54, death_cause: "assassination", bio_short: "Unexpected emperor who proved an able administrator. Conquered Britain and expanded Roman infrastructure.", latin_title: "Tiberius Claudius Caesar Augustus", quote: null },
++  { id: 5, name: "Nero", native_name: "Nero Claudius Caesar", dynasty: "Julio-Claudian", reign_start: 54, reign_end: 68, birth_year: 37, death_year: 68, death_cause: "suicide", bio_short: "Last of the Julio-Claudians. Patron of arts but infamous for persecution and the Great Fire of Rome. Forced to commit suicide.", latin_title: "Nero Claudius Caesar Augustus Germanicus", quote: "Qualis artifex pereo." },
++  { id: 23, name: "Galba", native_name: "Servius Sulpicius Galba", dynasty: "Year of Four Emperors", reign_start: 68, reign_end: 69, birth_year: -3, death_year: 69, death_cause: "assassination", bio_short: "First emperor of the Year of the Four Emperors. His strict policies and refusal to pay the Praetorians led to his murder.", latin_title: "Servius Galba Imperator Caesar Augustus", quote: null },
++  { id: 24, name: "Otho", native_name: "Marcus Salvius Otho", dynasty: "Year of Four Emperors", reign_start: 69, reign_end: 69, birth_year: 32, death_year: 69, death_cause: "suicide", bio_short: "Reigned only three months. Lost the Battle of Bedriacum to Vitellius and chose suicide over further civil war.", latin_title: "Imperator Marcus Otho Caesar Augustus", quote: null },
++  { id: 6, name: "Vespasian", native_name: "Titus Flavius Vespasianus", dynasty: "Flavian", reign_start: 69, reign_end: 79, birth_year: 9, death_year: 79, death_cause: "natural", bio_short: "Founded the Flavian dynasty. Restored order after civil war and began construction of the Colosseum.", latin_title: "Imperator Caesar Vespasianus Augustus", quote: "Vae, puto deus fio." },
++  { id: 7, name: "Titus", native_name: "Titus Flavius Vespasianus", dynasty: "Flavian", reign_start: 79, reign_end: 81, birth_year: 39, death_year: 81, death_cause: "natural", bio_short: "Completed the Colosseum and managed the eruption of Vesuvius. Beloved emperor whose short reign was marked by generosity.", latin_title: "Imperator Titus Caesar Vespasianus Augustus", quote: "Amici, diem perdidi." },
++  { id: 8, name: "Domitian", native_name: "Titus Flavius Domitianus", dynasty: "Flavian", reign_start: 81, reign_end: 96, birth_year: 51, death_year: 96, death_cause: "assassination", bio_short: "Autocratic but efficient ruler. Strengthened frontier defences but terrorised the Senate. Assassinated by court officials.", latin_title: "Imperator Caesar Domitianus Augustus", quote: null },
++  { id: 9, name: "Nerva", native_name: "Marcus Cocceius Nerva", dynasty: "Nerva-Antonine", reign_start: 96, reign_end: 98, birth_year: 30, death_year: 98, death_cause: "natural", bio_short: "First of the Five Good Emperors. Elderly senator who established adoption-based succession.", latin_title: "Imperator Nerva Caesar Augustus", quote: null },
++  { id: 10, name: "Trajan", native_name: "Marcus Ulpius Traianus", dynasty: "Nerva-Antonine", reign_start: 98, reign_end: 117, birth_year: 53, death_year: 117, death_cause: "natural", bio_short: "Optimus Princeps — the best ruler. Expanded the Empire to its greatest extent and built Trajan's Forum and Column.", latin_title: "Imperator Caesar Nerva Traianus Optimus Augustus", quote: "Felicior Augusto, melior Traiano." },
++  { id: 11, name: "Hadrian", native_name: "Publius Aelius Hadrianus", dynasty: "Nerva-Antonine", reign_start: 117, reign_end: 138, birth_year: 76, death_year: 138, death_cause: "natural", bio_short: "Great builder and traveller. Consolidated borders with Hadrian's Wall and rebuilt the Pantheon.", latin_title: "Imperator Caesar Traianus Hadrianus Augustus", quote: "Animula vagula blandula." },
++  { id: 12, name: "Antoninus Pius", native_name: "Titus Aurelius Fulvus", dynasty: "Nerva-Antonine", reign_start: 138, reign_end: 161, birth_year: 86, death_year: 161, death_cause: "natural", bio_short: "Longest-reigning of the Five Good Emperors. His peaceful 23-year rule was the zenith of the Pax Romana.", latin_title: "Imperator Caesar Titus Aelius Hadrianus Antoninus Augustus Pius", quote: "Aequanimitas." },
++  { id: 13, name: "Marcus Aurelius", native_name: "Marcus Aurelius Antoninus", dynasty: "Nerva-Antonine", reign_start: 161, reign_end: 180, birth_year: 121, death_year: 180, death_cause: "natural", bio_short: "The philosopher-emperor. Author of Meditations, he spent most of his reign defending the Empire against Germanic tribes.", latin_title: "Imperator Caesar Marcus Aurelius Antoninus Augustus", quote: "Ta eis heauton — Meditations." },
++  { id: 14, name: "Commodus", native_name: "Lucius Aurelius Commodus", dynasty: "Nerva-Antonine", reign_start: 180, reign_end: 192, birth_year: 161, death_year: 192, death_cause: "assassination", bio_short: "Son of Marcus Aurelius who abandoned philosophy for the arena. His erratic rule ended the Pax Romana.", latin_title: "Imperator Caesar Lucius Aelius Aurelius Commodus Augustus", quote: null },
++  { id: 15, name: "Septimius Severus", native_name: "Lucius Septimius Severus", dynasty: "Severan", reign_start: 193, reign_end: 211, birth_year: 145, death_year: 211, death_cause: "natural", bio_short: "African-born emperor who founded the Severan dynasty. Militarised the empire and expanded its borders in Africa.", latin_title: "Imperator Caesar Lucius Septimius Severus Pertinax Augustus", quote: "Laboremus." },
++  { id: 16, name: "Caracalla", native_name: "Marcus Aurelius Antoninus", dynasty: "Severan", reign_start: 211, reign_end: 217, birth_year: 188, death_year: 217, death_cause: "assassination", bio_short: "Granted citizenship to all free inhabitants of the Empire. Built the magnificent Baths of Caracalla in Rome.", latin_title: "Imperator Caesar Marcus Aurelius Severus Antoninus Augustus", quote: null },
++  { id: 17, name: "Diocletian", native_name: "Gaius Aurelius Valerius", dynasty: "Tetrarchy", reign_start: 284, reign_end: 305, birth_year: 244, death_year: 311, death_cause: "natural", bio_short: "Saved the Empire from the Crisis of the Third Century. Established the Tetrarchy and voluntarily abdicated.", latin_title: "Imperator Caesar Gaius Aurelius Valerius Diocletianus Augustus", quote: "If only you could see the cabbages I planted..." },
++  { id: 18, name: "Constantine I", native_name: "Flavius Valerius Constantinus", dynasty: "Constantinian", reign_start: 306, reign_end: 337, birth_year: 272, death_year: 337, death_cause: "natural", bio_short: "First Christian emperor. Founded Constantinople and transformed the religious landscape of the Empire forever.", latin_title: "Imperator Caesar Flavius Constantinus Maximus Augustus", quote: "In hoc signo vinces." },
++  { id: 19, name: "Julian", native_name: "Flavius Claudius Julianus", dynasty: "Constantinian", reign_start: 361, reign_end: 363, birth_year: 331, death_year: 363, death_cause: "battle", bio_short: "The Apostate — last pagan emperor who attempted to restore traditional Roman religion. Killed in battle against Persia.", latin_title: "Imperator Caesar Flavius Claudius Julianus Augustus", quote: "Vicisti, Galilaee." },
++  { id: 20, name: "Theodosius I", native_name: "Flavius Theodosius", dynasty: "Theodosian", reign_start: 379, reign_end: 395, birth_year: 347, death_year: 395, death_cause: "natural", bio_short: "Last emperor to rule both East and West. Made Christianity the official state religion and banned pagan worship.", latin_title: "Imperator Caesar Flavius Theodosius Augustus", quote: null },
++  { id: 21, name: "Romulus Augustulus", native_name: "Flavius Romulus Augustus", dynasty: "None", reign_start: 475, reign_end: 476, birth_year: 460, death_year: 507, death_cause: "unknown", bio_short: "Last Western Roman Emperor. A teenager deposed by Odoacer, marking the traditional fall of the Western Empire.", latin_title: "Imperator Romulus Augustus", quote: null },
++];
++
++const DYNASTY_COLORS: Record<string, string> = {
++  "None": "#6B6560",
++  "Julio-Claudian": "#C9A84C",
++  "Year of Four Emperors": "#E24B4A",
++  "Flavian": "#5DCAA5",
++  "Nerva-Antonine": "#85B7EB",
++  "Severan": "#ED93B1",
++  "Tetrarchy": "#F09957",
++  "Constantinian": "#AFA9EC",
++  "Theodosian": "#97C459",
++};
++
++const DYNASTIES = [...new Set(RULERS.map((r: Ruler) => r.dynasty))].sort();
++const DEATH_CAUSES = [...new Set(RULERS.map((r: Ruler) => r.death_cause))].sort();
++
++function getEra(year: number): Era {
++  if (year < -509) return { name: "Roman Kingdom", color: "#6B6560" };
++  if (year < -27) return { name: "Roman Republic", color: "#C9A84C" };
++  if (year < 96) return { name: "Early Empire", color: "#8B0000" };
++  if (year < 192) return { name: "Pax Romana", color: "#5DCAA5" };
++  if (year < 284) return { name: "Crisis of the Third Century", color: "#E24B4A" };
++  if (year < 395) return { name: "Dominate", color: "#AFA9EC" };
++  return { name: "Fall of the West", color: "#6B6560" };
++}
++
++function formatYear(y: number): string {
++  if (y < 0) return `${Math.abs(y)} BC`;
++  return `${y} AD`;
++}
++
++function reignLength(r: Ruler): number {
++  return Math.abs((r.reign_end || 0) - r.reign_start);
++}
++
++function deathIcon(cause: string): DeathIconInfo {
++  switch (cause) {
++    case "assassination": return { symbol: "\u2020", color: "#E24B4A", label: "Assassination" };
++    case "battle": return { symbol: "\u2694\uFE0F", color: "#E24B4A", label: "Killed in battle" };
++    case "suicide": return { symbol: "\u2666", color: "#E8C547", label: "Suicide" };
++    case "natural": return { symbol: "\u25CF", color: "#5DCAA5", label: "Natural causes" };
++    default: return { symbol: "?", color: "rgba(240,236,226,0.3)", label: "Unknown" };
+   }
++}
++
++function RulerRow({ ruler, isSelected, onClick, style }: RulerRowProps) {
++  const [hovered, setHovered] = useState(false);
++  const di = deathIcon(ruler.death_cause);
++  const dc = DYNASTY_COLORS[ruler.dynasty] || "#6B6560";
++  const active = isSelected || hovered;
++  const eStart = -509;
++  const eEnd = 476;
++  const span = eEnd - eStart;
++  const barLeft = ((ruler.reign_start - eStart) / span) * 100;
++  const barWidth = Math.max(((ruler.reign_end - ruler.reign_start) / span) * 100, 1);
++
++  return (
++    <div
++      onClick={onClick}
++      onMouseEnter={() => setHovered(true)}
++      onMouseLeave={() => setHovered(false)}
++      style={{
++        display: "grid",
++        gridTemplateColumns: "4px 1fr 120px 80px 40px",
++        alignItems: "center",
++        gap: "0",
++        padding: "0",
++        cursor: "pointer",
++        background: active ? "rgba(139,0,0,0.10)" : "transparent",
++        transition: "all 0.25s ease",
++        position: "relative",
++        boxShadow: active ? `inset 0 0 30px rgba(139,0,0,0.06), 0 0 20px rgba(0,0,0,0.15)` : "none",
++        transform: hovered ? "scale(1.005)" : "scale(1)",
++        ...style,
++      }}
++    >
++      {/* Dynasty color stripe */}
++      <div style={{ width: "4px", alignSelf: "stretch", background: active ? dc : `${dc}60`, transition: "background 0.25s ease", borderRadius: "0 2px 2px 0" }} />
++
++      {/* Name + dynasty + mini reign bar */}
++      <div style={{ padding: "14px 16px" }}>
++        <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
++          <span style={{
++            fontFamily: "'Playfair Display', serif",
++            fontSize: "15px",
++            fontWeight: isSelected ? 600 : 500,
++            color: active ? "#F0ECE2" : "rgba(240,236,226,0.75)",
++            transition: "color 0.2s ease",
++          }}>
++            {ruler.name}
++          </span>
++          <span style={{ fontSize: "11px", color: dc, opacity: 0.7, fontWeight: 500 }}>{ruler.dynasty}</span>
++        </div>
++        {/* Mini reign bar */}
++        <div style={{ marginTop: "6px", height: "3px", background: "rgba(255,255,255,0.04)", borderRadius: "2px", position: "relative", overflow: "hidden" }}>
++          <div style={{
++            position: "absolute",
++            top: 0,
++            bottom: 0,
++            left: `${Math.max(barLeft, 0)}%`,
++            width: `${barWidth}%`,
++            background: active ? dc : `${dc}80`,
++            borderRadius: "2px",
++            transition: "background 0.2s ease",
++            boxShadow: active ? `0 0 6px ${dc}60` : "none",
++            minWidth: "3px",
++          }} />
++        </div>
++      </div>
++
++      {/* Reign */}
++      <div style={{ fontSize: "12px", color: "rgba(240,236,226,0.45)", fontVariantNumeric: "tabular-nums", padding: "0 8px" }}>
++        {formatYear(ruler.reign_start)}<br/>
++        <span style={{ color: "rgba(240,236,226,0.25)" }}>{formatYear(ruler.reign_end)}</span>
++      </div>
++
++      {/* Duration */}
++      <div style={{ fontSize: "13px", color: active ? "rgba(240,236,226,0.6)" : "rgba(240,236,226,0.3)", fontWeight: 500, textAlign: "center" }}>
++        {reignLength(ruler)}<span style={{ fontSize: "10px", marginLeft: "2px", opacity: 0.6 }}>yr</span>
++      </div>
++
++      {/* Death icon */}
++      <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
++        <span style={{ color: di.color, fontSize: "13px", opacity: active ? 1 : 0.6, transition: "opacity 0.2s ease" }}>{di.symbol}</span>
++      </div>
++    </div>
++  );
++}
++
++function RulerDetail({ ruler, onClose }: RulerDetailProps) {
++  const di = deathIcon(ruler.death_cause);
++  const dc = DYNASTY_COLORS[ruler.dynasty] || "#6B6560";
++  const era = getEra(ruler.reign_start);
++  const lifespan = `${formatYear(ruler.birth_year)} – ${formatYear(ruler.death_year)}`;
++  const age = Math.abs(ruler.death_year - ruler.birth_year);
++  const eStart = -509;
++  const eEnd = 476;
++  const span = eEnd - eStart;
++  const barLeft = ((ruler.reign_start - eStart) / span) * 100;
++  const barWidth = Math.max(((ruler.reign_end - ruler.reign_start) / span) * 100, 0.5);
++  const ticks = [-500, -250, 0, 250, 476];
++
++  return (
++    <div style={{
++      background: "linear-gradient(180deg, rgba(20,19,15,0.98) 0%, rgba(12,11,9,0.99) 100%)",
++      border: "1px solid rgba(201,168,76,0.12)",
++      borderRadius: "16px",
++      padding: "0",
++      position: "relative",
++      overflow: "hidden",
++      boxShadow: "0 30px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(201,168,76,0.08), inset 0 0 60px rgba(0,0,0,0.3)",
++    }}>
++      {/* Texture overlay */}
++      <div style={{
++        position: "absolute", inset: 0, opacity: 0.03, pointerEvents: "none",
++        backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.75' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E")`,
++        backgroundSize: "200px",
++      }} />
++
++      {/* Gold accent line top */}
++      <div style={{
++        height: "2px",
++        background: "linear-gradient(90deg, transparent 0%, #C9A84C 20%, #E8C547 50%, #C9A84C 80%, transparent 100%)",
++        opacity: 0.6,
++      }} />
++
++      {/* Content */}
++      <div style={{ padding: "28px 24px 24px", position: "relative" }}>
++        {/* Close */}
++        <div onClick={onClose} style={{
++          position: "absolute", top: "16px", right: "16px", width: "28px", height: "28px",
++          borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
++          cursor: "pointer", color: "rgba(240,236,226,0.35)", fontSize: "16px",
++          border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)",
++        }}>×</div>
++
++        {/* Top label */}
++        <div style={{
++          fontSize: "10px", letterSpacing: "0.3em", textTransform: "uppercase",
++          color: "rgba(201,168,76,0.5)", marginBottom: "16px", fontWeight: 500,
++        }}>
++          Emperor Dossier
++        </div>
++
++        {/* Dynasty + Era badges */}
++        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
++          <div style={{
++            padding: "3px 10px", borderRadius: "100px",
++            background: `${dc}18`, border: `1px solid ${dc}35`,
++            fontSize: "10px", color: dc, letterSpacing: "0.06em",
++            textTransform: "uppercase", fontWeight: 600,
++          }}>
++            {ruler.dynasty}
++          </div>
++          <div style={{
++            padding: "3px 10px", borderRadius: "100px",
++            background: `${era.color}15`, border: `1px solid ${era.color}30`,
++            fontSize: "10px", color: era.color, letterSpacing: "0.06em",
++            textTransform: "uppercase", fontWeight: 500,
++          }}>
++            {era.name}
++          </div>
++        </div>
++
++        {/* Name */}
++        <h2 style={{
++          fontFamily: "'Playfair Display', serif", fontSize: "30px", fontWeight: 600,
++          color: "#F0ECE2", margin: "0 0 2px", lineHeight: 1.15,
++        }}>
++          {ruler.name}
++        </h2>
++
++        {/* Latin title */}
++        <div style={{
++          fontSize: "12px", color: "rgba(201,168,76,0.55)",
++          fontVariant: "small-caps", letterSpacing: "0.04em",
++          marginBottom: ruler.quote ? "8px" : "20px", lineHeight: 1.4,
++          fontFamily: "'Playfair Display', serif",
++        }}>
++          {ruler.latin_title}
++        </div>
++
++        {/* Quote */}
++        {ruler.quote && (
++          <div style={{
++            fontSize: "13px", color: "rgba(240,236,226,0.35)",
++            fontStyle: "italic", marginBottom: "20px",
++            paddingLeft: "12px", borderLeft: "2px solid rgba(201,168,76,0.2)",
++            fontFamily: "'Playfair Display', serif", lineHeight: 1.5,
++          }}>
++            &quot;{ruler.quote}&quot;
++          </div>
++        )}
++
++        {/* Divider */}
++        <div style={{ height: "1px", background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.15), transparent)", marginBottom: "20px" }} />
++
++        {/* Stats grid */}
++        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "20px" }}>
++          {[
++            { label: "Reign", value: `${formatYear(ruler.reign_start)} – ${formatYear(ruler.reign_end)}` },
++            { label: "Duration", value: `${reignLength(ruler)} years` },
++            { label: "Lifespan", value: `${lifespan}`, sub: `${age} years` },
++            { label: "Fate", value: di.label, color: di.color, icon: di.symbol },
++          ].map((s: { label: string; value: string; sub?: string; icon?: string; color?: string }) => (
++            <div key={s.label} style={{
++              padding: "10px 12px", borderRadius: "8px",
++              background: "rgba(255,255,255,0.025)",
++              border: "1px solid rgba(255,255,255,0.04)",
++            }}>
++              <div style={{ fontSize: "10px", color: "rgba(240,236,226,0.3)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: "4px", fontWeight: 500 }}>
++                {s.label}
++              </div>
++              <div style={{
++                fontSize: "13px", color: s.color || "rgba(240,236,226,0.7)", fontWeight: 500,
++                display: "flex", alignItems: "center", gap: "5px",
++              }}>
++                {s.icon && <span style={{ fontSize: "13px" }}>{s.icon}</span>}
++                {s.value}
++              </div>
++              {s.sub && <div style={{ fontSize: "11px", color: "rgba(240,236,226,0.25)", marginTop: "1px" }}>{s.sub}</div>}
++            </div>
++          ))}
++        </div>
++
++        {/* Timeline */}
++        <div style={{ marginBottom: "20px" }}>
++          <div style={{ fontSize: "10px", color: "rgba(240,236,226,0.3)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: "8px", fontWeight: 500 }}>
++            Reign timeline
++          </div>
++          <div style={{
++            position: "relative", height: "40px",
++            background: "rgba(255,255,255,0.02)", borderRadius: "6px",
++            border: "1px solid rgba(255,255,255,0.05)", overflow: "hidden",
++          }}>
++            {/* Tick marks */}
++            {ticks.map((t: number) => {
++              const pos = ((t - eStart) / span) * 100;
++              return (
++                <div key={t} style={{ position: "absolute", top: 0, bottom: 0, left: `${pos}%`, width: "1px", background: "rgba(255,255,255,0.04)" }}>
++                  <span style={{ position: "absolute", bottom: "2px", left: "3px", fontSize: "8px", color: "rgba(240,236,226,0.2)", whiteSpace: "nowrap" }}>
++                    {t === 0 ? "0" : t < 0 ? `${Math.abs(t)} BC` : `${t}`}
++                  </span>
++                </div>
++              );
++            })}
++            {/* BC/AD marker */}
++            <div style={{ position: "absolute", top: 0, bottom: 0, left: `${((0 - eStart) / span) * 100}%`, width: "1px", background: "rgba(201,168,76,0.15)" }} />
++
++            {/* Active reign bar */}
++            <div style={{
++              position: "absolute", top: "6px", bottom: "14px",
++              left: `${Math.max(barLeft, 0)}%`,
++              width: `${barWidth}%`,
++              background: `linear-gradient(135deg, #8B0000, #B22222)`,
++              borderRadius: "3px", minWidth: "4px",
++              boxShadow: "0 0 12px rgba(139,0,0,0.5), 0 0 4px rgba(139,0,0,0.3)",
++            }} />
++          </div>
++        </div>
++
++        {/* Divider */}
++        <div style={{ height: "1px", background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent)", marginBottom: "16px" }} />
++
++        {/* Bio */}
++        <div>
++          <div style={{ fontSize: "10px", color: "rgba(240,236,226,0.3)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: "8px", fontWeight: 500 }}>
++            Biography
++          </div>
++          <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(240,236,226,0.6)", margin: 0 }}>
++            {ruler.bio_short}
++          </p>
++        </div>
++      </div>
++
++      {/* Bottom gold line */}
++      <div style={{
++        height: "1px",
++        background: "linear-gradient(90deg, transparent 0%, #C9A84C 30%, #C9A84C 70%, transparent 100%)",
++        opacity: 0.12,
++      }} />
++    </div>
++  );
++}
++
++export default function RulersEncyclopaedia() {
++  const [visible, setVisible] = useState(false);
++  const [search, setSearch] = useState("");
++  const [dynasty, setDynasty] = useState("All");
++  const [deathFilter, setDeathFilter] = useState("All");
++  const [sortBy, setSortBy] = useState("reign");
++  const [selected, setSelected] = useState<number | null>(null);
++
++  useEffect(() => { setTimeout(() => setVisible(true), 100); }, []);
++
++  const filtered = RULERS.filter((r: Ruler) => {
++    if (search && !r.name.toLowerCase().includes(search.toLowerCase()) && !r.native_name.toLowerCase().includes(search.toLowerCase())) return false;
++    if (dynasty !== "All" && r.dynasty !== dynasty) return false;
++    if (deathFilter !== "All" && r.death_cause !== deathFilter) return false;
++    return true;
++  });
++
++  filtered.sort((a: Ruler, b: Ruler) => {
++    if (sortBy === "reign") return a.reign_start - b.reign_start;
++    if (sortBy === "name") return a.name.localeCompare(b.name);
++    if (sortBy === "duration") return reignLength(b) - reignLength(a);
++    return 0;
++  });
++
++  const selectedRuler = RULERS.find((r: Ruler) => r.id === selected);
++
++  // Group for dynasty separators
++  let lastDynasty: string | null = null;
++
++  const selectStyle: CSSProperties = {
++    padding: "9px 32px 9px 12px", borderRadius: "8px",
++    border: "1px solid rgba(255,255,255,0.08)",
++    background: "#14130f", color: "#F0ECE2", fontSize: "12px",
++    fontFamily: "'DM Sans', sans-serif", cursor: "pointer",
++    outline: "none", appearance: "none",
++    backgroundImage: `url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23F0ECE2' stroke-opacity='0.35' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E")`,
++    backgroundRepeat: "no-repeat", backgroundPosition: "right 10px center",
++  };
++
++  return (
++    <div style={{
++      minHeight: "100vh", background: "#0C0B09", color: "#F0ECE2",
++      fontFamily: "'DM Sans', sans-serif", overflowX: "hidden",
++    }}>
++      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
++
++      {/* ====== ATMOSPHERE LAYERS ====== */}
++      {/* Noise texture */}
++      <svg style={{ position: "fixed", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0, opacity: 0.025 }}>
++        <filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" seed="2" /></filter>
++        <rect width="100%" height="100%" fill="#fff" filter="url(#noise)" />
++      </svg>
++
++      {/* Radial ambient glow */}
++      <div style={{ position: "fixed", inset: 0, background: "radial-gradient(ellipse at 25% 15%, rgba(139,0,0,0.09) 0%, transparent 45%), radial-gradient(ellipse at 75% 80%, rgba(201,168,76,0.04) 0%, transparent 40%)", pointerEvents: "none", zIndex: 0 }} />
++
++      {/* Vignette */}
++      <div style={{ position: "fixed", inset: 0, background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.45) 100%)", pointerEvents: "none", zIndex: 0 }} />
++
++      {/* Faint map lines */}
++      <svg style={{ position: "fixed", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0, opacity: 0.02 }}>
++        <defs>
++          <pattern id="maplines" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
++            <path d="M0,30 Q15,20 30,30 T60,30" stroke="#C9A84C" strokeWidth="0.3" fill="none" opacity="0.5" />
++            <path d="M30,0 Q20,15 30,30 T30,60" stroke="#C9A84C" strokeWidth="0.2" fill="none" opacity="0.3" />
++          </pattern>
++        </defs>
++        <rect width="100%" height="100%" fill="url(#maplines)" />
++      </svg>
++
++      {/* Marble texture dots */}
++      <svg style={{ position: "fixed", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0, opacity: 0.015 }}>
++        <defs>
++          <pattern id="marble" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
++            <circle cx="20" cy="20" r="1" fill="#C9A84C" opacity="0.5" />
++            <circle cx="55" cy="45" r="0.7" fill="#C9A84C" opacity="0.3" />
++            <circle cx="40" cy="70" r="0.5" fill="#8B0000" opacity="0.4" />
++            <path d="M10,50 Q25,45 40,55" stroke="#C9A84C" strokeWidth="0.2" fill="none" opacity="0.3" />
++          </pattern>
++        </defs>
++        <rect width="100%" height="100%" fill="url(#marble)" />
++      </svg>
++
++      {/* ====== CONTENT ====== */}
++      <div style={{ position: "relative", zIndex: 1, maxWidth: "1100px", margin: "0 auto", padding: "48px 24px 80px" }}>
++
++        {/* ====== CINEMATIC HEADER ====== */}
++        <header style={{
++          textAlign: "center", marginBottom: "56px",
++          opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(20px)",
++          transition: "all 0.8s ease",
++        }}>
++          {/* Back nav */}
++          <div style={{ textAlign: "left", marginBottom: "32px" }}>
++            <div onClick={() => window.history.back()} style={{
++              cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "6px",
++              fontSize: "11px", color: "rgba(240,236,226,0.35)", letterSpacing: "0.1em", textTransform: "uppercase",
++            }}>
++              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 13L5 8L10 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
++              Roman Empire
++            </div>
++          </div>
++
++          <div style={{
++            fontSize: "10px", letterSpacing: "0.35em", textTransform: "uppercase",
++            color: "rgba(201,168,76,0.4)", marginBottom: "16px", fontWeight: 500,
++          }}>
++            <span style={{ display: "inline-flex", alignItems: "center", gap: "10px" }}>
++              <span style={{ width: "20px", height: "1px", background: "rgba(201,168,76,0.25)", display: "inline-block" }} />
++              Imperium Romanum
++              <span style={{ width: "20px", height: "1px", background: "rgba(201,168,76,0.25)", display: "inline-block" }} />
++            </span>
++          </div>
++
++          <h1 style={{
++            fontFamily: "'Playfair Display', serif",
++            fontSize: "clamp(38px, 6vw, 58px)", fontWeight: 600,
++            margin: "0 0 8px", letterSpacing: "0.06em", lineHeight: 1.05,
++            background: "linear-gradient(135deg, #F4D03F 0%, #E8C547 20%, #D4AF37 40%, #C9A84C 60%, #E8C547 80%, #F4D03F 100%)",
++            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
++          }}>
++            Rulers of Rome
++          </h1>
++
++          <p style={{
++            fontFamily: "'Playfair Display', serif", fontSize: "16px",
++            color: "rgba(240,236,226,0.4)", fontStyle: "italic",
++            margin: "0 0 24px", fontWeight: 400, letterSpacing: "0.02em",
++          }}>
++            Imperial Chronology of the Roman Empire
++          </p>
++
++          {/* Gold divider */}
++          <div style={{
++            width: "80px", height: "1px", margin: "0 auto",
++            background: "linear-gradient(90deg, transparent, #C9A84C, transparent)", opacity: 0.4,
++          }} />
++
++          {/* Stats ribbon */}
++          <div style={{
++            display: "inline-flex", gap: "32px", marginTop: "24px",
++            padding: "12px 24px", borderRadius: "8px",
++            background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)",
++          }}>
++            {[
++              { v: "24", l: "Rulers shown" },
++              { v: "68", l: "Total in database" },
++              { v: "985", l: "Years spanned" },
++            ].map((s: { v: string; l: string }) => (
++              <div key={s.l} style={{ textAlign: "center" }}>
++                <div style={{ fontSize: "18px", fontWeight: 600, color: "rgba(201,168,76,0.7)", fontFamily: "'Playfair Display', serif" }}>{s.v}</div>
++                <div style={{ fontSize: "10px", color: "rgba(240,236,226,0.25)", letterSpacing: "0.05em", textTransform: "uppercase" }}>{s.l}</div>
++              </div>
++            ))}
++          </div>
++        </header>
++
++        {/* ====== FILTERS ====== */}
++        <div style={{
++          display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "28px", alignItems: "center",
++          padding: "14px 16px", borderRadius: "10px",
++          background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.04)",
++          opacity: visible ? 1 : 0, transition: "opacity 0.6s ease 0.2s",
++        }}>
++          <div style={{ position: "relative", flex: "1 1 200px", maxWidth: "260px" }}>
++            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style={{ position: "absolute", left: "11px", top: "50%", transform: "translateY(-50%)", opacity: 0.3 }}>
++              <circle cx="7" cy="7" r="5" stroke="#F0ECE2" strokeWidth="1.2" />
++              <path d="M11 11L14 14" stroke="#F0ECE2" strokeWidth="1.2" strokeLinecap="round" />
++            </svg>
++            <input
++              value={search} onChange={(e: ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
++              placeholder="Search rulers..."
++              style={{
++                width: "100%", padding: "9px 12px 9px 34px", borderRadius: "8px",
++                border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)",
++                color: "#F0ECE2", fontSize: "12px", fontFamily: "'DM Sans', sans-serif", outline: "none",
++              }}
++            />
++          </div>
++
++          <select value={dynasty} onChange={(e: ChangeEvent<HTMLSelectElement>) => setDynasty(e.target.value)} style={selectStyle}>
++            <option value="All">All dynasties</option>
++            {DYNASTIES.map((d: string) => <option key={d} value={d}>{d}</option>)}
++          </select>
++
++          <select value={deathFilter} onChange={(e: ChangeEvent<HTMLSelectElement>) => setDeathFilter(e.target.value)} style={selectStyle}>
++            <option value="All">All fates</option>
++            {DEATH_CAUSES.map((d: string) => <option key={d} value={d}>{d}</option>)}
++          </select>
++
++          {/* Sort */}
++          <div style={{ display: "flex", gap: "3px", marginLeft: "auto" }}>
++            {[
++              { key: "reign", label: "Chrono" },
++              { key: "name", label: "A–Z" },
++              { key: "duration", label: "Longest" },
++            ].map((s: { key: string; label: string }) => (
++              <div key={s.key} onClick={() => setSortBy(s.key)} style={{
++                padding: "7px 11px", borderRadius: "6px", fontSize: "11px", fontWeight: 500, cursor: "pointer",
++                color: sortBy === s.key ? "#F0ECE2" : "rgba(240,236,226,0.3)",
++                background: sortBy === s.key ? "rgba(139,0,0,0.18)" : "transparent",
++                border: sortBy === s.key ? "1px solid rgba(139,0,0,0.25)" : "1px solid transparent",
++                transition: "all 0.2s ease",
++              }}>
++                {s.label}
++              </div>
++            ))}
++          </div>
++        </div>
++
++        {/* Legend */}
++        <div style={{ display: "flex", gap: "14px", marginBottom: "16px", paddingLeft: "4px" }}>
++          {[
++            { cause: "natural", label: "Natural" },
++            { cause: "assassination", label: "Assassination" },
++            { cause: "suicide", label: "Suicide" },
++            { cause: "battle", label: "Battle" },
++          ].map((l: { cause: string; label: string }) => {
++            const di = deathIcon(l.cause);
++            return (
++              <div key={l.cause} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "10px", color: "rgba(240,236,226,0.35)" }}>
++                <span style={{ color: di.color, fontSize: "11px" }}>{di.symbol}</span>
++                {l.label}
++              </div>
++            );
++          })}
++        </div>
++
++        {/* ====== CONTENT GRID ====== */}
++        <div style={{ display: "grid", gridTemplateColumns: selected ? "1fr 380px" : "1fr", gap: "20px", alignItems: "start" }}>
++
++          {/* List panel */}
++          <div style={{
++            background: "linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%)",
++            border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px", overflow: "hidden",
++            boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
++          }}>
++            {/* Table header */}
++            <div style={{
++              display: "grid", gridTemplateColumns: "4px 1fr 120px 80px 40px",
++              padding: "10px 0", borderBottom: "1px solid rgba(255,255,255,0.06)",
++              fontSize: "10px", color: "rgba(240,236,226,0.25)", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 500,
++            }}>
++              <div />
++              <div style={{ paddingLeft: "16px" }}>Ruler</div>
++              <div style={{ paddingLeft: "8px" }}>Reign</div>
++              <div style={{ textAlign: "center" }}>Duration</div>
++              <div style={{ textAlign: "center" }}>Fate</div>
++            </div>
++
++            {/* Rows */}
++            <div style={{ maxHeight: "620px", overflowY: "auto" }}>
++              {filtered.length === 0 ? (
++                <div style={{ padding: "48px 16px", textAlign: "center", color: "rgba(240,236,226,0.25)", fontSize: "13px" }}>
++                  No rulers match your filters
++                </div>
++              ) : (
++                filtered.map((r: Ruler, i: number) => {
++                  const showDynastySep = sortBy === "reign" && r.dynasty !== lastDynasty;
++                  lastDynasty = r.dynasty;
++                  const dc = DYNASTY_COLORS[r.dynasty] || "#6B6560";
++                  return (
++                    <div key={r.id}>
++                      {showDynastySep && (
++                        <div style={{
++                          padding: "8px 16px 6px 20px", fontSize: "10px", letterSpacing: "0.12em",
++                          textTransform: "uppercase", color: dc, fontWeight: 600, opacity: 0.6,
++                          borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none",
++                          background: "rgba(255,255,255,0.01)",
++                        }}>
++                          {r.dynasty}
++                        </div>
++                      )}
++                      <RulerRow
++                        ruler={r} isSelected={selected === r.id}
++                        onClick={() => setSelected(selected === r.id ? null : r.id)}
++                        style={{
++                          borderBottom: "1px solid rgba(255,255,255,0.025)",
++                          opacity: visible ? 1 : 0,
++                          transition: `opacity 0.4s ease ${0.3 + i * 0.02}s`,
++                        }}
++                      />
++                    </div>
++                  );
++                })
++              )}
++            </div>
++
++            {/* Footer */}
++            <div style={{
++              padding: "10px 16px", borderTop: "1px solid rgba(255,255,255,0.05)",
++              fontSize: "11px", color: "rgba(240,236,226,0.2)",
++              display: "flex", justifyContent: "space-between",
++            }}>
++              <span>{filtered.length} of {RULERS.length} rulers</span>
++              <span style={{ fontSize: "10px" }}>Sample — full: 68 rulers</span>
++            </div>
++          </div>
+ 
+-  const supabase = await createClient();
+-  const rulers = await getRulers(supabase, empire.id);
++          {/* Detail panel */}
++          {selectedRuler && (
++            <div style={{ position: "sticky", top: "24px", animation: "slideIn 0.3s ease" }}>
++              <RulerDetail ruler={selectedRuler} onClose={() => setSelected(null)} />
++            </div>
++          )}
++        </div>
++      </div>
+ 
+-  return <RulersEncyclopaedia empire={empire} rulers={rulers} />;
++      <style>{`
++        * { box-sizing: border-box; }
++        ::selection { background: rgba(201,168,76,0.3); color: #F0ECE2; }
++        ::-webkit-scrollbar { width: 4px; }
++        ::-webkit-scrollbar-track { background: transparent; }
++        ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.12); border-radius: 2px; }
++        ::-webkit-scrollbar-thumb:hover { background: rgba(201,168,76,0.2); }
++        input::placeholder { color: rgba(240,236,226,0.25); }
++        select option { background: #14130f; color: #F0ECE2; }
++        input:focus { border-color: rgba(201,168,76,0.25) !important; }
++        select:focus { border-color: rgba(201,168,76,0.25) !important; }
++        @keyframes slideIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
++      `}</style>
++    </div>
++  );
+ }
