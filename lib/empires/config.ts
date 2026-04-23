@@ -27,7 +27,7 @@ export const EMPIRE_CONFIGS: EmpireConfig[] = [
   {
     id: 2,
     name: 'Chinese Empire',
-    nativeName: 'Zhonghua Diguo',
+    nativeName: '中華帝國',
     capital: 'CHANGAN',
     slug: 'chinese',
     color: '#DE2910',
@@ -64,5 +64,4 @@ export const EMPIRE_CONFIGS: EmpireConfig[] = [
 
 export function getEmpireBySlug(slug: string): EmpireConfig | undefined {
   return EMPIRE_CONFIGS.find((empire) => empire.slug === slug);
-  return EMPIRE_CONFIGS.find((e) => e.slug === slug);
 }

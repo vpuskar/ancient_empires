@@ -331,6 +331,101 @@ const JAPANESE_SNAPSHOTS: Record<number, SnapshotEnrichment> = {
     storyTitle: 'Continental Peak',
     storySummary:
       'Korea, Taiwan, Karafuto, the Kwantung Leased Territory, Manchukuo, Pacific mandate islands, and occupied coastal China are under Japanese control or direct influence. Full expansion into Southeast Asia and the Pacific War against the United States remain three years away.',
+const CHINESE_SNAPSHOTS: Record<number, SnapshotEnrichment> = {
+  [-1]: {
+    era: 'Han Dynasty (Peak)',
+    eraDesc:
+      'The Han Dynasty at its zenith. The Silk Road flourishes, connecting China to distant lands. Military expansion into Central Asia, Korea, and Vietnam defines an era of unprecedented reach.',
+    eraRange: '206 BC - 9 AD',
+    ruler: 'Emperor Wu of Han',
+    provinces: [
+      'Han heartland',
+      'Korean protectorates',
+      'Central Asian routes',
+      'Northern Vietnam',
+    ],
+    storyTitle: 'The Silk Road Empire',
+    storySummary:
+      "At its peak the Han Dynasty rivalled Rome in scale and sophistication. Caravans linked Chang'an to Persia; armies pushed into the steppes. This was the moment China first defined itself as a world power.",
+  },
+  [500]: {
+    era: 'Period of Division',
+    eraDesc:
+      'China fractured after the Han collapse. The Toba Wei dominate the north; Han Chinese dynasties rule the south. Buddhism spreads rapidly, leaving extraordinary cave art at Dunhuang and Longmen.',
+    eraRange: '220 - 589 AD',
+    ruler: 'Multiple — Northern Wei / Southern Dynasties',
+    provinces: [
+      'Northern Wei',
+      'Eastern Jin successor states',
+      'Southern dynasties',
+    ],
+    storyTitle: 'A Divided Land',
+    storySummary:
+      'For nearly four centuries China had no single ruler. Yet this fragmentation was also a period of profound cultural transformation — Buddhism took root, new art forms emerged, and the groundwork for Tang greatness was laid.',
+  },
+  [700]: {
+    era: 'Tang Dynasty (Golden Age)',
+    eraDesc:
+      "Tang China is the world's most cosmopolitan civilization. Chang'an, the capital, is the world's largest city. Poetry, painting, and Buddhism flourish.",
+    eraRange: '618 - 907 AD',
+    ruler: 'Emperor Xuanzong',
+    provinces: [
+      'Core Tang domains',
+      'Protectorates in Central Asia',
+      'Tibet borderlands',
+      'Korean influence',
+    ],
+    storyTitle: "The World's Capital",
+    storySummary:
+      "Chang'an in 700 AD was home to over a million people and merchants from dozens of nations. Tang poets defined Chinese literature for all time. The empire stretched further west than any Chinese dynasty before or since.",
+  },
+  [1100]: {
+    era: 'Northern Song Dynasty',
+    eraDesc:
+      'Despite losing the north to the Jurchen Jin, Song China undergoes an economic revolution. Gunpowder weapons, movable type printing, and paper money transform society.',
+    eraRange: '960 - 1127 AD',
+    ruler: 'Song Emperors',
+    provinces: [
+      'Song Empire (central and south)',
+      'Jin Dynasty (north)',
+      'Liao remnants',
+    ],
+    storyTitle: 'Revolution Without Conquest',
+    storySummary:
+      "The Song never matched Tang territorial scale, but no dynasty was more innovative. Paper money, printing, and explosive weapons all emerged here. China's economy became the largest in the world.",
+  },
+  [1500]: {
+    era: 'Ming Dynasty',
+    eraDesc:
+      "The Ming have restored Han Chinese rule and built the Forbidden City. Zheng He's fleets reach East Africa. The Great Wall is rebuilt to its most famous form.",
+    eraRange: '1368 - 1644 AD',
+    ruler: 'Yongle / Xuande Era',
+    provinces: [
+      'Ming heartland',
+      'Northern frontier (Great Wall)',
+      'Maritime tributary network',
+      'Southwest borderlands',
+    ],
+    storyTitle: 'The Dragon Throne',
+    storySummary:
+      "The Forbidden City stood complete; the Great Wall gleamed new. Zheng He's treasure fleets dwarfed anything Europe could muster. The Ming represented Han Chinese civilization at its most confident and self-assured.",
+  },
+  [1800]: {
+    era: 'Qing Dynasty (Zenith)',
+    eraDesc:
+      'The Qing at maximum territorial extent. Tibet, Xinjiang, Mongolia, and Manchuria all under Qing control. Internal prosperity masks growing Western pressure.',
+    eraRange: '1735 - 1796 AD',
+    ruler: 'Qianlong Emperor (legacy period)',
+    provinces: [
+      'Qing proper',
+      'Tibet',
+      'Xinjiang',
+      'Outer Mongolia',
+      'Manchuria',
+    ],
+    storyTitle: 'The Last Summit',
+    storySummary:
+      'Under Qianlong the Qing Empire reached its greatest extent — larger than any previous Chinese dynasty. But as the emperor celebrated, the first Western ships carrying new demands were already rounding the Cape.',
   },
 };
 
@@ -340,6 +435,7 @@ const SNAPSHOT_ENRICHMENTS: Record<
 > = {
   1: ROMAN_SNAPSHOTS,
   3: JAPANESE_SNAPSHOTS,
+  2: CHINESE_SNAPSHOTS,
   4: OTTOMAN_SNAPSHOTS,
 };
 
@@ -373,6 +469,17 @@ const TIMELINE_MARKERS: Record<number, TimelineMarker[]> = {
     { year: 1600, label: '1600 AD', title: 'Battle of Sekigahara' },
     { year: 1868, label: '1868 AD', title: 'Meiji Restoration' },
     { year: 1945, label: '1945 AD', title: 'End of the Japanese Empire' },
+  2: [
+    { year: -221, label: '221 BC', title: 'Qin Unifies China' },
+    { year: -206, label: '206 BC', title: 'Han Dynasty Founded' },
+    { year: -141, label: '141 BC', title: 'Emperor Wu Ascends' },
+    { year: 220, label: '220 AD', title: 'Han Dynasty Falls' },
+    { year: 618, label: '618 AD', title: 'Tang Dynasty Founded' },
+    { year: 755, label: '755 AD', title: 'An Lushan Rebellion' },
+    { year: 1271, label: '1271 AD', title: 'Yuan Dynasty (Kublai Khan)' },
+    { year: 1368, label: '1368 AD', title: 'Ming Dynasty Founded' },
+    { year: 1644, label: '1644 AD', title: 'Qing Dynasty Founded' },
+    { year: 1912, label: '1912 AD', title: 'Empire Ends' },
   ],
   4: [
     { year: 1402, label: '1402 AD', title: 'Battle of Ankara' },
