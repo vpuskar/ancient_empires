@@ -331,6 +331,9 @@ const JAPANESE_SNAPSHOTS: Record<number, SnapshotEnrichment> = {
     storyTitle: 'Continental Peak',
     storySummary:
       'Korea, Taiwan, Karafuto, the Kwantung Leased Territory, Manchukuo, Pacific mandate islands, and occupied coastal China are under Japanese control or direct influence. Full expansion into Southeast Asia and the Pacific War against the United States remain three years away.',
+  }, // ← FIX: closing brace for 1938 entry (was missing)
+}; // ← FIX: closing brace for JAPANESE_SNAPSHOTS (was missing)
+
 const CHINESE_SNAPSHOTS: Record<number, SnapshotEnrichment> = {
   [-1]: {
     era: 'Han Dynasty (Peak)',
@@ -434,8 +437,8 @@ const SNAPSHOT_ENRICHMENTS: Record<
   Record<number, SnapshotEnrichment>
 > = {
   1: ROMAN_SNAPSHOTS,
-  3: JAPANESE_SNAPSHOTS,
   2: CHINESE_SNAPSHOTS,
+  3: JAPANESE_SNAPSHOTS,
   4: OTTOMAN_SNAPSHOTS,
 };
 
@@ -454,6 +457,18 @@ const ROMAN_MARKERS: TimelineMarker[] = [
 
 const TIMELINE_MARKERS: Record<number, TimelineMarker[]> = {
   1: ROMAN_MARKERS,
+  2: [
+    { year: -221, label: '221 BC', title: 'Qin Unifies China' },
+    { year: -206, label: '206 BC', title: 'Han Dynasty Founded' },
+    { year: -141, label: '141 BC', title: 'Emperor Wu Ascends' },
+    { year: 220, label: '220 AD', title: 'Han Dynasty Falls' },
+    { year: 618, label: '618 AD', title: 'Tang Dynasty Founded' },
+    { year: 755, label: '755 AD', title: 'An Lushan Rebellion' },
+    { year: 1271, label: '1271 AD', title: 'Yuan Dynasty (Kublai Khan)' },
+    { year: 1368, label: '1368 AD', title: 'Ming Dynasty Founded' },
+    { year: 1644, label: '1644 AD', title: 'Qing Dynasty Founded' },
+    { year: 1912, label: '1912 AD', title: 'Empire Ends' },
+  ],
   3: [
     {
       year: -660,
@@ -469,18 +484,7 @@ const TIMELINE_MARKERS: Record<number, TimelineMarker[]> = {
     { year: 1600, label: '1600 AD', title: 'Battle of Sekigahara' },
     { year: 1868, label: '1868 AD', title: 'Meiji Restoration' },
     { year: 1945, label: '1945 AD', title: 'End of the Japanese Empire' },
-  2: [
-    { year: -221, label: '221 BC', title: 'Qin Unifies China' },
-    { year: -206, label: '206 BC', title: 'Han Dynasty Founded' },
-    { year: -141, label: '141 BC', title: 'Emperor Wu Ascends' },
-    { year: 220, label: '220 AD', title: 'Han Dynasty Falls' },
-    { year: 618, label: '618 AD', title: 'Tang Dynasty Founded' },
-    { year: 755, label: '755 AD', title: 'An Lushan Rebellion' },
-    { year: 1271, label: '1271 AD', title: 'Yuan Dynasty (Kublai Khan)' },
-    { year: 1368, label: '1368 AD', title: 'Ming Dynasty Founded' },
-    { year: 1644, label: '1644 AD', title: 'Qing Dynasty Founded' },
-    { year: 1912, label: '1912 AD', title: 'Empire Ends' },
-  ],
+  ], // ← FIX: closing bracket for empire_id 3 array (was missing)
   4: [
     { year: 1402, label: '1402 AD', title: 'Battle of Ankara' },
     { year: 1453, label: '1453 AD', title: 'Constantinople Falls' },
