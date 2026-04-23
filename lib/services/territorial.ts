@@ -265,11 +265,81 @@ const OTTOMAN_SNAPSHOTS: Record<number, SnapshotEnrichment> = {
   },
 };
 
+const JAPANESE_SNAPSHOTS: Record<number, SnapshotEnrichment> = {
+  800: {
+    era: 'Nara / Early Heian Period',
+    eraDesc:
+      'The Yamato state consolidates its bureaucratic order under the ritsuryo system, with imperial authority extending across Honshu, Shikoku, and northern Kyushu.',
+    eraRange: 'c. 794 - 900 AD',
+    ruler: 'Emperor Kanmu',
+    provinces: ['Yamashiro', 'Yamato', 'Musashi', 'Settsu', 'Mutsu'],
+    storyTitle: 'Court and Frontier',
+    storySummary:
+      'The court governs from Heian-kyo, established in 794. Imperial authority extends across Honshu, Shikoku, and northern Kyushu, while campaigns against the Emishi push the frontier further into Tohoku. Hokkaido and the Ryukyu islands remain outside imperial administration.',
+  },
+  1200: {
+    era: 'Kamakura Shogunate',
+    eraDesc:
+      'Japan operates under dual authority: the emperor at Kyoto and the Kamakura shogunate in eastern Japan.',
+    eraRange: '1185 - 1333 AD',
+    ruler: 'Minamoto no Yoritomo',
+    provinces: ['Yamashiro', 'Sagami', 'Mutsu', 'Chikuzen', 'Echigo'],
+    storyTitle: 'Warrior Government',
+    storySummary:
+      'Warrior government controls all four main islands. The Northern Fujiwara have been crushed. Zen Buddhism and samurai culture are reshaping Japanese society from the east. The Mongol threat has not yet materialized.',
+  },
+  1600: {
+    era: 'Sekigahara - Tokugawa Unification',
+    eraDesc:
+      "Tokugawa Ieyasu's victory at Sekigahara ends a century of civil war and unifies the archipelago under a single political authority.",
+    eraRange: '1600 - 1603 AD',
+    ruler: 'Tokugawa Ieyasu',
+    provinces: ['Musashi', 'Mikawa', 'Owari', 'Satsuma', 'Chikuzen'],
+    storyTitle: 'A New Peace',
+    storySummary:
+      'The entire main island chain - Honshu, Kyushu, Shikoku, and the Hokkaido frontier - is brought under Tokugawa hegemony. A new era of enforced peace begins.',
+  },
+  1800: {
+    era: 'Mid-Edo Period',
+    eraDesc:
+      'Two centuries of Tokugawa peace have produced a stable, prosperous, and largely isolated Japan.',
+    eraRange: '1603 - 1868 AD',
+    ruler: 'Emperor Kokaku',
+    provinces: ['Musashi', 'Yamashiro', 'Satsuma', 'Echigo', 'Ezo'],
+    storyTitle: 'Peace Under Pressure',
+    storySummary:
+      'All four main islands are integrated under shogunal administration. Northern Hokkaido is increasingly under direct control as Russian ships probe the northern frontier. Urban merchant culture flourishes alongside declining shogunal finances.',
+  },
+  1900: {
+    era: 'Meiji Imperial Expansion',
+    eraDesc:
+      'Victory in the First Sino-Japanese War (1894-95) delivers Taiwan and the Pescadores to Japan, marking the beginning of overseas colonial expansion.',
+    eraRange: '1868 - 1912 AD',
+    ruler: 'Emperor Meiji',
+    provinces: ['Musashi', 'Yamashiro', 'Satsuma', 'Chikuzen', 'Hizen'],
+    storyTitle: 'Modern Imperial Power',
+    storySummary:
+      'Industrial modernization, a conscript army, and a modern navy have transformed Japan within a single generation. The nation is now recognized as a significant regional power, with Korea firmly within its sphere of influence.',
+  },
+  1938: {
+    era: 'Empire of Japan - Continental Peak',
+    eraDesc:
+      'The Empire of Japan reaches its greatest continental extent through formal colonies, leased territories, mandates, client states, and occupied coastal China.',
+    eraRange: '1910 - 1945 AD',
+    ruler: 'Emperor Showa (Hirohito)',
+    provinces: ['Musashi', 'Yamashiro', 'Chikuzen', 'Hizen', 'Satsuma'],
+    storyTitle: 'Continental Peak',
+    storySummary:
+      'Korea, Taiwan, Karafuto, the Kwantung Leased Territory, Manchukuo, Pacific mandate islands, and occupied coastal China are under Japanese control or direct influence. Full expansion into Southeast Asia and the Pacific War against the United States remain three years away.',
+  },
+};
+
 const SNAPSHOT_ENRICHMENTS: Record<
   number,
   Record<number, SnapshotEnrichment>
 > = {
   1: ROMAN_SNAPSHOTS,
+  3: JAPANESE_SNAPSHOTS,
   4: OTTOMAN_SNAPSHOTS,
 };
 
@@ -288,6 +358,22 @@ const ROMAN_MARKERS: TimelineMarker[] = [
 
 const TIMELINE_MARKERS: Record<number, TimelineMarker[]> = {
   1: ROMAN_MARKERS,
+  3: [
+    {
+      year: -660,
+      label: '660 BC',
+      title: 'Traditional founding of imperial line',
+    },
+    { year: 587, label: '587 AD', title: 'Soga victory - Buddhism secured' },
+    { year: 645, label: '645 AD', title: 'Taika Reforms' },
+    { year: 710, label: '710 AD', title: 'Capital established at Nara' },
+    { year: 794, label: '794 AD', title: 'Capital moved to Heian-kyo' },
+    { year: 1185, label: '1185 AD', title: 'Kamakura shogunate begins' },
+    { year: 1333, label: '1333 AD', title: 'Kemmu Restoration' },
+    { year: 1600, label: '1600 AD', title: 'Battle of Sekigahara' },
+    { year: 1868, label: '1868 AD', title: 'Meiji Restoration' },
+    { year: 1945, label: '1945 AD', title: 'End of the Japanese Empire' },
+  ],
   4: [
     { year: 1402, label: '1402 AD', title: 'Battle of Ankara' },
     { year: 1453, label: '1453 AD', title: 'Constantinople Falls' },
