@@ -508,18 +508,41 @@ Status: 🔄 IN PROGRESS — Data files generated, pending import and code integ
   - Cambodia/Cochin China excluded from 1938 (source data error; Japan didn't occupy until 1940-41)
   - No BC snapshots exist in source dataset — earliest viable polygon is ~300-800 AD
 
+#### ✓ Japanese empire_extent SQL (generated, pending import)
+
+- 6 rows inserted for years 800, 1200, 1600, 1800, 1900, 1938
+- area_km2: 295K → 335K → 350K → 378K → 633K → 2,100K (dramatic arc matches imperial expansion)
+- geojson_url pattern: `/geojson/japanese_{year}.geojson`
+
+#### ✓ Territorial Enrichment (merged to develop — PR #70)
+
+- lib/services/territorial.ts: JAPANESE_SNAPSHOTS constant with 6 curated snapshots
+- SNAPSHOT_ENRICHMENTS[3] = JAPANESE_SNAPSHOTS registered
+- TIMELINE_MARKERS[3] populated with 10 markers (-660 to 1945)
+- Merge conflict with feature/chinese-overview-content resolved manually (Accept Both Changes pattern)
+- Post-merge syntax error (2 missing closing braces + 1 missing `],`) fixed in territorial.ts
+- Key lesson: merge conflict resolution in territorial.ts can silently drop closing braces — always verify brace balance after resolving conflicts in this file
+- Brace balance verified: 92 open, 92 close
+
+#### ✓ Personality Quiz Config (Codex — pending PR)
+
+- lib/config/personality/japanese.ts created: JAPANESE_PERSONALITY export
+- 8 questions using only valid dimension keys: power_style, conflict, legacy, innovation, people_focus, risk, moral_framework, charisma
+- 6 ruler profiles (spec-aligned set): Emperor Meiji, Tokugawa Ieyasu, Emperor Kanmu, Emperor Go-Daigo, Emperor Showa, Prince Shotoku
+- All 32 delta arrays and 6 vector arrays verified at exactly 8 numbers each
+- lib/config/personality/index.ts: 3: JAPANESE_PERSONALITY registered
+- displayName: "Japanese" (not "Japanese Empire")
+
 #### ⏳ Japanese Still Pending
 
-- empire_extent INSERT SQL (6 rows for years 800, 1200, 1600, 1800, 1900, 1938)
-- Territorial enrichment in lib/services/territorial.ts (JAPANESE_SNAPSHOTS constant)
+- Import all data files into Supabase (rulers, events, battles, places, provinces, chapters, empire_extent)
 - 5,000 quiz questions (Python generation script)
-- Personality quiz config (lib/config/personality/japanese.ts — 8 questions, 6 ruler profiles)
 - lib/config/quiz-difficulties.ts: Japanese labels (Heimin/Samurai/Daimyo/Shogun)
 - Japanese added to EMPIRE_CONFIGS code (id=3, slug='japanese', color=#BC002D)
 - nativeName: '大日本帝国', capital: 'TOKYO'
 - 'japanese' added to FULL_CONTENT_SLUGS in app/sitemap.ts
 - Landing page stats update to include Japanese data
-- Vitest personality test: empire_id 99 still valid for unsupported empire case
+- Vitest personality test: update unsupported empire case (empire_id 99 still valid)
 
 ## Service Layer Pattern
 
@@ -737,6 +760,13 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 - Japanese province backfill: 118/124 places mapped; 6 outside Japan (Korea, China, Ryukyu, Taiwan) remain NULL
 - Japanese 'draw' outcome: confirmed valid in battles CHECK constraint
 - Battles dataset evaluated and corrected before import — 3 outcome fixes applied
+- territorial.ts merge conflicts: always "Accept Both Changes" — both sides add empire entries to same objects; never choose one side only
+- territorial.ts brace balance: verify `{` count == `}` count after every merge conflict resolution — conflict markers can silently drop closing braces causing Turbopack parse errors
+- Personality quiz ruler set: Japanese spec set is Meiji, Ieyasu, Kanmu, Go-Daigo, Showa, Prince Shotoku — do not substitute without explicit override note
+- Codex prompt discipline: always add "Do not modify any other files" and "Do not change existing exports, interfaces, or function bodies" explicitly — implied scope is insufficient
+- Codex prompt verification: "For this step, run type-check and lint only" — avoid claiming these are "sufficient" in absolute terms; CI still runs the full suite on PRs
+- Codex prompt dimension keys: always list all 8 fixed personality dimension keys explicitly and say "use only these" — prevents near-match typo drift across personality configs
+- Codex prompt style: say "match the file's existing import/export/style pattern" not "use this exact content" — repo enforces ESLint + Prettier, stylistic consistency matters beyond just type annotations
 
 ## Lighthouse scores (production — ancient-empires.vercel.app)
 
