@@ -90,6 +90,42 @@ const EMPIRE_DIFFICULTY_LABELS: Record<
       subtitle: 'Master of the Known World',
     },
   },
+  2: {
+    1: {
+      name: 'Xiucai',
+      subtitle: 'Cultivated Talent',
+    },
+    2: {
+      name: 'Juren',
+      subtitle: 'Recommended Man',
+    },
+    3: {
+      name: 'Jinshi',
+      subtitle: 'Presented Scholar',
+    },
+    4: {
+      name: 'Zhuangyuan',
+      subtitle: 'Top Scholar of the Realm',
+    },
+  },
+  3: {
+    1: {
+      name: 'Heimin',
+      subtitle: 'Commoner',
+    },
+    2: {
+      name: 'Samurai',
+      subtitle: 'Warrior',
+    },
+    3: {
+      name: 'Daimyo',
+      subtitle: 'Domain Lord',
+    },
+    4: {
+      name: 'Shogun',
+      subtitle: 'Supreme Commander',
+    },
+  },
   4: {
     1: {
       name: 'Reaya',

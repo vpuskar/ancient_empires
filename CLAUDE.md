@@ -87,6 +87,11 @@ Key convention: negative integers for BC dates (-117 = 117 BC)
 
 -1, 500, 700, 1100, 1500, 1800
 
+### empire_extent actual years (Japanese, empire_id=3):
+
+800, 1200, 1600, 1800, 1900, 1938
+(No BC snapshots — source dataset has no Japan polygon before ~300 AD; 800 is earliest meaningful Yamato state polygon)
+
 ### quiz_questions.difficulty levels:
 
 - 1 = Plebs (basic common knowledge) — ~25%
@@ -99,6 +104,7 @@ Key convention: negative integers for BC dates (-117 = 117 BC)
 - Roman: Plebs / Legionarius / Senator / Imperator
 - Chinese: Xiucai (秀才) / Juren (举人) / Jinshi (进士) / Zhuangyuan (状元)
 - Ottoman: Reaya / Sipahi / Pasha / Vizier
+- Japanese: Heimin (平民) / Samurai (武士) / Daimyo (大名) / Shogun (将軍)
 - Labels defined in lib/config/quiz-difficulties.ts → EMPIRE_DIFFICULTY_LABELS
 
 ### quiz_questions.category values (Roman Empire):
@@ -204,14 +210,23 @@ Files (Chinese Empire):
 - chinese_1500.geojson — 1500 AD, Ming dynasty
 - chinese_1800.geojson — 1800 AD, Qing dynasty at zenith
 
+Files (Japanese Empire):
+
+- japanese_800.geojson  — 800 AD, Nara/early Heian core state
+- japanese_1200.geojson — 1200 AD, Imperial Japan (Fujiwara/Kamakura)
+- japanese_1600.geojson — 1600 AD, Japan (Warring States unified by Tokugawa)
+- japanese_1800.geojson — 1800 AD, stable Edo Japan
+- japanese_1900.geojson — 1900 AD, Imperial Japan post-Sino-Japanese War (Taiwan acquired)
+- japanese_1938.geojson — 1938 AD, Empire of Japan at continental peak (+ Saipan mandate)
+
 ## Current Phase
 
-Phase 5 — Chinese Empire (Week 15-17)
-Status: ✅ COMPLETE — All data imported, all pages functional, personality quiz live.
+Phase 6 — Japanese Empire (Week 18-20)
+Status: 🔄 IN PROGRESS — Data files generated, pending import and code integration.
 
 ## What is complete
 
-### Phase 0 — Foundation (Week 1-2) ✓
+### Phase 0 — Architecture (Week 1-2) ✓
 
 - Supabase project created with full schema (10 tables + RLS + user_roles)
 - All 4 empires seeded in empires table
@@ -404,11 +419,8 @@ Status: ✅ COMPLETE — All data imported, all pages functional, personality qu
 #### ✓ Chinese Personality Quiz (static config)
 
 - lib/config/personality/chinese.ts: 8 Chinese-themed questions + 6 emperor profiles
-- Question structure matches Ottoman/Roman: `question`, `dimension`, `delta` (8-number array)
-- Ruler structure matches Ottoman/Roman: `id`, `name`, `title`, `years`, `portrait`, `color`, `description`, `traits`, `vector`
 - 6 results: Qin Shi Huang, Kangxi Emperor, Wu Zetian, Yongzheng Emperor, Hongwu Emperor, Tang Xuanzong
 - Registered in lib/config/personality/index.ts (empire_id=2)
-- Export: `CHINESE_PERSONALITY` (matches `ROMAN_PERSONALITY`, `OTTOMAN_PERSONALITY` naming pattern)
 - displayName: "Chinese"
 
 #### ✓ Chinese Integration (code)
@@ -423,37 +435,114 @@ Status: ✅ COMPLETE — All data imported, all pages functional, personality qu
 #### ✓ Chinese Territorial Enrichment
 
 - lib/services/territorial.ts: CHINESE_SNAPSHOTS constant with 6 curated snapshots
-  - -1: Han Dynasty (Peak) — Emperor Wu of Han
-  - 500: Period of Division — Multiple rulers (Northern Wei / Southern Dynasties)
-  - 700: Tang Dynasty (Golden Age) — Emperor Xuanzong
-  - 1100: Northern Song Dynasty — Song Emperors
-  - 1500: Ming Dynasty — Yongle / Xuande Era
-  - 1800: Qing Dynasty (Zenith) — Qianlong Emperor legacy
 - CHINESE_SNAPSHOTS registered in SNAPSHOT_ENRICHMENTS (key 2)
-- Chinese timeline markers added to TIMELINE_MARKERS (10 events: Qin unification through empire end)
-- Generic fallback still works for unmatched years
+- Chinese timeline markers added to TIMELINE_MARKERS (10 events)
 
 #### ✓ Chinese Quiz Difficulty Labels
 
 - lib/config/quiz-difficulties.ts: Chinese labels added under empire_id=2
-- Xiucai (秀才) — Cultivated Talent (difficulty 1)
-- Juren (举人) — Recommended Man (difficulty 2)
-- Jinshi (进士) — Presented Scholar (difficulty 3)
-- Zhuangyuan (状元) — Top Scholar of the Realm (difficulty 4)
-- Based on imperial examination ranks (keju system)
+- Xiucai (秀才) / Juren (举人) / Jinshi (进士) / Zhuangyuan (状元)
 
 #### ✓ Chinese Bug Fixes
 
 - lib/empires/config.ts: removed duplicate return line in getEmpireBySlug()
-- chinese.ts personality: fixed question id type (string→number), removed invalid option id field, matched exact PersonalityQuestion/RulerProfile type structure
+- chinese.ts personality: fixed question id type, removed invalid option id field
 
 #### ✓ Chinese Overview Page Content
 
 - /chinese renders curated long-form overview via CONTENT.chinese in components/empires/EmpireOverview.tsx
-- Same shared component path as /roman and /ottoman: app/[empire]/page.tsx → <EmpireOverview empire={empire} stats={stats} />
-- Stats panel remains DB/service-driven (no hardcoded counts)
-- Intro, 7 dynastic periods, and 5 featured rulers defined as static curated content
 - Merged via feature/chinese-overview-content → develop (commit 50938c2)
+
+### Phase 6 — Japanese Empire (Week 18-20) 🔄 IN PROGRESS
+
+#### ✓ Japanese Data Files Generated (pending Supabase import)
+
+- **126 emperors CSV** — complete sequence Jimmu through Naruhito (empire_id=3)
+  - Dynasty field uses historical period names (Legendary → Kofun → Asuka → Nara → Heian → Kamakura → Nanboku-cho → Muromachi → Azuchi-Momoyama → Edo → Meiji → Taisho → Showa → Heisei → Reiwa)
+  - death_cause: Anko/Sushun → assassination, Antoku → battle, Kobun → battle
+  - Living emperors (Akihito, Naruhito): reign_end, death_year, death_cause all NULL
+  - All bios ≤300 chars verified
+
+- **140 events SQL** — corrected final version
+  - 3 ruler assignment bugs fixed: Hogen Conflict → Go-Shirakawa; Shimabara → Empress Meisho; Great Fire of Meireki → Emperor Go-Sai
+  - Coverage: legendary period through 2021 Tokyo Olympics
+  - All category values valid per DB CHECK constraint
+
+- **113 battles SQL** — corrected final version
+  - 3 outcome fixes: Bunei → victory; Noryang → defeat; Coral Sea → defeat
+  - Generic 'Jokyu War' deleted; replaced with 3 specific 1221 engagements
+  - 2 new battles added: Imphal 1944 (65,000 casualties), Manila 1945 (100,000 civilian dead)
+  - 'draw' confirmed valid in outcome CHECK constraint
+
+- **124 places SQL** — corrected final version
+  - Duplicate coordinates resolved: Kyoto/Heian-kyo, Nara/Heijo-kyo, Edo/Tokyo, Seoul/Keijo
+  - Keijo removed (duplicate of Seoul)
+  - Ise Grand Shrine founded_year → -3
+  - 17 new places added: Nijo Castle, Goryokaku, Tsushima Island, Itsukushima Shrine, Fushimi Inari, Dazaifu Tenmangu, Nagoya, Hagi, Mito, Kochi, Inuyama Castle, Matsue Castle, and others
+
+- **Province backfill SQL** — 118/124 places mapped to 36 provinces
+  - 6 places intentionally NULL: Seoul, Pyongyang, Taihoku, Shuri Castle, Port Arthur, Mukden (outside Japan)
+  - Uses subquery pattern: `SELECT id FROM provinces WHERE empire_id = 3 AND name = '...'`
+  - Run AFTER provinces insert
+
+- **62 provinces SQL** — corrected final version
+  - established year: all 700 → 701 (Taiho Code, historically accurate)
+  - Ezo established: 1600 → 1604 (Matsumae domain founding)
+  - Apostrophe fix: Ieyasu''s
+  - 5 new provinces added: Izumo, Hoki, Inaba, Tsushima, Iki, Awaji
+  - Awa (Kazusa) renamed to Awa (native_name 安房国 differentiates from Awa/阿波国 Shikoku)
+
+- **17 chapters SQL** — full narrative prose, dollar-quoted
+  - 322–425 words per chapter, all within 300–500 target
+  - Boundary fixes: Muromachi period_start=1333, period_end=1467; Sengoku period_start=1467
+  - Coverage: Jomon origins (-14000) through Reiwa present (2019–NULL)
+
+- **6 GeoJSON files** — extracted from aourednik/historical-basemaps
+  - japanese_800.geojson (8.9 KB) — Nara/early Heian
+  - japanese_1200.geojson (9.6 KB) — Kamakura era
+  - japanese_1600.geojson (9.7 KB) — Warring States unified
+  - japanese_1800.geojson (21.2 KB) — mid-Edo stable
+  - japanese_1900.geojson (32.9 KB) — post-Sino-Japanese War
+  - japanese_1938.geojson (93.4 KB) — Empire of Japan + Saipan mandate
+  - All under 200KB limit; no mapshaper simplification needed
+  - Cambodia/Cochin China excluded from 1938 (source data error; Japan didn't occupy until 1940-41)
+  - No BC snapshots exist in source dataset — earliest viable polygon is ~300-800 AD
+
+#### ✓ Japanese empire_extent SQL (generated, pending import)
+
+- 6 rows inserted for years 800, 1200, 1600, 1800, 1900, 1938
+- area_km2: 295K → 335K → 350K → 378K → 633K → 2,100K (dramatic arc matches imperial expansion)
+- geojson_url pattern: `/geojson/japanese_{year}.geojson`
+
+#### ✓ Territorial Enrichment (merged to develop — PR #70)
+
+- lib/services/territorial.ts: JAPANESE_SNAPSHOTS constant with 6 curated snapshots
+- SNAPSHOT_ENRICHMENTS[3] = JAPANESE_SNAPSHOTS registered
+- TIMELINE_MARKERS[3] populated with 10 markers (-660 to 1945)
+- Merge conflict with feature/chinese-overview-content resolved manually (Accept Both Changes pattern)
+- Post-merge syntax error (2 missing closing braces + 1 missing `],`) fixed in territorial.ts
+- Key lesson: merge conflict resolution in territorial.ts can silently drop closing braces — always verify brace balance after resolving conflicts in this file
+- Brace balance verified: 92 open, 92 close
+
+#### ✓ Personality Quiz Config (Codex — pending PR)
+
+- lib/config/personality/japanese.ts created: JAPANESE_PERSONALITY export
+- 8 questions using only valid dimension keys: power_style, conflict, legacy, innovation, people_focus, risk, moral_framework, charisma
+- 6 ruler profiles (spec-aligned set): Emperor Meiji, Tokugawa Ieyasu, Emperor Kanmu, Emperor Go-Daigo, Emperor Showa, Prince Shotoku
+- All 32 delta arrays and 6 vector arrays verified at exactly 8 numbers each
+- lib/config/personality/index.ts: 3: JAPANESE_PERSONALITY registered
+- displayName: "Japanese" (not "Japanese Empire")
+
+#### ⏳ Japanese Still Pending
+
+- Import all data files into Supabase (rulers, events, battles, places, provinces, chapters, empire_extent)
+- 5,000 quiz questions (Python generation script)
+- lib/config/quiz-difficulties.ts: Japanese labels (Heimin/Samurai/Daimyo/Shogun)
+- Japanese added to EMPIRE_CONFIGS code (id=3, slug='japanese', color=#BC002D)
+- nativeName: '大日本帝国', capital: 'TOKYO'
+- 'japanese' added to FULL_CONTENT_SLUGS in app/sitemap.ts
+- Landing page stats update to include Japanese data
+- Vitest personality test: update unsupported empire case (empire_id 99 still valid)
 
 ## Service Layer Pattern
 
@@ -512,7 +601,7 @@ Child components (QuestionScreen, QuizTimer, QuizProgress, ScoreCard) are presen
 
 ### DisplayName Pattern
 
-- PersonalityConfig.displayName = "Roman" / "Ottoman" / "Chinese" (not "X Empire")
+- PersonalityConfig.displayName = "Roman" / "Ottoman" / "Chinese" / "Japanese" (not "X Empire")
 - Used in titles and metadata for clean user-facing copy
 - Does NOT modify global EmpireConfig
 
@@ -538,7 +627,7 @@ Child components (QuestionScreen, QuizTimer, QuizProgress, ScoreCard) are presen
 - Static generation via app/sitemap.ts
 - Only includes pages with actual shipped content
 - FULL_CONTENT_SLUGS controls which empires get sub-page entries
-- Current: ['roman', 'ottoman', 'chinese']
+- Current: ['roman', 'ottoman', 'chinese'] — 'japanese' to be added after import
 
 ## Charting — D3.js
 
@@ -594,6 +683,21 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 | GeoJSON files  | 6     | chinese_bc1 through chinese_1800                        |
 | personality    | 6     | emperor profiles, static config (not DB)                |
 
+## Data completeness — Japanese Empire (files ready, pending import)
+
+| Table          | Rows  | Key fields populated                                             |
+| -------------- | ----- | ---------------------------------------------------------------- |
+| rulers         | 126   | name, native_name, dynasty, reign_start/end, bio_short (CSV)    |
+| events         | ~140  | year, category, significance, ruler_id (all corrected)          |
+| battles        | 113   | lat/lng, outcome, opposing_force, casualties (corrected)        |
+| places         | 124   | lat/lng, type, province_id (backfill SQL ready), founded_year   |
+| provinces      | 62    | name, native_name, established, dissolved (corrected)           |
+| chapters       | 17    | slug, title, content_md (300-500 words each, dollar-quoted)     |
+| empire_extent  | 6     | years 800, 1200, 1600, 1800, 1900, 1938 (INSERT pending)        |
+| quiz_questions | 5,000 | pending generation                                              |
+| GeoJSON files  | 6     | japanese_800 through japanese_1938 (all <200KB)                 |
+| personality    | 6     | pending: lib/config/personality/japanese.ts                     |
+
 ## Known technical debt
 
 - iOS Safari test deferred (not yet verified)
@@ -602,9 +706,8 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 - CI env vars use mock values — consider GitHub Secrets for real keys
 - Province polygon boundaries deferred (nearest-centroid used for MVP)
 - 2 pre-existing lint warnings in app/page.tsx and app/[empire]/timeline/page.tsx (custom font usage)
-- Pre-existing D3 typing issues (Cannot find module 'd3' + implicit any) — not introduced by Phase 4/5
+- Pre-existing D3 typing issues (Cannot find module 'd3' + implicit any) — not introduced by Phase 4/5/6
 - .codex-worktrees/.next files cause repo-wide lint failures — gitignore recommended
-
 
 ## Key decisions & why
 
@@ -638,17 +741,32 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 - Battles 'inconclusive' outcome not in DB constraint — mapped to 'defeat' for closest semantic match
 - Chinese rulers: 101 curated (not exhaustive ~550) — 80/20 rule; all major dynasties covered
 - Chinese naming: "Emperor Wu of Han" style disambiguates repeated temple names across dynasties
-- Chinese dynasty field uses granular values: "Western Han", "Eastern Han", "Northern Song",
-  "Southern Song", "Cao Wei", "Shu Han", "Eastern Wu", "Western Jin", "Eastern Jin"
+- Chinese dynasty field uses granular values: "Western Han", "Eastern Han", "Northern Song" etc.
 - Chinese battle outcomes: always from perspective of the primary Chinese regime at that time
-- Chinese provinces: formal Ming-Qing sheng system only — no cultural/geographic regions
-  (Guanzhong, Jiangnan-as-region, Liaodong removed to avoid overlap)
+- Chinese provinces: formal Ming-Qing sheng system only
 - Chinese GeoJSON year -1: DB convention uses exact snapshot years; bc1 source maps to year -1
 - Chinese 500 AD snapshot uses two polygons (Toba Wei + Jin Empire) for the divided empire
 - Chinese quiz difficulty labels: Xiucai/Juren/Jinshi/Zhuangyuan (imperial examination ranks)
 - Chinese personality quiz structure: delta arrays + vector arrays matching Ottoman/Roman pattern exactly
 - Landing page stats updated to include all 3 active empires (Roman + Ottoman + Chinese)
 - Vitest personality test: uses empire_id 99 (not 4) for unsupported empire case — Ottoman now registered
+- Japanese rulers: 126 complete (all emperors Jimmu through Naruhito — NOT 80/20; unbroken imperial line warrants completeness)
+- Japanese dynasty field uses historical period names (Legendary, Kofun, Asuka, etc.) — single dynasty throughout history
+- Japanese chapters: 17 (more than other empires) to cover full arc from -14000 to present; 300-500 words each
+- Japanese chapter boundaries: Muromachi ends 1467 (Onin War start), Sengoku starts 1467 — no overlap
+- Japanese GeoJSON: no BC snapshots in source data; earliest polygon is 800 AD (Yamato state)
+- Japanese 1938 snapshot: Cambodia/Cochin China excluded despite SUBJECTO='Empire of Japan' in source (Japan didn't occupy Indochina until 1940-41 — source data error)
+- Japanese provinces established year: 701 (Taiho Code) not 700 — more historically precise
+- Japanese province backfill: 118/124 places mapped; 6 outside Japan (Korea, China, Ryukyu, Taiwan) remain NULL
+- Japanese 'draw' outcome: confirmed valid in battles CHECK constraint
+- Battles dataset evaluated and corrected before import — 3 outcome fixes applied
+- territorial.ts merge conflicts: always "Accept Both Changes" — both sides add empire entries to same objects; never choose one side only
+- territorial.ts brace balance: verify `{` count == `}` count after every merge conflict resolution — conflict markers can silently drop closing braces causing Turbopack parse errors
+- Personality quiz ruler set: Japanese spec set is Meiji, Ieyasu, Kanmu, Go-Daigo, Showa, Prince Shotoku — do not substitute without explicit override note
+- Codex prompt discipline: always add "Do not modify any other files" and "Do not change existing exports, interfaces, or function bodies" explicitly — implied scope is insufficient
+- Codex prompt verification: "For this step, run type-check and lint only" — avoid claiming these are "sufficient" in absolute terms; CI still runs the full suite on PRs
+- Codex prompt dimension keys: always list all 8 fixed personality dimension keys explicitly and say "use only these" — prevents near-match typo drift across personality configs
+- Codex prompt style: say "match the file's existing import/export/style pattern" not "use this exact content" — repo enforces ESLint + Prettier, stylistic consistency matters beyond just type annotations
 
 ## Lighthouse scores (production — ancient-empires.vercel.app)
 
@@ -658,10 +776,25 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 - Note: Vercel preview URLs always show SEO 66-69 due to x-robots-tag: noindex header — always test on production URL
 - Ottoman production Lighthouse (ancient-empires.vercel.app/ottoman): Performance 96, matches Roman
 
-## On the Horizon — Phase 6+
+## On the Horizon — Phase 6 remaining + Phase 7
 
-Phase 6 — Japanese Empire (Week 18-20): Rekichizu roads, gengo era conversion
-Phase 7 — Compare + Polish (Week 21-24): cross-empire D3 widgets, OG image generation, i18n, admin UI
+**Phase 6 remaining (Japanese Empire):**
+- Import all generated data files into Supabase
+- Generate empire_extent INSERT SQL + territorial enrichment
+- Generate 5,000 quiz questions (Python script, 6 categories)
+- Build personality quiz config (6 Japanese rulers)
+- Add Japanese difficulty labels to lib/config/quiz-difficulties.ts
+- Code integration (EMPIRE_CONFIGS, sitemap, landing page, territorial enrichment)
+- Verify all /japanese/* pages working
+- Update landing page stats
+
+**Phase 7 — Compare + Polish (Week 21-24):**
+- Cross-empire D3 widgets on /compare page
+- 10-question cross-empire personality quiz, 2x2 result grid
+- @vercel/og personality share images + Supabase Storage cache
+- i18n translations (Italian, German, Turkish, Japanese)
+- Admin CRUD UI for chapters and quiz questions
+- Deferred Phase 2 debt: iOS Safari test, GitHub Secrets for CI env vars, server-side PostHog capture
 
 ## Do NOT change without consultation
 

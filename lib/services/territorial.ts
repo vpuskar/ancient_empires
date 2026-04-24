@@ -265,11 +265,180 @@ const OTTOMAN_SNAPSHOTS: Record<number, SnapshotEnrichment> = {
   },
 };
 
+const JAPANESE_SNAPSHOTS: Record<number, SnapshotEnrichment> = {
+  800: {
+    era: 'Nara / Early Heian Period',
+    eraDesc:
+      'The Yamato state consolidates its bureaucratic order under the ritsuryo system, with imperial authority extending across Honshu, Shikoku, and northern Kyushu.',
+    eraRange: 'c. 794 - 900 AD',
+    ruler: 'Emperor Kanmu',
+    provinces: ['Yamashiro', 'Yamato', 'Musashi', 'Settsu', 'Mutsu'],
+    storyTitle: 'Court and Frontier',
+    storySummary:
+      'The court governs from Heian-kyo, established in 794. Imperial authority extends across Honshu, Shikoku, and northern Kyushu, while campaigns against the Emishi push the frontier further into Tohoku. Hokkaido and the Ryukyu islands remain outside imperial administration.',
+  },
+  1200: {
+    era: 'Kamakura Shogunate',
+    eraDesc:
+      'Japan operates under dual authority: the emperor at Kyoto and the Kamakura shogunate in eastern Japan.',
+    eraRange: '1185 - 1333 AD',
+    ruler: 'Minamoto no Yoritomo',
+    provinces: ['Yamashiro', 'Sagami', 'Mutsu', 'Chikuzen', 'Echigo'],
+    storyTitle: 'Warrior Government',
+    storySummary:
+      'Warrior government controls all four main islands. The Northern Fujiwara have been crushed. Zen Buddhism and samurai culture are reshaping Japanese society from the east. The Mongol threat has not yet materialized.',
+  },
+  1600: {
+    era: 'Sekigahara - Tokugawa Unification',
+    eraDesc:
+      "Tokugawa Ieyasu's victory at Sekigahara ends a century of civil war and unifies the archipelago under a single political authority.",
+    eraRange: '1600 - 1603 AD',
+    ruler: 'Tokugawa Ieyasu',
+    provinces: ['Musashi', 'Mikawa', 'Owari', 'Satsuma', 'Chikuzen'],
+    storyTitle: 'A New Peace',
+    storySummary:
+      'The entire main island chain - Honshu, Kyushu, Shikoku, and the Hokkaido frontier - is brought under Tokugawa hegemony. A new era of enforced peace begins.',
+  },
+  1800: {
+    era: 'Mid-Edo Period',
+    eraDesc:
+      'Two centuries of Tokugawa peace have produced a stable, prosperous, and largely isolated Japan.',
+    eraRange: '1603 - 1868 AD',
+    ruler: 'Emperor Kokaku',
+    provinces: ['Musashi', 'Yamashiro', 'Satsuma', 'Echigo', 'Ezo'],
+    storyTitle: 'Peace Under Pressure',
+    storySummary:
+      'All four main islands are integrated under shogunal administration. Northern Hokkaido is increasingly under direct control as Russian ships probe the northern frontier. Urban merchant culture flourishes alongside declining shogunal finances.',
+  },
+  1900: {
+    era: 'Meiji Imperial Expansion',
+    eraDesc:
+      'Victory in the First Sino-Japanese War (1894-95) delivers Taiwan and the Pescadores to Japan, marking the beginning of overseas colonial expansion.',
+    eraRange: '1868 - 1912 AD',
+    ruler: 'Emperor Meiji',
+    provinces: ['Musashi', 'Yamashiro', 'Satsuma', 'Chikuzen', 'Hizen'],
+    storyTitle: 'Modern Imperial Power',
+    storySummary:
+      'Industrial modernization, a conscript army, and a modern navy have transformed Japan within a single generation. The nation is now recognized as a significant regional power, with Korea firmly within its sphere of influence.',
+  },
+  1938: {
+    era: 'Empire of Japan - Continental Peak',
+    eraDesc:
+      'The Empire of Japan reaches its greatest continental extent through formal colonies, leased territories, mandates, client states, and occupied coastal China.',
+    eraRange: '1910 - 1945 AD',
+    ruler: 'Emperor Showa (Hirohito)',
+    provinces: ['Musashi', 'Yamashiro', 'Chikuzen', 'Hizen', 'Satsuma'],
+    storyTitle: 'Continental Peak',
+    storySummary:
+      'Korea, Taiwan, Karafuto, the Kwantung Leased Territory, Manchukuo, Pacific mandate islands, and occupied coastal China are under Japanese control or direct influence. Full expansion into Southeast Asia and the Pacific War against the United States remain three years away.',
+  }, // ← FIX: closing brace for 1938 entry (was missing)
+}; // ← FIX: closing brace for JAPANESE_SNAPSHOTS (was missing)
+
+const CHINESE_SNAPSHOTS: Record<number, SnapshotEnrichment> = {
+  [-1]: {
+    era: 'Han Dynasty (Peak)',
+    eraDesc:
+      'The Han Dynasty at its zenith. The Silk Road flourishes, connecting China to distant lands. Military expansion into Central Asia, Korea, and Vietnam defines an era of unprecedented reach.',
+    eraRange: '206 BC - 9 AD',
+    ruler: 'Emperor Wu of Han',
+    provinces: [
+      'Han heartland',
+      'Korean protectorates',
+      'Central Asian routes',
+      'Northern Vietnam',
+    ],
+    storyTitle: 'The Silk Road Empire',
+    storySummary:
+      "At its peak the Han Dynasty rivalled Rome in scale and sophistication. Caravans linked Chang'an to Persia; armies pushed into the steppes. This was the moment China first defined itself as a world power.",
+  },
+  [500]: {
+    era: 'Period of Division',
+    eraDesc:
+      'China fractured after the Han collapse. The Toba Wei dominate the north; Han Chinese dynasties rule the south. Buddhism spreads rapidly, leaving extraordinary cave art at Dunhuang and Longmen.',
+    eraRange: '220 - 589 AD',
+    ruler: 'Multiple — Northern Wei / Southern Dynasties',
+    provinces: [
+      'Northern Wei',
+      'Eastern Jin successor states',
+      'Southern dynasties',
+    ],
+    storyTitle: 'A Divided Land',
+    storySummary:
+      'For nearly four centuries China had no single ruler. Yet this fragmentation was also a period of profound cultural transformation — Buddhism took root, new art forms emerged, and the groundwork for Tang greatness was laid.',
+  },
+  [700]: {
+    era: 'Tang Dynasty (Golden Age)',
+    eraDesc:
+      "Tang China is the world's most cosmopolitan civilization. Chang'an, the capital, is the world's largest city. Poetry, painting, and Buddhism flourish.",
+    eraRange: '618 - 907 AD',
+    ruler: 'Emperor Xuanzong',
+    provinces: [
+      'Core Tang domains',
+      'Protectorates in Central Asia',
+      'Tibet borderlands',
+      'Korean influence',
+    ],
+    storyTitle: "The World's Capital",
+    storySummary:
+      "Chang'an in 700 AD was home to over a million people and merchants from dozens of nations. Tang poets defined Chinese literature for all time. The empire stretched further west than any Chinese dynasty before or since.",
+  },
+  [1100]: {
+    era: 'Northern Song Dynasty',
+    eraDesc:
+      'Despite losing the north to the Jurchen Jin, Song China undergoes an economic revolution. Gunpowder weapons, movable type printing, and paper money transform society.',
+    eraRange: '960 - 1127 AD',
+    ruler: 'Song Emperors',
+    provinces: [
+      'Song Empire (central and south)',
+      'Jin Dynasty (north)',
+      'Liao remnants',
+    ],
+    storyTitle: 'Revolution Without Conquest',
+    storySummary:
+      "The Song never matched Tang territorial scale, but no dynasty was more innovative. Paper money, printing, and explosive weapons all emerged here. China's economy became the largest in the world.",
+  },
+  [1500]: {
+    era: 'Ming Dynasty',
+    eraDesc:
+      "The Ming have restored Han Chinese rule and built the Forbidden City. Zheng He's fleets reach East Africa. The Great Wall is rebuilt to its most famous form.",
+    eraRange: '1368 - 1644 AD',
+    ruler: 'Yongle / Xuande Era',
+    provinces: [
+      'Ming heartland',
+      'Northern frontier (Great Wall)',
+      'Maritime tributary network',
+      'Southwest borderlands',
+    ],
+    storyTitle: 'The Dragon Throne',
+    storySummary:
+      "The Forbidden City stood complete; the Great Wall gleamed new. Zheng He's treasure fleets dwarfed anything Europe could muster. The Ming represented Han Chinese civilization at its most confident and self-assured.",
+  },
+  [1800]: {
+    era: 'Qing Dynasty (Zenith)',
+    eraDesc:
+      'The Qing at maximum territorial extent. Tibet, Xinjiang, Mongolia, and Manchuria all under Qing control. Internal prosperity masks growing Western pressure.',
+    eraRange: '1735 - 1796 AD',
+    ruler: 'Qianlong Emperor (legacy period)',
+    provinces: [
+      'Qing proper',
+      'Tibet',
+      'Xinjiang',
+      'Outer Mongolia',
+      'Manchuria',
+    ],
+    storyTitle: 'The Last Summit',
+    storySummary:
+      'Under Qianlong the Qing Empire reached its greatest extent — larger than any previous Chinese dynasty. But as the emperor celebrated, the first Western ships carrying new demands were already rounding the Cape.',
+  },
+};
+
 const SNAPSHOT_ENRICHMENTS: Record<
   number,
   Record<number, SnapshotEnrichment>
 > = {
   1: ROMAN_SNAPSHOTS,
+  2: CHINESE_SNAPSHOTS,
+  3: JAPANESE_SNAPSHOTS,
   4: OTTOMAN_SNAPSHOTS,
 };
 
@@ -288,6 +457,34 @@ const ROMAN_MARKERS: TimelineMarker[] = [
 
 const TIMELINE_MARKERS: Record<number, TimelineMarker[]> = {
   1: ROMAN_MARKERS,
+  2: [
+    { year: -221, label: '221 BC', title: 'Qin Unifies China' },
+    { year: -206, label: '206 BC', title: 'Han Dynasty Founded' },
+    { year: -141, label: '141 BC', title: 'Emperor Wu Ascends' },
+    { year: 220, label: '220 AD', title: 'Han Dynasty Falls' },
+    { year: 618, label: '618 AD', title: 'Tang Dynasty Founded' },
+    { year: 755, label: '755 AD', title: 'An Lushan Rebellion' },
+    { year: 1271, label: '1271 AD', title: 'Yuan Dynasty (Kublai Khan)' },
+    { year: 1368, label: '1368 AD', title: 'Ming Dynasty Founded' },
+    { year: 1644, label: '1644 AD', title: 'Qing Dynasty Founded' },
+    { year: 1912, label: '1912 AD', title: 'Empire Ends' },
+  ],
+  3: [
+    {
+      year: -660,
+      label: '660 BC',
+      title: 'Traditional founding of imperial line',
+    },
+    { year: 587, label: '587 AD', title: 'Soga victory - Buddhism secured' },
+    { year: 645, label: '645 AD', title: 'Taika Reforms' },
+    { year: 710, label: '710 AD', title: 'Capital established at Nara' },
+    { year: 794, label: '794 AD', title: 'Capital moved to Heian-kyo' },
+    { year: 1185, label: '1185 AD', title: 'Kamakura shogunate begins' },
+    { year: 1333, label: '1333 AD', title: 'Kemmu Restoration' },
+    { year: 1600, label: '1600 AD', title: 'Battle of Sekigahara' },
+    { year: 1868, label: '1868 AD', title: 'Meiji Restoration' },
+    { year: 1945, label: '1945 AD', title: 'End of the Japanese Empire' },
+  ], // ← FIX: closing bracket for empire_id 3 array (was missing)
   4: [
     { year: 1402, label: '1402 AD', title: 'Battle of Ankara' },
     { year: 1453, label: '1453 AD', title: 'Constantinople Falls' },

@@ -49,6 +49,7 @@ const empires: Empire[] = [
       "Survey dynastic change, imperial expansion, and the continuity of one of the world's longest historical traditions.",
     statLabel: 'Dynasties',
     statValue: '13 major',
+    href: '/chinese',
     accent: '#f8df82',
     accentSoft: '#fff0b3',
     border: 'rgba(248, 223, 130, 0.24)',
@@ -65,6 +66,7 @@ const empires: Empire[] = [
       'Trace the imperial line, the age of shoguns, and the transformations that reshaped Japan across centuries.',
     statLabel: 'Imperial line',
     statValue: '126 emperors',
+    href: '/japanese',
     accent: '#ff8a99',
     accentSoft: '#ffc0c8',
     border: 'rgba(255, 138, 153, 0.24)',
@@ -92,11 +94,11 @@ const empires: Empire[] = [
 ];
 
 const stats = [
-  { label: 'Rulers profiled', value: '105' },
-  { label: 'Historical places', value: '7,682' },
-  { label: 'Battles mapped', value: '161' },
-  { label: 'Quiz questions', value: '9,377' },
-  { label: 'Key events', value: '216' },
+  { label: 'Rulers profiled', value: '332' },
+  { label: 'Historical places', value: '7862' },
+  { label: 'Battles mapped', value: '326' },
+  { label: 'Quiz questions', value: '20000' },
+  { label: 'Key events', value: '467' },
 ];
 
 export function generateMetadata() {

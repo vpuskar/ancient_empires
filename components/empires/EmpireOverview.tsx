@@ -263,6 +263,375 @@ const CONTENT: Record<string, EmpireContent> = {
     closingQuote:
       'All roads lead to Rome \u2014 and every road begins with a single step.',
   },
+  chinese: {
+    hook: "From the first unification under Qin Shi Huang in 221 BC to the fall of the Qing Dynasty in 1912, Chinese imperial history spans over two millennia of dynastic rise and fall. This is the story of the world's longest continuous political tradition \u2014 shaped by Confucian philosophy, technological innovation, and the rhythms of the Mandate of Heaven.",
+    rulers: [
+      {
+        name: 'Qin Shi Huang',
+        reign: '221 \u2013 210 BC',
+        title: 'First Emperor',
+        desc: 'United the Warring States, standardized script and measures, and began the first imperial order in China.',
+        color: '#DE2910',
+      },
+      {
+        name: 'Emperor Wu of Han',
+        reign: '141 \u2013 87 BC',
+        title: 'Han Expansionist',
+        desc: 'Extended Han power deep into Inner Asia, opened the Silk Road, and elevated Confucian statecraft.',
+        color: '#C9A84C',
+      },
+      {
+        name: 'Wu Zetian',
+        reign: '690 \u2013 705 AD',
+        title: 'Only Woman Emperor',
+        desc: 'Ruled in her own name, strengthened the examination system, and presided over a confident Tang court.',
+        color: '#7B6B8A',
+      },
+      {
+        name: 'Kangxi Emperor',
+        reign: '1661 \u2013 1722 AD',
+        title: 'Qing Consolidator',
+        desc: 'Stabilized the Qing dynasty, expanded imperial frontiers, and sponsored scholarship on a vast scale.',
+        color: '#3E4E88',
+      },
+      {
+        name: 'Qianlong Emperor',
+        reign: '1735 \u2013 1796 AD',
+        title: 'High Qing Zenith',
+        desc: 'Oversaw the empire at its greatest territorial extent while projecting courtly grandeur and cultural confidence.',
+        color: '#6B7B3A',
+      },
+    ],
+    timeline: [
+      {
+        year: '221 BC',
+        label: 'Qin unification of China',
+        era: 'Qin',
+        pos: 0,
+      },
+      {
+        year: '141 BC',
+        label: 'Emperor Wu of Han begins his reign',
+        era: 'Han',
+        pos: 12,
+      },
+      {
+        year: '618 AD',
+        label: 'Tang dynasty founded',
+        era: 'Tang',
+        pos: 34,
+      },
+      {
+        year: '960 AD',
+        label: 'Song dynasty begins',
+        era: 'Song',
+        pos: 48,
+      },
+      {
+        year: '1271 AD',
+        label: 'Kublai Khan proclaims the Yuan',
+        era: 'Yuan',
+        pos: 62,
+      },
+      {
+        year: '1368 AD',
+        label: 'Ming dynasty established',
+        era: 'Ming',
+        pos: 70,
+      },
+      {
+        year: '1644 AD',
+        label: 'Qing enters Beijing',
+        era: 'Qing',
+        pos: 80,
+      },
+      {
+        year: '1796 AD',
+        label: 'End of the Qianlong era',
+        era: 'High Qing',
+        pos: 88,
+      },
+      {
+        year: '1912 AD',
+        label: 'Last emperor abdicates',
+        era: 'End of Empire',
+        pos: 90,
+      },
+    ],
+    chapters: [
+      {
+        num: 'I',
+        title: 'Qin Unification',
+        era: '221 \u2013 206 BC',
+        teaser:
+          'The first empire welded rival states into one realm through law, roads, walls, and a shared written order.',
+      },
+      {
+        num: 'II',
+        title: 'The Han World',
+        era: '206 BC \u2013 220 AD',
+        teaser:
+          'Silk Road exchange, Confucian governance, and early imperial institutions gave Chinese rule enduring form.',
+      },
+      {
+        num: 'III',
+        title: 'The Tang Golden Age',
+        era: '618 \u2013 907 AD',
+        teaser:
+          "Chang'an became the cosmopolitan center of a dynasty famed for poetry, Buddhism, and aristocratic brilliance.",
+      },
+      {
+        num: 'IV',
+        title: 'Song Innovation',
+        era: '960 \u2013 1279 AD',
+        teaser:
+          'Commerce, cities, gunpowder, printing, and paper money transformed the empire into a powerhouse of invention.',
+      },
+      {
+        num: 'V',
+        title: 'Under the Yuan',
+        era: '1271 \u2013 1368 AD',
+        teaser:
+          'Kublai Khan ruled China from a Mongol court that linked East Asia to the wider Eurasian world.',
+      },
+      {
+        num: 'VI',
+        title: 'Ming Restoration',
+        era: '1368 \u2013 1644 AD',
+        teaser:
+          'The Forbidden City, Zheng He voyages, and rebuilt frontier defenses marked a confident return of native rule.',
+      },
+      {
+        num: 'VII',
+        title: 'The Qing Century and Crisis',
+        era: '1644 \u2013 1912 AD',
+        teaser:
+          'High Qing prosperity gave way to rebellion, foreign pressure, and the final collapse of the dynastic order.',
+      },
+    ],
+    map: {
+      viewBox: '170 55 290 205',
+      caption:
+        'At its Qing height, imperial China stretched from Manchuria to Xinjiang and from the Mongolian steppe to the South China coast under a single dynastic state.',
+      capitalA: { cx: 392, cy: 118, label: "Chang'an" },
+      capitalB: { cx: 430, cy: 98, label: 'Beijing' },
+      provinces: [
+        {
+          name: 'North China Plain',
+          d: 'M378,106 L420,96 L446,108 L448,132 L420,144 L384,138 L370,122 Z',
+          primary: true,
+        },
+        {
+          name: 'Guanzhong',
+          d: 'M350,116 L378,108 L390,122 L380,142 L352,140 L340,128 Z',
+          primary: true,
+        },
+        {
+          name: 'Manchuria',
+          d: 'M422,76 L458,68 L482,82 L476,106 L446,112 L420,98 Z',
+        },
+        {
+          name: 'Mongolia',
+          d: 'M350,82 L414,72 L438,86 L430,102 L390,110 L352,100 L338,90 Z',
+        },
+        {
+          name: 'Xinjiang',
+          d: 'M238,100 L302,90 L336,102 L324,126 L274,132 L232,118 Z',
+        },
+        {
+          name: 'Tibet',
+          d: 'M274,130 L334,122 L356,142 L340,164 L290,166 L262,148 Z',
+        },
+        {
+          name: 'Sichuan',
+          d: 'M328,138 L360,132 L378,146 L370,170 L338,176 L318,160 Z',
+        },
+        {
+          name: 'Yangtze Valley',
+          d: 'M360,142 L414,136 L438,150 L432,176 L396,184 L364,176 Z',
+        },
+        {
+          name: 'South China',
+          d: 'M350,176 L408,180 L428,196 L414,224 L370,228 L340,206 Z',
+        },
+      ],
+    },
+    closingQuote:
+      'Dynasties rose and fell, but the imperial idea endured through ritual, learning, and the conviction that order under Heaven could be renewed.',
+  },
+  japanese: {
+    hook: 'Japanese imperial history traces an unbroken dynastic line across more than two millennia — from the legendary founding of the Yamato state to the industrial modernity of the Meiji era and the catastrophic expansion of the twentieth century. No other monarchy in world history has maintained continuous dynastic legitimacy for so long. Across this vast span Japan absorbed continental civilization from China and Korea, developed its own distinctive literary and aesthetic traditions, endured centuries of warrior government under successive shogunates, and then remade itself with astonishing speed into a modern industrial power. The Japanese imperial story is one of remarkable cultural continuity threaded through profound political transformation.',
+    rulers: [
+      {
+        name: 'Emperor Meiji',
+        reign: '1867 – 1912',
+        title: 'Modernizing Emperor',
+        desc: "Presided over Japan's transformation from feudal isolation to modern industrial great power within a single generation.",
+        color: '#BC002D',
+      },
+      {
+        name: 'Tokugawa Ieyasu',
+        reign: '1600 – 1616',
+        title: 'Founding Shogun',
+        desc: 'Won the Battle of Sekigahara and built institutional foundations that kept Japan at peace for 250 years.',
+        color: '#C9A84C',
+      },
+      {
+        name: 'Empress Suiko',
+        reign: '593 – 628',
+        title: 'First Empress Regnant',
+        desc: "Japan's first empress regnant who governed alongside Prince Shotoku, transforming the court through Buddhism and continental statecraft.",
+        color: '#7B6B8A',
+      },
+      {
+        name: 'Emperor Kanmu',
+        reign: '781 – 806',
+        title: 'Founder of Heian-kyo',
+        desc: 'Founded the city of Kyoto, shaping Japanese political geography for over a millennium.',
+        color: '#6B7B3A',
+      },
+      {
+        name: 'Emperor Go-Daigo',
+        reign: '1318 – 1339',
+        title: 'Restoration Claimant',
+        desc: 'Overthrew the Kamakura shogunate in the Kemmu Restoration, briefly restoring direct imperial rule before going into defiant exile.',
+        color: '#3E4E88',
+      },
+    ],
+    timeline: [
+      {
+        year: 'c. 300 AD',
+        label: 'Yamato state begins to consolidate',
+        era: 'Yamato',
+        pos: 0,
+      },
+      {
+        year: '552 AD',
+        label: 'Buddhism arrives from Baekje',
+        era: 'Asuka',
+        pos: 14,
+      },
+      {
+        year: '645 AD',
+        label: 'Taika Reforms launched',
+        era: 'Asuka',
+        pos: 22,
+      },
+      {
+        year: '710 AD',
+        label: 'Nara becomes first permanent capital',
+        era: 'Nara',
+        pos: 30,
+      },
+      {
+        year: '794 AD',
+        label: 'Heian-kyo founded',
+        era: 'Heian',
+        pos: 38,
+      },
+      {
+        year: '1192 AD',
+        label: 'Kamakura shogunate established',
+        era: 'Kamakura',
+        pos: 52,
+      },
+      {
+        year: '1600 AD',
+        label: 'Sekigahara clears path to Tokugawa rule',
+        era: 'Unification',
+        pos: 68,
+      },
+      {
+        year: '1868 AD',
+        label: 'Meiji Restoration begins',
+        era: 'Modern Empire',
+        pos: 82,
+      },
+      {
+        year: '1945 AD',
+        label: 'Imperial expansion ends with surrender',
+        era: 'End of Empire',
+        pos: 90,
+      },
+    ],
+    chapters: [
+      {
+        num: 'I',
+        title: 'Yamato and Asuka Period',
+        era: 'c. 300 – 710 AD',
+        teaser:
+          'The Yamato court absorbed Buddhism, writing, and statecraft from the continent while building the first centralized imperial order.',
+      },
+      {
+        num: 'II',
+        title: 'Nara and Heian Period',
+        era: '710 – 1185 AD',
+        teaser:
+          'Courtly refinement flowered at Nara and Kyoto as Fujiwara influence, cloistered rule, and rising warrior clans reshaped power.',
+      },
+      {
+        num: 'III',
+        title: 'Kamakura and Muromachi Shogunates',
+        era: '1185 – 1573 AD',
+        teaser:
+          'Warrior governments ruled beside the throne, repelled Mongol invasions, and presided over cultural brilliance before Sengoku fragmentation.',
+      },
+      {
+        num: 'IV',
+        title: 'Unification and Edo Period',
+        era: '1573 – 1868 AD',
+        teaser:
+          'Nobunaga, Hideyoshi, and Ieyasu reunited the realm before Tokugawa peace fostered cities, commerce, kabuki, ukiyo-e, and haiku.',
+      },
+      {
+        num: 'V',
+        title: 'Meiji Restoration and Modern Empire',
+        era: '1868 – 1945 AD',
+        teaser:
+          'Japan industrialized with startling speed, rose as a great power, and then drove its empire into catastrophic war and defeat.',
+      },
+    ],
+    map: {
+      viewBox: '170 55 290 205',
+      caption:
+        'At its modern imperial height, Japan combined the home islands with overseas possessions, but its political and cultural core remained anchored in Honshu and the capital at Tokyo.',
+      capitalA: { cx: 432, cy: 152, label: 'Tokyo' },
+      provinces: [
+        {
+          name: 'Hokkaido',
+          d: 'M424,88 L448,80 L466,90 L460,108 L438,114 L420,102 Z',
+        },
+        {
+          name: 'Tohoku',
+          d: 'M418,116 L438,110 L448,126 L444,144 L426,148 L414,134 Z',
+        },
+        {
+          name: 'Kanto',
+          d: 'M428,144 L446,140 L454,152 L448,166 L432,168 L422,156 Z',
+          primary: true,
+        },
+        {
+          name: 'Kansai',
+          d: 'M402,150 L420,146 L428,156 L422,168 L406,170 L396,160 Z',
+          primary: true,
+        },
+        {
+          name: 'Chugoku',
+          d: 'M378,152 L402,148 L408,160 L398,170 L378,168 L370,160 Z',
+        },
+        {
+          name: 'Shikoku',
+          d: 'M394,174 L410,172 L414,180 L404,188 L392,186 Z',
+        },
+        {
+          name: 'Kyushu',
+          d: 'M356,166 L378,160 L388,172 L380,190 L360,192 L348,178 Z',
+        },
+      ],
+    },
+    closingQuote:
+      'Across centuries of court ritual, warrior rule, and industrial transformation, imperial Japan remade its institutions without surrendering the prestige of the throne.',
+  },
   ottoman: {
     hook: "From a frontier beylik in northwestern Anatolia to a transcontinental empire spanning the Balkans, the Arab provinces, and the eastern Mediterranean, the Ottoman state fused conquest, law, faith, and commerce into one of the early modern world's most durable imperial systems.",
     rulers: [
