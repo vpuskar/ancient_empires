@@ -108,6 +108,24 @@ const EMPIRE_DIFFICULTY_LABELS: Record<
       subtitle: 'Top Scholar of the Realm',
     },
   },
+  3: {
+    1: {
+      name: 'Heimin',
+      subtitle: 'Commoner',
+    },
+    2: {
+      name: 'Samurai',
+      subtitle: 'Warrior',
+    },
+    3: {
+      name: 'Daimyo',
+      subtitle: 'Domain Lord',
+    },
+    4: {
+      name: 'Shogun',
+      subtitle: 'Supreme Commander',
+    },
+  },
   4: {
     1: {
       name: 'Reaya',

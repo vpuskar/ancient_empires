@@ -66,6 +66,7 @@ const empires: Empire[] = [
       'Trace the imperial line, the age of shoguns, and the transformations that reshaped Japan across centuries.',
     statLabel: 'Imperial line',
     statValue: '126 emperors',
+    href: '/japanese',
     accent: '#ff8a99',
     accentSoft: '#ffc0c8',
     border: 'rgba(255, 138, 153, 0.24)',
@@ -93,11 +94,11 @@ const empires: Empire[] = [
 ];
 
 const stats = [
-  { label: 'Rulers profiled', value: '206' },
-  { label: 'Historical places', value: '7,738' },
-  { label: 'Battles mapped', value: '213' },
-  { label: 'Quiz questions', value: '20,000' },
-  { label: 'Key events', value: '327' },
+  { label: 'Rulers profiled', value: '332' },
+  { label: 'Historical places', value: '7862' },
+  { label: 'Battles mapped', value: '326' },
+  { label: 'Quiz questions', value: '20000' },
+  { label: 'Key events', value: '467' },
 ];
 
 export function generateMetadata() {

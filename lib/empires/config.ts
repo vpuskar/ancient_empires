@@ -39,8 +39,8 @@ export const EMPIRE_CONFIGS: EmpireConfig[] = [
   {
     id: 3,
     name: 'Japanese Empire',
-    nativeName: 'Dai Nippon Teikoku',
-    capital: 'HEIAN-KYO',
+    nativeName: '大日本帝国',
+    capital: 'TOKYO',
     slug: 'japanese',
     color: '#BC002D',
     start: -660,
