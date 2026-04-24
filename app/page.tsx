@@ -96,7 +96,7 @@ const stats = [
   { label: 'Rulers profiled', value: '206' },
   { label: 'Historical places', value: '7,738' },
   { label: 'Battles mapped', value: '213' },
-  { label: 'Quiz questions', value: '14,377' },
+  { label: 'Quiz questions', value: '20,000' },
   { label: 'Key events', value: '327' },
 ];
 
