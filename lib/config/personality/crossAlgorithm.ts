@@ -46,7 +46,9 @@ function clampScore(score: number): number {
 }
 
 function toMatchPercent(score: number): number {
-  return Math.round(((score + 1) / 2) * 100);
+  const clampedScore = clampScore(score);
+
+  return Math.round(((clampedScore + 1) / 2) * 100);
 }
 
 function calculateRulerResult(
@@ -91,14 +93,14 @@ export function calculateCrossEmpireResult(
   const empireScores: EmpireScore[] = EMPIRE_IDS.map((empireId) => {
     const base = cosineSimilarity(userVector, EMPIRE_ARCHETYPES[empireId]);
     const bias = getBias(questions, answers, empireId);
-    const rawScore = clampScore(base + bias);
+    const rawScore = base + bias;
 
     return {
       empireId,
       score: rawScore,
       matchPercent: toMatchPercent(rawScore),
     };
-  }).sort((left, right) => right.matchPercent - left.matchPercent);
+  }).sort((left, right) => right.score - left.score);
 
   const winningEmpireId = empireScores[0].empireId;
   const rulerResult = calculateRulerResult(userVector, winningEmpireId);
