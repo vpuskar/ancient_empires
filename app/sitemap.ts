@@ -17,6 +17,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 1,
     },
+    {
+      url: `${SITE_URL}/compare`,
+      lastModified,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
   ];
 
   for (const slug of ALL_SLUGS) {
