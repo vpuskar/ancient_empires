@@ -232,7 +232,7 @@ Files (Japanese Empire):
 ## Current Phase
 
 Phase 7 — Compare + Polish (Week 21-24)
-Status: 🔜 NEXT — Phases 1–6 all complete and merged to main.
+Status: 🔄 IN PROGRESS — Compare page and cross-empire personality quiz complete.
 
 ## What is complete
 
@@ -529,6 +529,49 @@ Status: 🔜 NEXT — Phases 1–6 all complete and merged to main.
 - /japanese/analytics — Charts using empire.color #BC002D
 - Lighthouse: passing (Vercel preview confirmed; production verified post merge-to-main)
 
+### Phase 7 — Compare + Polish (Week 21-24) 🔄 IN PROGRESS
+
+#### ✅ feature/compare-page (merged to develop — PR #73)
+
+- /compare route: server component, revalidate 3600
+- lib/types/compare.ts: EmpireExtentRow, CompareAggregates, CompareData, RulerAtYear
+- lib/services/compare.ts: getCompareData(), getRulerAtYear()
+- app/api/compare/ruler/route.ts: GET, Zod validated, no-store, server boundary
+- lib/config/compare/scrubber.ts: SCRUBBER_MIN/MAX/DEFAULT, APEX_SNAPS, BUTTERFLY_BANDS
+- lib/config/compare/legacyRadar.ts: LegacyProfile, LEGACY_RADAR_DATA (curated scores, not objective data)
+- components/compare/CompareCanvas.tsx: orchestrator, currentYear state
+- components/compare/TimelineScrubber.tsx: range input, SVG apex ticks, snap logic
+- components/compare/VisualPulse.tsx: D3 overlapping area chart, butterfly band overlays, year marker
+- components/compare/RulerVitals.tsx: client, fetches /api/compare/ruler, debounced 200ms
+- components/compare/EmpireCard.tsx: active/fallen/not-founded badge, peak territory, RulerVitals
+- components/compare/StatWidgets.tsx: 4 CSS-only bar charts (rulers, battles, events, peak territory)
+- components/compare/LegacyRadar.tsx: D3 spider chart, 5 axes, 4 empire polygons
+- /compare added to sitemap, Compare link added to EmpireSectionNav
+
+#### ✅ feature/cross-empire-personality (merged to develop — PR #74)
+
+- /compare/personality route: force-static, buildMetadata
+- lib/types/crossPersonality.ts: PersonalityVector8 tuple type, CrossEmpireQuestion,
+  CrossPersonalityResult, EmpireScore, EmpireId
+- lib/config/personality/empireArchetypes.ts: EMPIRE_ARCHETYPES per empire (curated, not objective)
+- lib/config/personality/crossQuestions.ts: CROSS_QUESTIONS (10 questions, 8 themes)
+- lib/config/personality/crossAlgorithm.ts: calculateCrossEmpireResult()
+  — builds single user vector from cross-questions
+  — scores 4 empire archetypes via cosine similarity + empireBias
+  — drills down to ruler via cosineSimilarity(userVector, ruler.vector) directly
+  (does NOT reuse cross-question answer indices against empire-specific questions)
+  — clamping fix applied: sort on unclamped rawScore, clamp only for matchPercent display
+- components/compare/CrossPersonalityQuiz.tsx: intro/playing/result state machine, no timer
+- components/compare/CrossEmpireResultCard.tsx: empire claim hero, ruler card, two-stage
+  match explanation, tension bars, actions
+- Promo strip added to CompareCanvas linking to /compare/personality
+- /compare/personality added to sitemap
+
+#### ✅ feature/cross-empire-personality-fix (merged to develop)
+
+- crossAlgorithm.ts: rawScore unclamped for sorting; clamp applied only at matchPercent display
+  Prevents tie-collapse when empireBias accumulates across 10 questions
+
 ## Service Layer Pattern
 
 All Supabase access goes through `lib/services/*.ts`. API routes and page.tsx server components import services, never call Supabase directly.
@@ -693,6 +736,11 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 - 2 pre-existing lint warnings in app/page.tsx and app/[empire]/timeline/page.tsx (custom font usage)
 - Pre-existing D3 typing issues (Cannot find module 'd3' + implicit any) — not introduced by Phase 4/5/6
 - .codex-worktrees/.next files cause repo-wide lint failures — gitignore recommended
+- d3/@types/d3 missing from node_modules — causes repo-wide type-check failures
+  on all D3 components (analytics, territorial, compare). Pre-existing debt,
+  not introduced by Phase 7. Fix: npm install -D @types/d3
+- .codex-worktrees/.next generated files cause repo-wide lint failures.
+  Fix: add .codex-worktrees/ to .gitignore
 
 ## Key decisions & why
 
@@ -758,6 +806,24 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 - Uncommitted Codex changes: always verify with `git status` after Codex runs — changes sitting locally but not pushed will not appear on Vercel preview or develop branch
 - app/page.tsx merge conflict resolution: always Accept Current Change when stats numbers conflict — the newer branch has the correct updated stats
 - EmpireOverview.tsx CONTENT shape: Codex must read the actual file shape before writing content — the real type may differ from the prompt's suggested schema (happened during Phase 6 Japanese overview)
+- Compare page uses /api/compare/ruler API route for RulerVitals: server-side
+  Supabase access must not be imported into client components — API route is
+  the correct server boundary
+- Cross-empire personality uses single user vector (not per-empire vectors):
+  simpler to author, test, and reason about; empire discrimination via
+  archetype cosine similarity + small empireBias nudges
+- Ruler drill-down uses cosineSimilarity(userVector, ruler.vector) directly:
+  cross-question answer indices are semantically incompatible with
+  empire-specific personality question indices
+- CrossPersonalityResult type named distinctly from CrossEmpireResultCard
+  component: avoids TypeScript import/name collision
+- PersonalityVector8 tuple type: enforces exactly 8 numbers at compile time
+- Empire archetype scores and Legacy Radar scores are curated product
+  scores — not objective historical data. Both are labeled in code comments
+  and UI captions.
+- Sort empire scores on unclamped rawScore: clamping before sort collapses
+  distinct scores to ceiling value across 10 questions, biasing results
+  toward lower empire_id order
 
 ## Lighthouse scores (production — ancient-empires.vercel.app)
 
@@ -768,16 +834,13 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 - Ottoman production Lighthouse (ancient-empires.vercel.app/ottoman): Performance 96, matches Roman
 - Phase 6 production Lighthouse: passing — all 4 empires verified on ancient-empires.vercel.app
 
-## On the Horizon — Phase 7
+## On the Horizon — Phase 7 remaining
 
-**Phase 7 — Compare + Polish (Week 21-24):**
-- Cross-empire D3 widgets on /compare page
-- 10-question cross-empire personality quiz, 2x2 result grid at /compare/personality
-- @vercel/og personality share images + Supabase Storage cache
-- i18n translations (Italian, German, Turkish, Japanese)
+- @vercel/og personality share images + Supabase Storage cache + Sentry fallback
+- i18n translations (Italian, German, Turkish, Japanese) via Claude Code
 - Admin CRUD UI for chapters and quiz questions
-- Deferred Phase 2 debt: iOS Safari test, GitHub Secrets for CI env vars, server-side PostHog capture
-- .codex-worktrees/.next files lint failures — add to .gitignore
+- Deferred Phase 2 debt: iOS Safari test, GitHub Secrets for CI env vars,
+  server-side PostHog capture for quiz_completed and share_clicked
 
 ## Do NOT change without consultation
 
