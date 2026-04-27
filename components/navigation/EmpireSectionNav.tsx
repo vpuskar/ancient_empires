@@ -8,7 +8,11 @@ interface EmpireSectionNavProps {
   empire: EmpireConfig;
 }
 
-const NAV_ITEMS = [
+type NavItem =
+  | { label: string; suffix: string; href?: never }
+  | { label: string; href: string; suffix?: never };
+
+const NAV_ITEMS: NavItem[] = [
   { label: 'Overview', suffix: '' },
   { label: 'Rulers', suffix: '/rulers' },
   { label: 'Map', suffix: '/map' },
@@ -18,6 +22,7 @@ const NAV_ITEMS = [
   { label: 'Personality', suffix: '/personality' },
   { label: 'Quiz', suffix: '/quiz' },
   { label: 'Analytics', suffix: '/analytics' },
+  { label: 'Compare', href: '/compare' },
 ];
 
 export function EmpireSectionNav({ empire }: EmpireSectionNavProps) {
@@ -31,7 +36,7 @@ export function EmpireSectionNav({ empire }: EmpireSectionNavProps) {
     >
       <div className="flex min-w-max gap-2 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-2">
         {NAV_ITEMS.map((item) => {
-          const href = `${basePath}${item.suffix}`;
+          const href = item.href ?? `${basePath}${item.suffix ?? ''}`;
           const isActive = pathname === href;
 
           return (

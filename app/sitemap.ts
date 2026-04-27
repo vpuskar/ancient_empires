@@ -19,6 +19,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${SITE_URL}/compare/personality`,
+      url: `${SITE_URL}/compare`,
       lastModified,
       changeFrequency: 'weekly',
       priority: 0.8,
