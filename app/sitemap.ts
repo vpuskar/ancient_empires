@@ -23,6 +23,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.8,
     },
+    {
+      url: `${SITE_URL}/compare/personality`,
+      lastModified,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
   ];
 
   for (const slug of ALL_SLUGS) {
