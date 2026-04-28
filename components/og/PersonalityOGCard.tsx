@@ -18,8 +18,8 @@ export function PersonalityOGCard({
   return (
     <div
       style={{
-        width: 1200,
-        height: 630,
+        width: '1200px',
+        height: '630px',
         background: '#111111',
         display: 'flex',
         flexDirection: 'row',
