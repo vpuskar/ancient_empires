@@ -18,21 +18,22 @@ export function PersonalityOGCard({
   return (
     <div
       style={{
-        width: '1200px',
-        height: '630px',
-        background: '#111111',
         display: 'flex',
         flexDirection: 'row',
+        width: '1200px',
+        height: '630px',
+        backgroundColor: '#111111',
+        position: 'relative',
         color: '#F5ECD7',
         fontFamily: 'Inter',
       }}
     >
       <div
         style={{
-          width: 380,
-          height: 630,
           display: 'flex',
           flexDirection: 'column',
+          width: '420px',
+          height: '630px',
           alignItems: 'center',
           justifyContent: 'center',
           gap: 16,
@@ -202,9 +203,10 @@ export function PersonalityOGCard({
 
       <div
         style={{
-          flex: 1,
           display: 'flex',
           flexDirection: 'column',
+          flex: 1,
+          height: '630px',
           justifyContent: 'center',
           padding: 48,
           gap: 18,
