@@ -18,23 +18,22 @@ export function generateMetadata() {
   );
   ogUrl.searchParams.set('matchPercent', '84');
   ogUrl.searchParams.set('traits', 'Power,Legacy,Ambition');
-  const ogImage = ogUrl.toString();
-  const existingMetadata = buildMetadata({
+  const base = buildMetadata({
     title: 'Which Empire Claims You?',
     description,
     path: '/compare/personality',
   });
 
   return {
-    ...existingMetadata,
+    ...base,
     openGraph: {
-      ...existingMetadata.openGraph,
-      images: [{ url: ogImage, width: 1200, height: 630 }],
+      ...(base.openGraph ?? {}),
+      images: [{ url: ogUrl.toString(), width: 1200, height: 630 }],
     },
     twitter: {
-      ...existingMetadata.twitter,
+      ...(base.twitter ?? {}),
       card: 'summary_large_image',
-      images: [ogImage],
+      images: [ogUrl.toString()],
     },
   };
 }

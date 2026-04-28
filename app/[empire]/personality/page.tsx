@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getPersonalityConfig } from '@/lib/config/personality';
 import { getEmpireBySlug } from '@/lib/empires/config';
+import { buildMetadata } from '@/lib/seo/metadata';
 import { PersonalityQuiz } from './_components/PersonalityQuiz';
 
 export const revalidate = 86400;
@@ -37,17 +38,23 @@ export async function generateMetadata({
   ogUrl.searchParams.set('rulerTitle', 'Discover your historical match');
   ogUrl.searchParams.set('matchPercent', '75');
   ogUrl.searchParams.set('traits', 'Strategic,Visionary,Legacy-builder');
-  const ogImage = ogUrl.toString();
-
-  return {
+  const base = buildMetadata({
     title: `Which ${config.displayName} Ruler Are You? | Ancient Empires`,
     description: `Discover which ${config.displayName} ruler matches your personality. Answer 8 questions about power, leadership, and legacy.`,
+    path: `/${empire.slug}/personality`,
+    rawTitle: true,
+  });
+
+  return {
+    ...base,
     openGraph: {
-      images: [{ url: ogImage, width: 1200, height: 630 }],
+      ...(base.openGraph ?? {}),
+      images: [{ url: ogUrl.toString(), width: 1200, height: 630 }],
     },
     twitter: {
+      ...(base.twitter ?? {}),
       card: 'summary_large_image',
-      images: [ogImage],
+      images: [ogUrl.toString()],
     },
   };
 }
