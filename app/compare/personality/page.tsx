@@ -18,24 +18,13 @@ export function generateMetadata() {
   );
   ogUrl.searchParams.set('matchPercent', '84');
   ogUrl.searchParams.set('traits', 'Power,Legacy,Ambition');
-  const base = buildMetadata({
+
+  return buildMetadata({
     title: 'Which Empire Claims You?',
     description,
     path: '/compare/personality',
+    ogImage: ogUrl.toString(),
   });
-
-  return {
-    ...base,
-    openGraph: {
-      ...(base.openGraph ?? {}),
-      images: [{ url: ogUrl.toString(), width: 1200, height: 630 }],
-    },
-    twitter: {
-      ...(base.twitter ?? {}),
-      card: 'summary_large_image',
-      images: [ogUrl.toString()],
-    },
-  };
 }
 
 export default function ComparePersonalityPage() {

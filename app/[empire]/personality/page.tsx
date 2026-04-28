@@ -38,25 +38,14 @@ export async function generateMetadata({
   ogUrl.searchParams.set('rulerTitle', 'Discover your historical match');
   ogUrl.searchParams.set('matchPercent', '75');
   ogUrl.searchParams.set('traits', 'Strategic,Visionary,Legacy-builder');
-  const base = buildMetadata({
+
+  return buildMetadata({
     title: `Which ${config.displayName} Ruler Are You? | Ancient Empires`,
     description: `Discover which ${config.displayName} ruler matches your personality. Answer 8 questions about power, leadership, and legacy.`,
     path: `/${empire.slug}/personality`,
+    ogImage: ogUrl.toString(),
     rawTitle: true,
   });
-
-  return {
-    ...base,
-    openGraph: {
-      ...(base.openGraph ?? {}),
-      images: [{ url: ogUrl.toString(), width: 1200, height: 630 }],
-    },
-    twitter: {
-      ...(base.twitter ?? {}),
-      card: 'summary_large_image',
-      images: [ogUrl.toString()],
-    },
-  };
 }
 
 export default async function PersonalityPage({
