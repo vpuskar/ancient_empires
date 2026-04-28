@@ -1,7 +1,6 @@
 export const runtime = 'edge';
 
 import { ImageResponse } from 'next/og';
-import * as Sentry from '@sentry/nextjs';
 import { z } from 'zod';
 import { PersonalityOGCard } from '@/components/og/PersonalityOGCard';
 
@@ -49,23 +48,6 @@ function getCacheKey(empireSlug: string, rulerName: string) {
     .replace(/^_|_$/g, '')}.png`;
 }
 
-async function getInterFont() {
-  try {
-    const response = await fetch(
-      'https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTcviYwYZ8UA3.woff2'
-    );
-
-    if (!response.ok) {
-      throw new Error(`Inter font fetch failed with status ${response.status}`);
-    }
-
-    return await response.arrayBuffer();
-  } catch (error) {
-    Sentry.captureException(error);
-    return undefined;
-  }
-}
-
 export async function GET(request: Request) {
   const parsed = querySchema.safeParse(getQueryParams(request));
 
@@ -102,7 +84,6 @@ export async function GET(request: Request) {
   }
 
   try {
-    const fontData = await getInterFont();
     const imageResponse = new ImageResponse(
       <PersonalityOGCard
         empireColor={empire.color}
@@ -115,17 +96,6 @@ export async function GET(request: Request) {
       {
         width: 1200,
         height: 630,
-        ...(fontData
-          ? {
-              fonts: [
-                {
-                  name: 'Inter',
-                  data: fontData,
-                  weight: 400,
-                },
-              ],
-            }
-          : {}),
       }
     );
     const buffer = await imageResponse.arrayBuffer();
@@ -145,7 +115,7 @@ export async function GET(request: Request) {
         throw new Error(`OG cache upload failed with status ${upload.status}`);
       }
     } catch (error) {
-      Sentry.captureException(error);
+      console.error('[og/personality]', error);
     }
 
     return new Response(buffer, {
@@ -155,7 +125,7 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    Sentry.captureException(error);
+    console.error('[og/personality]', error);
     return Response.redirect('/og-fallback.png', 302);
   }
 }
