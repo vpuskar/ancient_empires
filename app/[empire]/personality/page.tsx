@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getPersonalityConfig } from '@/lib/config/personality';
 import { getEmpireBySlug } from '@/lib/empires/config';
+import { buildMetadata } from '@/lib/seo/metadata';
 import { PersonalityQuiz } from './_components/PersonalityQuiz';
 
 export const revalidate = 86400;
@@ -19,10 +20,32 @@ export async function generateMetadata({
     return {};
   }
 
-  return {
+  const defaultRulerNames = {
+    roman: 'Augustus',
+    chinese: 'Qin Shi Huang',
+    japanese: 'Emperor Meiji',
+    ottoman: 'Suleiman I',
+  } as const;
+  const defaultRulerName =
+    defaultRulerNames[empire.slug as keyof typeof defaultRulerNames] ??
+    config.rulers[0]?.name ??
+    'Augustus';
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ancient-empires.vercel.app';
+  const ogUrl = new URL('/api/og/personality', siteUrl);
+  ogUrl.searchParams.set('empireSlug', empire.slug);
+  ogUrl.searchParams.set('rulerName', defaultRulerName);
+  ogUrl.searchParams.set('rulerTitle', 'Discover your historical match');
+  ogUrl.searchParams.set('matchPercent', '75');
+  ogUrl.searchParams.set('traits', 'Strategic,Visionary,Legacy-builder');
+
+  return buildMetadata({
     title: `Which ${config.displayName} Ruler Are You? | Ancient Empires`,
     description: `Discover which ${config.displayName} ruler matches your personality. Answer 8 questions about power, leadership, and legacy.`,
-  };
+    path: `/${empire.slug}/personality`,
+    ogImage: ogUrl.toString(),
+    rawTitle: true,
+  });
 }
 
 export default async function PersonalityPage({
