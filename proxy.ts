@@ -43,7 +43,11 @@ function getTiers() {
   return tiers;
 }
 
-const EXPENSIVE_ROUTES = ['/api/personality/og', '/api/quiz/calculate'];
+const EXPENSIVE_ROUTES = [
+  '/api/personality/og',
+  '/api/og/personality',
+  '/api/quiz/calculate',
+];
 
 function getTier(pathname: string): 'expensive' | 'standard' {
   if (EXPENSIVE_ROUTES.some((route) => pathname.startsWith(route))) {
