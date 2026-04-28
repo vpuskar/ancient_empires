@@ -59,6 +59,7 @@ export function PersonalityOGCard({
               left: 0,
               width: 24,
               height: 2,
+              display: 'flex',
               background: 'rgba(201,168,76,0.4)',
             }}
           />
@@ -69,6 +70,7 @@ export function PersonalityOGCard({
               left: 0,
               width: 2,
               height: 24,
+              display: 'flex',
               background: 'rgba(201,168,76,0.4)',
             }}
           />
@@ -91,6 +93,7 @@ export function PersonalityOGCard({
               right: 0,
               width: 24,
               height: 2,
+              display: 'flex',
               background: 'rgba(201,168,76,0.4)',
             }}
           />
@@ -101,6 +104,7 @@ export function PersonalityOGCard({
               right: 0,
               width: 2,
               height: 24,
+              display: 'flex',
               background: 'rgba(201,168,76,0.4)',
             }}
           />
@@ -125,6 +129,7 @@ export function PersonalityOGCard({
               height: 160,
               borderRadius: 80,
               border: '1px solid rgba(201,168,76,0.2)',
+              display: 'flex',
             }}
           />
           <div
@@ -151,6 +156,7 @@ export function PersonalityOGCard({
         <div
           style={{
             fontSize: 13,
+            display: 'flex',
             color: '#C9A84C',
             letterSpacing: '0.15em',
           }}
@@ -162,6 +168,7 @@ export function PersonalityOGCard({
           style={{
             fontSize: 32,
             fontWeight: 700,
+            display: 'flex',
             color: '#C9A84C',
             letterSpacing: '0.05em',
             textAlign: 'center',
@@ -173,6 +180,7 @@ export function PersonalityOGCard({
         <div
           style={{
             fontSize: 10,
+            display: 'flex',
             color: 'rgba(201,168,76,0.55)',
             letterSpacing: '0.12em',
             textAlign: 'center',
@@ -187,6 +195,7 @@ export function PersonalityOGCard({
           width: 1,
           alignSelf: 'center',
           height: '70%',
+          display: 'flex',
           background: 'rgba(201,168,76,0.2)',
         }}
       />
@@ -204,6 +213,7 @@ export function PersonalityOGCard({
         <div
           style={{
             fontSize: 11,
+            display: 'flex',
             letterSpacing: '0.22em',
             color: 'rgba(201,168,76,0.55)',
           }}
@@ -215,6 +225,7 @@ export function PersonalityOGCard({
           style={{
             fontSize: 44,
             fontWeight: 700,
+            display: 'flex',
             color: '#F5ECD7',
             lineHeight: 1.1,
           }}
@@ -225,6 +236,7 @@ export function PersonalityOGCard({
         <div
           style={{
             fontSize: 15,
+            display: 'flex',
             color: 'rgba(245,236,215,0.65)',
             fontStyle: 'italic',
           }}
@@ -247,6 +259,7 @@ export function PersonalityOGCard({
                 background: 'rgba(201,168,76,0.1)',
                 border: '1px solid rgba(201,168,76,0.28)',
                 borderRadius: 20,
+                display: 'flex',
                 padding: '5px 14px',
                 fontSize: 12,
                 color: '#C9A84C',
@@ -260,6 +273,7 @@ export function PersonalityOGCard({
         <div
           style={{
             height: 1,
+            display: 'flex',
             background: 'rgba(201,168,76,0.15)',
             marginTop: 4,
           }}
@@ -268,6 +282,7 @@ export function PersonalityOGCard({
         <div
           style={{
             fontSize: 13,
+            display: 'flex',
             color: 'rgba(201,168,76,0.55)',
             letterSpacing: '0.04em',
           }}
