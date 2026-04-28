@@ -572,6 +572,17 @@ Status: 🔄 IN PROGRESS — Compare page and cross-empire personality quiz comp
 - crossAlgorithm.ts: rawScore unclamped for sorting; clamp applied only at matchPercent display
   Prevents tie-collapse when empireBias accumulates across 10 questions
 
+#### ✅ feature/og-share-images (merged to develop — PR #76)
+
+- app/api/og/personality/route.tsx: edge runtime, three-layer
+  generation (Supabase cache → @vercel/og → static fallback)
+- components/og/PersonalityOGCard.tsx: 1200×630 card, empire color,
+  ruler initial avatar, match %, traits pills, gold aesthetic
+- proxy.ts: /api/og/personality added to EXPENSIVE routes (15 req/60s)
+- Metadata wiring: ogImage passed to buildMetadata helper on
+  /[empire]/personality and /compare/personality pages
+- Supabase Storage bucket 'og-cache' created (public, 2MB limit, image/png)
+
 ## Service Layer Pattern
 
 All Supabase access goes through `lib/services/*.ts`. API routes and page.tsx server components import services, never call Supabase directly.
@@ -745,7 +756,26 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 ## Key decisions & why
 
 - Manual CSV import preferred over scripts: simpler for sources with Export buttons
-- OG image cache (Supabase Storage) mandatory: prevents 2s render on every share
+- OG share image caching uses Supabase Storage bucket 'og-cache':
+  @vercel/og rendering takes 300-800ms. Cache key pattern:
+  `personality_{empireSlug}_{rulerName_sanitized}.png`
+  First request generates + uploads PNG. Subsequent requests
+  redirect to cached Supabase public URL (~20ms).
+  Cache invalidation:
+  Development: manually delete bucket contents in Supabase Dashboard
+  Production: prefix cache key with version (e.g. v2_personality_...)
+  so old files are ignored without downtime.
+  Design change = bump version prefix or manually clear bucket.
+- @vercel/og constraints (learned in Phase 7):
+  - export const runtime = 'edge' required on the route
+  - Every <div> with more than one child MUST have display: 'flex'
+    or display: 'none' — no exceptions, stricter than standard React
+  - Replace <p> and <span> with <div> — not supported
+  - No @sentry/nextjs imports — Node.js only, breaks edge runtime
+  - No Google Fonts fetch at build time — blocked at edge
+  - Root container must have explicit width/height in px (not %)
+  - All styles via inline style={{}} only — no Tailwind, no CSS vars
+  - Flexbox only — no CSS Grid
 - Rate limiting from Phase 0: prevents Supabase free tier exhaustion
 - Upstash Redis for rate limiting: in-memory Map resets on Vercel cold starts
 - proxy.ts (not middleware.ts): Next.js 16 renamed the file convention
@@ -836,7 +866,6 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 
 ## On the Horizon — Phase 7 remaining
 
-- @vercel/og personality share images + Supabase Storage cache + Sentry fallback
 - i18n translations (Italian, German, Turkish, Japanese) via Claude Code
 - Admin CRUD UI for chapters and quiz questions
 - Deferred Phase 2 debt: iOS Safari test, GitHub Secrets for CI env vars,
