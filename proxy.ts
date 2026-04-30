@@ -6,6 +6,7 @@
 //            /api/quiz/calculate       15  req / 60s per IP
 
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 import { env } from '@/lib/env';
@@ -60,8 +61,60 @@ function getTier(pathname: string): 'expensive' | 'standard' {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  let adminResponse: NextResponse | null = null;
+
+  if (pathname.startsWith('/admin')) {
+    adminResponse = NextResponse.next({
+      request,
+    });
+
+    const supabase = createServerClient(
+      env.NEXT_PUBLIC_SUPABASE_URL,
+      env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) =>
+              request.cookies.set(name, value)
+            );
+            adminResponse = NextResponse.next({
+              request,
+            });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              adminResponse?.cookies.set(name, value, options)
+            );
+          },
+        },
+      }
+    );
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .limit(1);
+
+    if (error || (data?.length ?? 0) === 0) {
+      return NextResponse.redirect(
+        new URL('/login?error=not_admin', request.url)
+      );
+    }
+  }
+
   if (!pathname.startsWith('/api/')) {
-    return NextResponse.next();
+    return adminResponse ?? NextResponse.next();
   }
 
   const ip =
@@ -99,5 +152,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: '/api/:path*',
+  matcher: ['/api/:path*', '/admin/:path*'],
 };
