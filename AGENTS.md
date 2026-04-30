@@ -583,6 +583,17 @@ Status: 🔄 IN PROGRESS — Compare page and cross-empire personality quiz comp
   /[empire]/personality and /compare/personality pages
 - Supabase Storage bucket 'og-cache' created (public, 2MB limit, image/png)
 
+#### ✅ feature/admin-auth-foundation (merged to develop — PR #__)
+
+- /admin route gated by user_roles.role = 'admin' check in proxy.ts
+- /login page with email + password (Supabase Auth)
+- lib/auth/admin.ts: getCurrentUser, isAdmin, requireAdmin helpers
+- POST /api/auth/signout route (303 redirect to /login)
+- Admin role granted via SQL: INSERT INTO user_roles (user_id, role)
+  SELECT id, 'admin' FROM auth.users WHERE email = '<email>'
+  ON CONFLICT (user_id) DO UPDATE SET role = 'admin'
+- Auth foundation only — admin CRUD pages built in Steps 2-4
+
 ## Service Layer Pattern
 
 All Supabase access goes through `lib/services/*.ts`. API routes and page.tsx server components import services, never call Supabase directly.
