@@ -1,4 +1,5 @@
-import { getEmpireBySlug } from '@/lib/empires/config';
+import { EMPIRE_CONFIGS, getEmpireBySlug } from '@/lib/empires/config';
+import { QuizManager } from './QuizManager';
 
 interface AdminQuizPageProps {
   searchParams: Promise<{
@@ -6,25 +7,29 @@ interface AdminQuizPageProps {
   }>;
 }
 
-function getEmpireName(slugParam: string | string[] | undefined) {
+function getSelectedEmpire(slugParam: string | string[] | undefined) {
   const slug = typeof slugParam === 'string' ? slugParam : 'roman';
   const empire = getEmpireBySlug(slug) ?? getEmpireBySlug('roman');
+  const fallbackEmpire = EMPIRE_CONFIGS[0];
 
-  return empire?.name ?? 'Roman Empire';
+  return {
+    empire: empire ?? fallbackEmpire,
+    slug: empire?.slug ?? 'roman',
+  };
 }
 
 export default async function AdminQuizPage({
   searchParams,
 }: AdminQuizPageProps) {
   const params = await searchParams;
-  const empireName = getEmpireName(params.empire);
+  const { empire, slug } = getSelectedEmpire(params.empire);
 
   return (
     <div>
       <h1 className="text-3xl font-semibold mb-2">
-        Quiz Questions &mdash; {empireName}
+        Quiz Questions &mdash; {empire.name}
       </h1>
-      <p className="text-neutral-400">Coming in Step 4.</p>
+      <QuizManager empireId={empire.id} empireSlug={slug} />
     </div>
   );
 }
