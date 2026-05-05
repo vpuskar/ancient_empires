@@ -15,17 +15,19 @@ const categories = [
   'battles',
 ] as const;
 
+const correctOptions = ['A', 'B', 'C', 'D'] as const;
+
 const updateSchema = z
   .object({
-    question: z.string().min(1).optional(),
-    option_a: z.string().min(1).optional(),
-    option_b: z.string().min(1).optional(),
-    option_c: z.string().min(1).optional(),
-    option_d: z.string().min(1).optional(),
-    correct: z.enum(['A', 'B', 'C', 'D']).optional(),
+    question: z.string().trim().min(1).optional(),
+    option_a: z.string().trim().min(1).optional(),
+    option_b: z.string().trim().min(1).optional(),
+    option_c: z.string().trim().min(1).optional(),
+    option_d: z.string().trim().min(1).optional(),
+    correct: z.string().trim().pipe(z.enum(correctOptions)).optional(),
     difficulty: z.number().int().min(1).max(4).nullable().optional(),
-    category: z.enum(categories).nullable().optional(),
-    explanation: z.string().nullable().optional(),
+    category: z.string().trim().pipe(z.enum(categories)).nullable().optional(),
+    explanation: z.string().trim().nullable().optional(),
     verified: z.boolean().optional(),
   })
   .refine((data) => Object.keys(data).length > 0);

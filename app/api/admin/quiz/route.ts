@@ -15,6 +15,8 @@ const categories = [
   'battles',
 ] as const;
 
+const correctOptions = ['A', 'B', 'C', 'D'] as const;
+
 const getSchema = z.object({
   empire_id: z.coerce.number().int().min(1).max(4),
   category: z.enum(categories).optional(),
@@ -27,15 +29,15 @@ const getSchema = z.object({
 
 const createSchema = z.object({
   empire_id: z.number().int().min(1).max(4),
-  question: z.string().min(1),
-  option_a: z.string().min(1),
-  option_b: z.string().min(1),
-  option_c: z.string().min(1),
-  option_d: z.string().min(1),
-  correct: z.enum(['A', 'B', 'C', 'D']),
+  question: z.string().trim().min(1),
+  option_a: z.string().trim().min(1),
+  option_b: z.string().trim().min(1),
+  option_c: z.string().trim().min(1),
+  option_d: z.string().trim().min(1),
+  correct: z.string().trim().pipe(z.enum(correctOptions)),
   difficulty: z.number().int().min(1).max(4).nullable().optional(),
-  category: z.enum(categories).nullable().optional(),
-  explanation: z.string().nullable().optional(),
+  category: z.string().trim().pipe(z.enum(categories)).nullable().optional(),
+  explanation: z.string().trim().nullable().optional(),
   verified: z.boolean().optional(),
 });
 
