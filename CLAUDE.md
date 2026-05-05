@@ -583,6 +583,58 @@ Status: 🔄 IN PROGRESS — Compare page and cross-empire personality quiz comp
   /[empire]/personality and /compare/personality pages
 - Supabase Storage bucket 'og-cache' created (public, 2MB limit, image/png)
 
+#### ✅ feature/admin-auth-foundation (merged to develop)
+
+- `/admin` route gated by `user_roles.role = 'admin'` check in `proxy.ts`
+- `/login` page with email + password form (Supabase Auth via `@supabase/ssr`)
+- `lib/auth/admin.ts`: `getCurrentUser()`, `isAdmin()`, `requireAdmin()` helpers
+- POST `/api/auth/signout` route (303 redirect to `/login`)
+- Placeholder `/admin` page showing logged-in user email
+- Non-admin users redirected to `/login?error=not_admin` with amber banner
+
+#### ✅ feature/admin-shell-layout (merged to develop)
+
+- `app/admin/layout.tsx`: wraps all admin pages, calls `requireAdmin()` (defense in depth)
+- `app/admin/AdminShell.tsx`: collapsible left sidebar with toggle, empire selector, nav links
+- `app/admin/EmpireSelector.tsx`: dropdown for 4 empires, persists via `?empire=<slug>` URL param
+- `app/admin/SignOutButton.tsx`: native POST form to `/api/auth/signout` (server component, no JS needed)
+- Sidebar nav links preserve `?empire=<slug>` param across navigation
+- Dashboard page with cards linking to Chapters and Quiz Questions sections
+
+#### ✅ feature/admin-chapters-crud (merged to develop)
+
+- `lib/services/chapters.ts`: CRUD service + exported `Chapter`, `ChapterInsert`, `ChapterUpdate` types
+- `app/api/admin/chapters/route.ts`: POST create (Zod validated, admin auth)
+- `app/api/admin/chapters/[id]/route.ts`: PUT update + DELETE (admin auth)
+- `app/admin/chapters/page.tsx`: empire-filtered table (sort_order, title, slug, period, actions)
+- `app/admin/chapters/ChapterForm.tsx`: shared create/edit form with auto-slug, Markdown textarea
+- `app/admin/chapters/DeleteChapterButton.tsx`: client delete with window.confirm
+- `app/admin/chapters/new/page.tsx` + `app/admin/chapters/[id]/edit/page.tsx`: full-page create/edit
+
+#### ✅ feature/admin-quiz-crud (merged to develop)
+
+- `lib/services/quiz-admin.ts`: search/paginate/CRUD service + exported types (separate from public `quiz.ts`)
+- `app/api/admin/quiz/route.ts`: GET search/filter/paginate + POST create (Zod validated, admin auth)
+- `app/api/admin/quiz/[id]/route.ts`: PUT update + DELETE (admin auth, id validation → 400)
+- `app/admin/quiz/QuizManager.tsx`: client orchestrator with filter dropdowns (category, difficulty, verified, free-text search), debounced search (300ms), paginated table (50/page)
+- `app/admin/quiz/QuizEditModal.tsx`: edit/create modal with all fields, Escape-to-close, backdrop click guard, delete button
+- Search escapes `%` and `_` for safe Postgres `ilike`; single `.select('*', { count: 'exact' })` query
+- Client components use `import type` only from `quiz-admin.ts` (server boundary safety)
+- Zod `.trim()` on all string fields prevents carriage return validation failures
+
+#### ✅ Quiz data cleanup (applied to develop)
+
+- Stripped `\r` carriage returns from `quiz_questions.category` (CSV import artifact)
+- Deduplicated quiz questions: 20,000 → 1,123 unique (Roman 210, Chinese 315, Japanese 198, Ottoman 400)
+- Duplicate cause: generation scripts produced ~12-25× copies per question
+- Quiz question regeneration needed to restore 5,000 unique per empire
+
+#### ✅ UX fixes (merged to develop)
+
+- Removed redundant "Explore empires" / "Platform highlights" nav links from landing page header
+- Quiz answer reveal delay increased from 1500ms → 5500ms (`advanceTimeoutRef` in `QuizGame.tsx`)
+- `EmpireSectionNav` made sticky (`sticky top-0 z-10 bg-zinc-950 backdrop-blur-sm`)
+
 #### ✅ feature/admin-auth-foundation (merged to develop — PR #__)
 
 - /admin route gated by user_roles.role = 'admin' check in proxy.ts
@@ -606,6 +658,8 @@ Current services:
 - lib/services/stats.ts
 - lib/services/analytics.ts (Phase 3)
 - lib/services/territorial.ts (Phase 3)
+- lib/services/chapters.ts (Phase 7: admin CRUD — getChaptersByEmpire, getChapterById, createChapter, updateChapter, deleteChapter)
+- lib/services/quiz-admin.ts (Phase 7: admin CRUD — searchQuizQuestions, getQuizQuestionById, createQuizQuestion, updateQuizQuestion, deleteQuizQuestion)
 
 Note: personality quiz does NOT use services — all data is static config in lib/config/personality/.
 
@@ -688,6 +742,9 @@ D3 + React pattern: 'use client', useRef<SVGSVGElement>, useEffect with cleanup,
 
 Empire section nav (`EmpireSectionNav.tsx`) links:
 Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Personality
+Admin navigation (`app/admin/AdminShell.tsx`):
+Collapsible sidebar with: Empire selector dropdown, Chapters, Quiz Questions, Sign Out
+Empire selector persists via `?empire=<slug>` URL param (default: roman)
 
 ## Data completeness — Roman Empire
 
@@ -701,7 +758,7 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 | events         | 98    | year, category, significance (1-5), ruler_id (62/98)    |
 | chapters       | 7     | slug, title, content_md (Markdown), period_start/end    |
 | empire_extent  | 6     | year, geojson_url, area_km2, notes                      |
-| quiz_questions | 5,000 | difficulty 1-4, 6 categories balanced (~833 each)       |
+| quiz_questions | 210 |  difficulty 1-4, 6 categories balanced (deduplicated from 5,000) |
 
 ## Data completeness — Ottoman Empire
 
@@ -714,7 +771,7 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 | provinces      | 41    | name, native_name, established, dissolved               |
 | chapters       | 10    | slug, title, content_md (Markdown), period_start/end    |
 | empire_extent  | 6     | year (1400-1900), geojson_url, area_km2                 |
-| quiz_questions | 5,000 | difficulty 1-4, categories                              |
+| quiz_questions | 400 | difficulty 1-4, 6 categories balanced (deduplicated from 5,000)                            |
 | GeoJSON files  | 6     | ottoman_1400 through ottoman_1900                       |
 | personality    | 6     | sultan profiles, static config (not DB)                 |
 
@@ -729,7 +786,7 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 | provinces      | 24    | name, native_name, established, dissolved (IDs 94-117)  |
 | chapters       | 10    | slug, title, content_md (Markdown), period_start/end    |
 | empire_extent  | 6     | year (-1, 500, 700, 1100, 1500, 1800), geojson_url      |
-| quiz_questions | 5,000 | difficulty 1-4, 6 categories evenly distributed         |
+| quiz_questions | 315   | difficulty 1-4, 6 categories balanced (deduplicated from 5,000) |
 | GeoJSON files  | 6     | chinese_bc1 through chinese_1800                        |
 | personality    | 6     | emperor profiles, static config (not DB)                |
 
@@ -744,7 +801,7 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 | provinces      | 62    | name, native_name, established, dissolved                                 |
 | chapters       | 17    | slug, title, content_md (300-500 words each, dollar-quoted)               |
 | empire_extent  | 6     | years 800/1200/1600/1800/1900/1938, geojson_url, area_km2                 |
-| quiz_questions | 5,000 | difficulty 1-4, 6 categories balanced (~833 each)                         |
+| quiz_questions | 198   | difficulty 1-4, 6 categories balanced (deduplicated from 5,000)             |
 | GeoJSON files  | 6     | japanese_800 through japanese_1938 (all <200KB)                           |
 | personality    | 6     | Meiji/Ieyasu/Kanmu/Go-Daigo/Showa/Shotoku, static config (not DB)         |
 
@@ -763,6 +820,9 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
   not introduced by Phase 7. Fix: npm install -D @types/d3
 - .codex-worktrees/.next generated files cause repo-wide lint failures.
   Fix: add .codex-worktrees/ to .gitignore
+- Quiz questions severely depleted after dedup: Roman 210, Chinese 315, Japanese 198, Ottoman 400 — need regeneration to 5,000 each
+- Landing page stat "20000 quiz questions" is stale — actual count is 1,123 post-dedup; update after regeneration
+- Admin API routes at /api/admin/* are not covered by proxy.ts admin guard — each route does its own auth check via getCurrentUser() + isAdmin()
 
 ## Key decisions & why
 
@@ -822,7 +882,7 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 - Chinese 500 AD snapshot uses two polygons (Toba Wei + Jin Empire) for the divided empire
 - Chinese quiz difficulty labels: Xiucai/Juren/Jinshi/Zhuangyuan (imperial examination ranks)
 - Chinese personality quiz structure: delta arrays + vector arrays matching Ottoman/Roman pattern exactly
-- Landing page stats updated to include all 4 active empires: 332 rulers / 7862 places / 326 battles / 20000 quiz / 467 events
+- Landing page stats: 332 rulers / 7862 places / 326 battles / 1123 quiz (post-dedup, pending regeneration) / 467 events
 - Vitest personality test: uses empire_id 99 (not 4) for unsupported empire case — Ottoman now registered
 - Japanese rulers: 126 complete (all emperors Jimmu through Naruhito — NOT 80/20; unbroken imperial line warrants completeness)
 - Japanese dynasty field uses historical period names (Legendary, Kofun, Asuka, etc.) — single dynasty throughout history
@@ -865,6 +925,15 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 - Sort empire scores on unclamped rawScore: clamping before sort collapses
   distinct scores to ceiling value across 10 questions, biasing results
   toward lower empire_id order
+- Admin auth uses Supabase Auth + user_roles table (not env var password or Vercel protection) — per-user revocation, audit trail, reuses Phase 0 infrastructure
+- Admin layout: collapsible sidebar, empire selector via URL param (?empire=slug) — shareable, debuggable, no hidden state
+- Admin quiz CRUD uses separate lib/services/quiz-admin.ts (not extending quiz.ts) — different query patterns (pagination, search), avoids breaking public quiz
+- Admin API routes use getCurrentUser() + isAdmin() (not requireAdmin()) — API routes need HTTP status codes (401/403), not redirects
+- Client components importing from service files must use `import type` only — prevents server Supabase client from leaking into client bundle
+- Quiz questions deduplicated via SQL (keep MIN(id) per empire_id + question) — generation scripts produced 12-25× copies per unique question
+- Zod .trim() added to all admin API string fields — prevents \r carriage return validation failures from CSV import artifacts
+- Quiz answer reveal delay: 5500ms (was 1500ms) — users need time to read the correct answer and explanation
+- EmpireSectionNav sticky: prevents losing navigation context when scrolling long pages (rulers, timeline)
 
 ## Lighthouse scores (production — ancient-empires.vercel.app)
 
@@ -877,10 +946,13 @@ Overview, Rulers, Map, Timeline, Territorial, Chapters, Quiz, Analytics, Persona
 
 ## On the Horizon — Phase 7 remaining
 
+- **Quiz question regeneration**: all 4 empires need 5,000 unique questions each (currently 210/315/198/400 after dedup)
 - i18n translations (Italian, German, Turkish, Japanese) via Claude Code
-- Admin CRUD UI for chapters and quiz questions
 - Deferred Phase 2 debt: iOS Safari test, GitHub Secrets for CI env vars,
   server-side PostHog capture for quiz_completed and share_clicked
+- `npm install -D @types/d3` (repo-wide type-check failures on D3 components)
+- Add `.codex-worktrees/` to `.gitignore` (causing repo-wide lint failures)
+- `SUPABASE_SERVICE_ROLE_KEY` rotation and mark as Sensitive in Vercel
 
 ## Do NOT change without consultation
 
