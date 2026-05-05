@@ -164,44 +164,6 @@ export default function HomePage() {
                 Interactive history platform
               </p>
             </div>
-
-            <nav aria-label="Primary">
-              <ul
-                style={{
-                  display: 'flex',
-                  gap: '16px',
-                  listStyle: 'none',
-                  margin: 0,
-                  padding: 0,
-                  flexWrap: 'wrap',
-                }}
-              >
-                <li>
-                  <a
-                    href="#empires"
-                    style={{
-                      color: '#f7e7b0',
-                      textDecoration: 'none',
-                      fontWeight: 500,
-                    }}
-                  >
-                    Explore empires
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#highlights"
-                    style={{
-                      color: 'rgba(240, 236, 226, 0.92)',
-                      textDecoration: 'none',
-                      fontWeight: 500,
-                    }}
-                  >
-                    Platform highlights
-                  </a>
-                </li>
-              </ul>
-            </nav>
           </div>
         </header>
 

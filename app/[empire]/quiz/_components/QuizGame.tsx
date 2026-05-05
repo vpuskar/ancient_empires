@@ -72,7 +72,9 @@ function DifficultyBadge({
 
 export function QuizGame({ empire, config }: QuizGameProps) {
   const [screen, setScreen] = useState<Screen>('difficulty');
-  const [difficulty, setDifficulty] = useState<QuizDifficultyLevel | null>(null);
+  const [difficulty, setDifficulty] = useState<QuizDifficultyLevel | null>(
+    null
+  );
   const [category, setCategory] = useState<string | null>(null);
   const [questionCount, setQuestionCount] = useState(10);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
@@ -147,7 +149,7 @@ export function QuizGame({ empire, config }: QuizGameProps) {
       setIsRevealed(false);
       isRevealedRef.current = false;
       setTimeLeft(difficulty.timer);
-    }, 1500);
+    }, 5500);
   };
 
   handleAnswerRef.current = (index: number) => {
@@ -438,7 +440,10 @@ export function QuizGame({ empire, config }: QuizGameProps) {
           </div>
 
           {(screen === 'category' || screen === 'loading') && difficulty ? (
-            <DifficultyBadge difficulty={difficulty} empireColor={empire.color} />
+            <DifficultyBadge
+              difficulty={difficulty}
+              empireColor={empire.color}
+            />
           ) : null}
 
           {screen === 'playing' ? (
@@ -463,9 +468,11 @@ export function QuizGame({ empire, config }: QuizGameProps) {
               <div className="mt-1 font-display text-xl text-[#F5E6C8]">
                 {formatScore(weightedScore)}
               </div>
-            <div className="mt-1 text-sm text-[#9A8B70]">{difficulty.name}</div>
-          </div>
-        ) : null}
+              <div className="mt-1 text-sm text-[#9A8B70]">
+                {difficulty.name}
+              </div>
+            </div>
+          ) : null}
         </header>
 
         <div className="px-5 py-8 sm:px-8 sm:py-10">
