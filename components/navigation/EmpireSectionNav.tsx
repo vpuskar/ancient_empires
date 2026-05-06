@@ -32,7 +32,7 @@ export function EmpireSectionNav({ empire }: EmpireSectionNavProps) {
   return (
     <nav
       aria-label={`${empire.name} sections`}
-      className="mb-8 overflow-x-auto pb-2"
+      className="mb-8 overflow-x-auto pb-2 sticky top-0 z-10 bg-zinc-950 backdrop-blur-sm"
     >
       <div className="flex min-w-max gap-2 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-2">
         {NAV_ITEMS.map((item) => {
