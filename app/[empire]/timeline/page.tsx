@@ -43,6 +43,9 @@ export default async function TimelinePage({
 
   const supabase = await createClient();
   const events = await getEventsWithRulers(supabase, empire.id);
+  const sortedEvents = [...events].sort(
+    (left, right) => left.year - right.year
+  );
 
   return (
     <>
@@ -53,7 +56,7 @@ export default async function TimelinePage({
           { name: 'Timeline', url: `${SITE_URL}/${slug}/timeline` },
         ])}
       />
-      <LegacyTimelinePage empire={empire} events={events} />
+      <LegacyTimelinePage empire={empire} events={sortedEvents} />
     </>
   );
 }

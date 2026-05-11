@@ -3,7 +3,7 @@
 import { EmpireSectionNav } from '@/components/navigation/EmpireSectionNav';
 import type { EmpireConfig } from '@/lib/empires/config';
 import type { TimelineEvent } from '@/lib/services/events';
-import { TimelineContainer } from './TimelineContainer';
+import { TimelineSection } from './TimelineSection';
 
 interface LegacyTimelinePageProps {
   empire: EmpireConfig;
@@ -38,7 +38,7 @@ export default function LegacyTimelinePage({
 
         <EmpireSectionNav empire={empire} />
 
-        <TimelineContainer empire={empire} events={events} />
+        <TimelineSection empire={empire} events={events} />
       </div>
     </main>
   );
