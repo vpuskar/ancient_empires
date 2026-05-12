@@ -6,6 +6,7 @@ import type { TimelineEvent } from '@/lib/services/events';
 import { ReportError } from '@/components/shared/ReportError';
 import { InteractiveTimeline } from './InteractiveTimeline';
 import TimelineErrorBoundary from './TimelineErrorBoundary';
+import { formatCategoryLabel, getCategoryKey } from './timelineDisplay';
 
 type CategoryFilter = 'all' | string;
 
@@ -14,19 +15,12 @@ interface TimelineSectionProps {
   events: TimelineEvent[];
 }
 
-function formatCategoryLabel(category: string): string {
-  return category
-    .split('_')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-}
-
 export function TimelineSection({ empire, events }: TimelineSectionProps) {
   const [activeFilter, setActiveFilter] = useState<CategoryFilter>('all');
 
   const filters = useMemo(() => {
     const categories = Array.from(
-      new Set(events.map((event) => event.category).filter(Boolean))
+      new Set(events.map((event) => getCategoryKey(event.category)))
     ).sort((left, right) => left.localeCompare(right));
 
     return [
@@ -40,7 +34,9 @@ export function TimelineSection({ empire, events }: TimelineSectionProps) {
 
   const filteredEvents = useMemo(() => {
     if (activeFilter === 'all') return events;
-    return events.filter((event) => event.category === activeFilter);
+    return events.filter(
+      (event) => getCategoryKey(event.category) === activeFilter
+    );
   }, [activeFilter, events]);
 
   return (
