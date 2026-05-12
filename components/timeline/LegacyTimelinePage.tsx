@@ -19,10 +19,10 @@ export default function LegacyTimelinePage({
   events,
 }: LegacyTimelinePageProps) {
   return (
-    <main className="min-h-screen bg-[#0C0B09] px-4 py-12 text-[#F0ECE2] sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
+    <main className="min-h-screen bg-[#0C0B09] px-3 py-10 text-[#F0ECE2] sm:px-5 lg:px-8">
+      <div className="mx-auto max-w-[1600px]">
         <header
-          className="mb-8 border-l-4 pl-6 py-2"
+          className="mb-8 max-w-6xl border-l-4 py-2 pl-6"
           style={{ borderColor: empire.color }}
         >
           <p className="mb-2 text-sm uppercase tracking-[0.2em] text-[#8B7355]">

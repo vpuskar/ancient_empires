@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useEffect } from 'react';
 import type { EmpireConfig } from '@/lib/empires/config';
 import type { TimelineEvent } from '@/lib/services/events';
@@ -12,18 +11,18 @@ type TimelineEventWithImage = TimelineEvent & {
 interface EventCardProps {
   empire: EmpireConfig;
   event: TimelineEventWithImage;
-  left: number;
-  top: number;
+  leftPercent: number;
+  topPercent: number;
   onClose: () => void;
 }
 
 const CATEGORY_BADGES: Record<string, string> = {
-  political: 'border-amber-500/40 bg-amber-100 text-amber-900',
-  military: 'border-red-500/40 bg-red-100 text-red-900',
-  cultural: 'border-blue-500/40 bg-blue-100 text-blue-900',
-  religious: 'border-purple-500/40 bg-purple-100 text-purple-900',
-  economic: 'border-green-500/40 bg-green-100 text-green-900',
-  natural: 'border-slate-500/40 bg-slate-100 text-slate-800',
+  political: 'border-amber-300/35 bg-amber-300/15 text-amber-100',
+  military: 'border-red-300/35 bg-red-400/15 text-red-100',
+  cultural: 'border-blue-300/35 bg-blue-400/15 text-blue-100',
+  religious: 'border-purple-300/35 bg-purple-400/15 text-purple-100',
+  economic: 'border-green-300/35 bg-green-400/15 text-green-100',
+  natural: 'border-slate-300/35 bg-slate-400/15 text-slate-100',
 };
 
 function formatYear(year: number): string {
@@ -50,14 +49,14 @@ function getFirstSentence(description: string | null): string {
 export function EventCard({
   empire,
   event,
-  left,
-  top,
+  leftPercent,
+  topPercent,
   onClose,
 }: EventCardProps) {
-  const imageUrl = event.image_url ?? null;
+  const imageUrl = event.image_url ?? event.ruler?.image_url ?? null;
   const badgeClass =
     CATEGORY_BADGES[event.category] ??
-    'border-stone-400/50 bg-stone-100 text-stone-800';
+    'border-stone-300/35 bg-stone-400/15 text-stone-100';
 
   useEffect(() => {
     function handleKeyDown(keyEvent: KeyboardEvent) {
@@ -71,56 +70,77 @@ export function EventCard({
   }, [onClose]);
 
   return (
-    <button
-      type="button"
-      aria-label={`Close ${event.name} event card`}
-      onClick={onClose}
-      className="absolute z-20 block w-[min(21rem,calc(100vw-2rem))] -translate-x-1/2 rounded-lg bg-white text-left text-stone-950 shadow-2xl ring-1 ring-black/10 focus:outline-none focus:ring-2"
+    <div
+      role="dialog"
+      aria-modal="false"
+      aria-label={`${event.name} event details`}
+      onClick={(clickEvent) => clickEvent.stopPropagation()}
+      className="absolute z-40 w-[min(22rem,calc(100%-2rem))] -translate-x-1/2 overflow-hidden rounded-2xl border border-white/15 bg-[#080b0d]/82 text-[#fff8df] shadow-[0_24px_80px_rgba(0,0,0,0.72)] backdrop-blur-xl"
       style={{
-        left,
-        top,
-        ['--tw-ring-color' as string]: empire.color,
+        left: `${Math.min(86, Math.max(14, leftPercent))}%`,
+        top:
+          topPercent > 56
+            ? `calc(${Math.max(18, topPercent - 42)}% - 1rem)`
+            : `calc(${Math.min(70, topPercent + 5)}% + 1rem)`,
       }}
     >
-      <div className="grid gap-0 overflow-hidden rounded-lg sm:grid-cols-[7.5rem_1fr]">
-        {imageUrl ? (
-          <Image
-            src={imageUrl}
-            alt={`${event.name} illustration`}
-            width={160}
-            height={140}
-            className="h-32 w-full object-cover sm:h-full"
-          />
-        ) : (
-          <div
-            aria-hidden="true"
-            className="h-28 w-full sm:h-full"
-            style={{
-              background: `linear-gradient(135deg, ${empire.color}2E, ${empire.color}0F), repeating-linear-gradient(45deg, transparent 0 10px, rgba(0,0,0,0.05) 10px 11px)`,
-            }}
-          />
-        )}
+      <div
+        aria-hidden="true"
+        className="absolute left-1/2 top-0 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rotate-45 border-l border-t border-white/15 bg-[#080b0d]/82"
+      />
 
-        <div className="p-4">
-          <div className="mb-2 flex flex-wrap items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wide text-stone-500">
-              {formatYear(event.year)}
-            </span>
-            <span
-              className={`rounded-full border px-2 py-0.5 text-xs font-medium ${badgeClass}`}
-            >
-              {formatCategoryLabel(event.category)}
-            </span>
-          </div>
+      {imageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={imageUrl}
+          alt={`${event.name} illustration`}
+          className="h-40 w-full object-cover opacity-90"
+        />
+      ) : (
+        <div
+          aria-hidden="true"
+          className="h-40 w-full"
+          style={{
+            background: `radial-gradient(circle at 28% 35%, ${empire.color}99, transparent 24%), radial-gradient(circle at 72% 44%, rgba(245, 201, 103, 0.32), transparent 28%), linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02)), repeating-linear-gradient(35deg, transparent 0 14px, rgba(255,255,255,0.06) 14px 15px)`,
+          }}
+        />
+      )}
 
-          <h2 className="text-base font-semibold leading-tight text-stone-950">
-            {event.name}
-          </h2>
-          <p className="mt-2 text-sm leading-relaxed text-stone-700">
-            {getFirstSentence(event.description)}
-          </p>
+      <div className="p-4">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#f5c967]">
+            {formatYear(event.year)}
+          </span>
+          <span
+            className={`rounded-full border px-2.5 py-1 text-xs font-medium ${badgeClass}`}
+          >
+            {formatCategoryLabel(event.category)}
+          </span>
         </div>
+
+        <h2 className="text-lg font-semibold leading-tight text-white">
+          {event.name}
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-[#d9ccb1]">
+          {getFirstSentence(event.description)}
+        </p>
+
+        {event.ruler && (
+          <p className="mt-3 text-xs uppercase tracking-[0.18em] text-[#f5e6bd]/55">
+            {event.ruler.name}
+          </p>
+        )}
       </div>
-    </button>
+
+      <button
+        type="button"
+        aria-label="Close event card"
+        onClick={onClose}
+        className="absolute right-3 top-3 rounded-full border border-white/15 bg-black/55 px-2.5 py-1 text-sm font-semibold text-white shadow-lg transition hover:bg-black/80 focus:outline-none focus:ring-2"
+        style={{ ['--tw-ring-color' as string]: empire.color }}
+      >
+        Close
+      </button>
+    </div>
   );
 }

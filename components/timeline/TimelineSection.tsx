@@ -44,8 +44,8 @@ export function TimelineSection({ empire, events }: TimelineSectionProps) {
   }, [activeFilter, events]);
 
   return (
-    <section className="px-6 pb-12">
-      <div className="mb-8 flex flex-wrap gap-3">
+    <section className="px-1 pb-12 sm:px-2">
+      <div className="mb-6 flex flex-wrap gap-3 px-2 sm:px-0">
         {filters.map((filter) => {
           const isActive = activeFilter === filter.value;
 
@@ -78,7 +78,7 @@ export function TimelineSection({ empire, events }: TimelineSectionProps) {
         })}
       </div>
 
-      <p className="mb-4 text-sm text-[#8B7355]">
+      <p className="mb-4 px-2 text-sm text-[#B9AA8E] sm:px-0">
         {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''}
       </p>
 
