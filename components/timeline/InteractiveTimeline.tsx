@@ -2,6 +2,7 @@
 
 import * as d3 from 'd3';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { FeatureCollection, Geometry } from 'geojson';
 import type { EmpireConfig } from '@/lib/empires/config';
 import type { TimelineEvent } from '@/lib/services/events';
 import { track } from '@/lib/posthog/track';
@@ -28,8 +29,11 @@ interface ActiveEvent {
   index: number;
 }
 
-const VIEWBOX_WIDTH = 1200;
-const VIEWBOX_HEIGHT = 720;
+type GeoJsonData = FeatureCollection<Geometry>;
+type GeoCoordinate = [number, number];
+
+const VIEWBOX_WIDTH = 1440;
+const VIEWBOX_HEIGHT = 820;
 const PLAY_INTERVAL_MS = 3400;
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -39,6 +43,57 @@ const CATEGORY_COLORS: Record<string, string> = {
   religious: '#a78bfa',
   economic: '#34d399',
   natural: '#94a3b8',
+};
+
+const GEOJSON_BACKGROUNDS: Record<string, string> = {
+  roman: '/geojson/roman_200.geojson',
+  chinese: '/geojson/chinese_1800.geojson',
+  japanese: '/geojson/japanese_1938.geojson',
+  ottoman: '/geojson/ottoman_1600.geojson',
+};
+
+const ROUTE_PRESETS: Record<string, GeoCoordinate[]> = {
+  roman: [
+    [-5.35, 36.13],
+    [2.17, 41.38],
+    [12.48, 41.89],
+    [23.73, 37.98],
+    [29.0, 41.0],
+    [31.24, 30.04],
+    [35.5, 33.9],
+    [44.4, 33.3],
+  ],
+  chinese: [
+    [103.8, 36.1],
+    [108.9, 34.3],
+    [112.9, 28.2],
+    [116.4, 39.9],
+    [118.8, 32.1],
+    [121.5, 31.2],
+    [126.6, 45.8],
+    [87.6, 43.8],
+  ],
+  japanese: [
+    [130.4, 33.6],
+    [135.5, 34.7],
+    [139.7, 35.7],
+    [141.3, 43.1],
+    [127.7, 26.2],
+    [121.5, 25.0],
+    [126.98, 37.56],
+    [123.4, 41.8],
+    [145.7, 15.2],
+  ],
+  ottoman: [
+    [26.0, 40.2],
+    [28.98, 41.0],
+    [32.85, 39.93],
+    [35.2, 32.1],
+    [31.24, 30.04],
+    [44.36, 33.31],
+    [21.43, 41.99],
+    [18.41, 43.86],
+  ],
 };
 
 function formatYear(year: number): string {
@@ -58,16 +113,67 @@ function getCategoryColor(category: string): string {
   return CATEGORY_COLORS[category] ?? '#a8a29e';
 }
 
-function getDesignedY(index: number, eventsLength: number): number {
-  const progress = eventsLength <= 1 ? 0 : index / (eventsLength - 1);
-  const primaryWave = Math.sin(progress * Math.PI * 3.2) * 145;
-  const secondaryWave = Math.sin(progress * Math.PI * 8.4 + 0.8) * 48;
-  const alternatingBend = index % 5 === 0 ? 42 : index % 5 === 2 ? -36 : 0;
+function interpolateRoute(
+  route: GeoCoordinate[],
+  progress: number
+): GeoCoordinate {
+  if (route.length === 0) return [0, 0];
+  if (route.length === 1) return route[0] ?? [0, 0];
 
-  return Math.min(
-    VIEWBOX_HEIGHT - 118,
-    Math.max(118, 360 + primaryWave + secondaryWave + alternatingBend)
-  );
+  const scaled = progress * (route.length - 1);
+  const startIndex = Math.min(Math.floor(scaled), route.length - 2);
+  const segmentProgress = scaled - startIndex;
+  const start = route[startIndex] ?? route[0] ?? [0, 0];
+  const end = route[startIndex + 1] ?? start;
+
+  return [
+    start[0] + (end[0] - start[0]) * segmentProgress,
+    start[1] + (end[1] - start[1]) * segmentProgress,
+  ];
+}
+
+function getProjection(geoJson: GeoJsonData | null) {
+  const projection = d3.geoMercator();
+
+  if (geoJson) {
+    projection.fitExtent(
+      [
+        [68, 72],
+        [VIEWBOX_WIDTH - 68, VIEWBOX_HEIGHT - 72],
+      ],
+      geoJson
+    );
+    return projection;
+  }
+
+  projection
+    .center([0, 35])
+    .scale(520)
+    .translate([VIEWBOX_WIDTH / 2, VIEWBOX_HEIGHT / 2]);
+  return projection;
+}
+
+function getPoints(
+  events: TimelineEvent[],
+  empire: EmpireConfig,
+  geoJson: GeoJsonData | null
+): TimelinePoint[] {
+  const projection = getProjection(geoJson);
+  const route = ROUTE_PRESETS[empire.slug] ?? ROUTE_PRESETS.roman;
+
+  return events.map((event, index) => {
+    const progress = events.length <= 1 ? 0 : index / (events.length - 1);
+    const coordinate = interpolateRoute(route, progress);
+    const projected = projection(coordinate);
+    const wave = Math.sin(progress * Math.PI * 7.2) * 18;
+
+    return {
+      event,
+      x: projected?.[0] ?? VIEWBOX_WIDTH / 2,
+      y: (projected?.[1] ?? VIEWBOX_HEIGHT / 2) + wave,
+      index,
+    };
+  });
 }
 
 function shouldFeaturePoint(
@@ -77,7 +183,7 @@ function shouldFeaturePoint(
   if (point.index === 0 || point.index === pointsLength - 1) return true;
   if (point.event.significance >= 5) return true;
 
-  const step = pointsLength > 120 ? 24 : pointsLength > 80 ? 16 : 10;
+  const step = pointsLength > 120 ? 24 : pointsLength > 80 ? 17 : 9;
   return point.index % step === 0;
 }
 
@@ -89,32 +195,7 @@ function shouldShowThumbnail(
     (featuredPoint) => featuredPoint.event.id === point.event.id
   );
 
-  return featuredIndex >= 0 && featuredIndex < 8;
-}
-
-function getPoints(
-  events: TimelineEvent[],
-  empire: EmpireConfig
-): TimelinePoint[] {
-  const minYear = d3.min(events, (event: TimelineEvent) => event.year);
-  const maxYear = d3.max(events, (event: TimelineEvent) => event.year);
-  const yearScale = d3
-    .scaleLinear()
-    .domain(
-      minYear === undefined || maxYear === undefined
-        ? [empire.startYear, empire.endYear]
-        : minYear === maxYear
-          ? [minYear - 1, maxYear + 1]
-          : [minYear, maxYear]
-    )
-    .range([92, VIEWBOX_WIDTH - 92]);
-
-  return events.map((event, index) => ({
-    event,
-    x: yearScale(event.year),
-    y: getDesignedY(index, events.length),
-    index,
-  }));
+  return featuredIndex >= 0 && featuredIndex < 7;
 }
 
 export function InteractiveTimeline({
@@ -128,8 +209,12 @@ export function InteractiveTimeline({
   const playIndexRef = useRef(0);
   const [activeEvent, setActiveEvent] = useState<ActiveEvent | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [geoJson, setGeoJson] = useState<GeoJsonData | null>(null);
 
-  const points = useMemo(() => getPoints(events, empire), [empire, events]);
+  const points = useMemo(
+    () => getPoints(events, empire, geoJson),
+    [empire, events, geoJson]
+  );
 
   const featuredPoints = useMemo(
     () => points.filter((point) => shouldFeaturePoint(point, points.length)),
@@ -176,6 +261,35 @@ export function InteractiveTimeline({
   );
 
   useEffect(() => {
+    const geoJsonUrl = GEOJSON_BACKGROUNDS[empire.slug];
+    let isCancelled = false;
+
+    if (!geoJsonUrl) return;
+
+    fetch(geoJsonUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to load ${geoJsonUrl}`);
+        }
+        return response.json() as Promise<GeoJsonData>;
+      })
+      .then((data) => {
+        if (!isCancelled) {
+          setGeoJson(data);
+        }
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setGeoJson(null);
+        }
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [empire.slug]);
+
+  useEffect(() => {
     const svgElement = svgRef.current;
     if (!svgElement || points.length === 0) return;
 
@@ -187,58 +301,119 @@ export function InteractiveTimeline({
 
     const defs = svg.append('defs');
 
-    const glow = defs.append('filter').attr('id', 'timeline-glow');
-    glow
-      .append('feGaussianBlur')
-      .attr('stdDeviation', 7)
-      .attr('result', 'coloredBlur');
-    const glowMerge = glow.append('feMerge');
-    glowMerge.append('feMergeNode').attr('in', 'coloredBlur');
-    glowMerge.append('feMergeNode').attr('in', 'SourceGraphic');
+    const waterGradient = defs
+      .append('radialGradient')
+      .attr('id', 'timeline-water')
+      .attr('cx', '48%')
+      .attr('cy', '44%')
+      .attr('r', '78%');
+    waterGradient
+      .append('stop')
+      .attr('offset', '0%')
+      .attr('stop-color', '#183a3c');
+    waterGradient
+      .append('stop')
+      .attr('offset', '54%')
+      .attr('stop-color', '#10242b');
+    waterGradient
+      .append('stop')
+      .attr('offset', '100%')
+      .attr('stop-color', '#071014');
 
-    const softBlur = defs.append('filter').attr('id', 'soft-map-blur');
-    softBlur.append('feGaussianBlur').attr('stdDeviation', 1.2);
+    const landGradient = defs
+      .append('linearGradient')
+      .attr('id', 'timeline-land')
+      .attr('x1', '0%')
+      .attr('x2', '100%')
+      .attr('y1', '0%')
+      .attr('y2', '100%');
+    landGradient
+      .append('stop')
+      .attr('offset', '0%')
+      .attr('stop-color', '#5a4f2e');
+    landGradient
+      .append('stop')
+      .attr('offset', '45%')
+      .attr('stop-color', '#253a2b');
+    landGradient
+      .append('stop')
+      .attr('offset', '100%')
+      .attr('stop-color', '#7a5531');
+
+    const routeGlow = defs.append('filter').attr('id', 'route-glow');
+    routeGlow
+      .append('feGaussianBlur')
+      .attr('stdDeviation', 9)
+      .attr('result', 'coloredBlur');
+    const routeMerge = routeGlow.append('feMerge');
+    routeMerge.append('feMergeNode').attr('in', 'coloredBlur');
+    routeMerge.append('feMergeNode').attr('in', 'SourceGraphic');
+
+    const projection = getProjection(geoJson);
+    const path = d3.geoPath(projection);
+
+    svg
+      .append('rect')
+      .attr('width', VIEWBOX_WIDTH)
+      .attr('height', VIEWBOX_HEIGHT)
+      .attr('fill', 'url(#timeline-water)');
+
+    const graticule = d3.geoGraticule().step([5, 5]);
+    svg
+      .append('path')
+      .datum(graticule())
+      .attr('d', path)
+      .attr('fill', 'none')
+      .attr('stroke', 'rgba(214, 196, 145, 0.12)')
+      .attr('stroke-width', 0.8)
+      .attr('stroke-dasharray', '3 12');
+
+    if (geoJson) {
+      svg
+        .append('g')
+        .attr('aria-hidden', 'true')
+        .selectAll('path')
+        .data(geoJson.features)
+        .join('path')
+        .attr('d', path)
+        .attr('fill', 'url(#timeline-land)')
+        .attr('fill-opacity', 0.86)
+        .attr('stroke', 'rgba(255, 230, 161, 0.42)')
+        .attr('stroke-width', 1.25)
+        .style('filter', 'drop-shadow(0 0 14px rgba(224, 197, 125, 0.24))');
+
+      svg
+        .append('g')
+        .attr('aria-hidden', 'true')
+        .selectAll('path')
+        .data(geoJson.features)
+        .join('path')
+        .attr('d', path)
+        .attr('fill', 'none')
+        .attr('stroke', empire.color)
+        .attr('stroke-opacity', 0.38)
+        .attr('stroke-width', 4)
+        .style('filter', `drop-shadow(0 0 12px ${empire.color}66)`);
+    }
+
+    svg
+      .append('g')
+      .attr('aria-hidden', 'true')
+      .selectAll('circle')
+      .data(points.filter((point) => point.index % 11 === 0))
+      .join('circle')
+      .attr('cx', (point: TimelinePoint) => point.x)
+      .attr('cy', (point: TimelinePoint) => point.y)
+      .attr('r', (_point: TimelinePoint, index: number) => 90 + index * 8)
+      .attr('fill', 'none')
+      .attr('stroke', 'rgba(255,255,255,0.045)')
+      .attr('stroke-width', 1.2);
 
     const line = d3
       .line<TimelinePoint>()
       .x((point: TimelinePoint) => point.x)
       .y((point: TimelinePoint) => point.y)
-      .curve(d3.curveCatmullRom.alpha(0.65));
-
-    const territoryLines = d3.range(12).map((lineIndex) =>
-      d3.range(9).map((pointIndex) => ({
-        x: -80 + pointIndex * 175,
-        y:
-          82 +
-          lineIndex * 54 +
-          Math.sin(pointIndex * 1.3 + lineIndex * 0.7) * 18,
-      }))
-    );
-
-    const backgroundGroup = svg.append('g').attr('aria-hidden', 'true');
-    territoryLines.forEach((territoryLine, lineIndex) => {
-      backgroundGroup
-        .append('path')
-        .datum(territoryLine)
-        .attr(
-          'd',
-          d3
-            .line<{ x: number; y: number }>()
-            .x((point) => point.x)
-            .y((point) => point.y)
-            .curve(d3.curveBasis)
-        )
-        .attr('fill', 'none')
-        .attr(
-          'stroke',
-          lineIndex % 3 === 0
-            ? 'rgba(232, 211, 151, 0.13)'
-            : 'rgba(148, 163, 184, 0.1)'
-        )
-        .attr('stroke-width', lineIndex % 4 === 0 ? 1.6 : 0.9)
-        .attr('stroke-dasharray', lineIndex % 2 === 0 ? '10 16' : '4 14')
-        .style('filter', 'url(#soft-map-blur)');
-    });
+      .curve(d3.curveCatmullRom.alpha(0.72));
 
     svg
       .append('path')
@@ -246,32 +421,32 @@ export function InteractiveTimeline({
       .attr('d', line)
       .attr('fill', 'none')
       .attr('stroke', empire.color)
-      .attr('stroke-opacity', 0.3)
-      .attr('stroke-width', 22)
+      .attr('stroke-opacity', 0.45)
+      .attr('stroke-width', 30)
       .attr('stroke-linecap', 'round')
       .attr('stroke-linejoin', 'round')
-      .style('filter', 'url(#timeline-glow)');
+      .style('filter', 'url(#route-glow)');
 
     svg
       .append('path')
       .datum(points)
       .attr('d', line)
       .attr('fill', 'none')
-      .attr('stroke', '#f5c967')
-      .attr('stroke-opacity', 0.88)
-      .attr('stroke-width', 8)
+      .attr('stroke', '#f0b94f')
+      .attr('stroke-opacity', 0.94)
+      .attr('stroke-width', 10)
       .attr('stroke-linecap', 'round')
       .attr('stroke-linejoin', 'round')
-      .style('filter', 'drop-shadow(0 0 16px rgba(245, 201, 103, 0.72))');
+      .style('filter', 'drop-shadow(0 0 18px rgba(240, 185, 79, 0.82))');
 
     svg
       .append('path')
       .datum(points)
       .attr('d', line)
       .attr('fill', 'none')
-      .attr('stroke', '#fff3b0')
+      .attr('stroke', '#fff2ad')
       .attr('stroke-opacity', 0.95)
-      .attr('stroke-width', 3)
+      .attr('stroke-width', 3.5)
       .attr('stroke-linecap', 'round')
       .attr('stroke-linejoin', 'round');
 
@@ -282,15 +457,15 @@ export function InteractiveTimeline({
       .join('text')
       .attr('x', (point: TimelinePoint) => point.x)
       .attr('y', (point: TimelinePoint) =>
-        point.y > VIEWBOX_HEIGHT * 0.58 ? point.y - 28 : point.y + 38
+        point.y > VIEWBOX_HEIGHT * 0.55 ? point.y - 34 : point.y + 42
       )
       .attr('text-anchor', 'middle')
-      .attr('fill', '#f8efd2')
-      .attr('font-size', 16)
-      .attr('font-weight', 700)
+      .attr('fill', '#fff4c8')
+      .attr('font-size', 18)
+      .attr('font-weight', 800)
       .style('paint-order', 'stroke')
-      .style('stroke', 'rgba(7, 10, 12, 0.86)')
-      .style('stroke-width', 5)
+      .style('stroke', 'rgba(2, 6, 8, 0.92)')
+      .style('stroke-width', 6)
       .text((point: TimelinePoint) => formatYear(point.event.year));
 
     const nodeGroups = svg
@@ -315,20 +490,20 @@ export function InteractiveTimeline({
       .append('circle')
       .attr(
         'r',
-        (point: TimelinePoint) => 17 + Math.min(point.event.significance, 5)
+        (point: TimelinePoint) => 16 + Math.min(point.event.significance, 5)
       )
       .attr('fill', (point: TimelinePoint) =>
         getCategoryColor(point.event.category)
       )
-      .attr('opacity', 0.2)
-      .style('filter', 'url(#timeline-glow)');
+      .attr('opacity', 0.24)
+      .style('filter', 'url(#route-glow)');
 
     nodeGroups
       .append('circle')
       .attr('r', 12)
-      .attr('fill', '#070a0c')
+      .attr('fill', 'rgba(2, 6, 8, 0.94)')
       .attr('stroke', '#ffe6a1')
-      .attr('stroke-width', 2.5);
+      .attr('stroke-width', 2.6);
 
     nodeGroups
       .append('circle')
@@ -336,12 +511,12 @@ export function InteractiveTimeline({
       .attr('fill', (point: TimelinePoint) =>
         getCategoryColor(point.event.category)
       )
-      .attr('stroke', 'rgba(255,255,255,0.85)')
-      .attr('stroke-width', 1.3)
+      .attr('stroke', 'rgba(255,255,255,0.88)')
+      .attr('stroke-width', 1.35)
       .style(
         'filter',
         (point: TimelinePoint) =>
-          `drop-shadow(0 0 9px ${getCategoryColor(point.event.category)})`
+          `drop-shadow(0 0 11px ${getCategoryColor(point.event.category)})`
       );
 
     nodeGroups
@@ -369,7 +544,7 @@ export function InteractiveTimeline({
           .select('circle:nth-child(2)')
           .attr('r', 12);
       });
-  }, [clearPlayInterval, empire, featuredPoints, openPoint, points]);
+  }, [clearPlayInterval, empire, featuredPoints, geoJson, openPoint, points]);
 
   useEffect(() => {
     clearPlayInterval();
@@ -413,32 +588,28 @@ export function InteractiveTimeline({
 
   return (
     <div
-      className="relative min-h-[560px] overflow-hidden rounded-2xl border border-white/10 bg-[#050706] shadow-2xl md:min-h-[76vh]"
+      className="relative min-h-[640px] overflow-hidden bg-[#061014] shadow-[0_30px_120px_rgba(0,0,0,0.62)] md:min-h-[82vh]"
       onClick={() => {
         setActiveEvent(null);
         setIsPlaying(false);
         clearPlayInterval();
       }}
-      style={{
-        background:
-          'radial-gradient(circle at 18% 24%, rgba(74, 92, 65, 0.42), transparent 20%), radial-gradient(circle at 78% 34%, rgba(19, 58, 80, 0.5), transparent 25%), radial-gradient(circle at 55% 76%, rgba(105, 70, 34, 0.38), transparent 29%), linear-gradient(135deg, #11150f 0%, #17211c 35%, #0b1821 63%, #2a1e13 100%)',
-      }}
     >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-45"
-        style={{
-          backgroundImage:
-            'linear-gradient(22deg, transparent 48%, rgba(228, 205, 147, 0.14) 49%, transparent 51%), linear-gradient(116deg, transparent 47%, rgba(79, 128, 116, 0.14) 49%, transparent 52%), radial-gradient(circle at center, transparent 0 42%, rgba(255,255,255,0.06) 43%, transparent 44%)',
-          backgroundSize: '170px 130px, 210px 160px, 52px 52px',
-        }}
+      <svg
+        ref={svgRef}
+        role="img"
+        aria-label={`${empire.name} map-backed cinematic timeline from ${formatYear(
+          events[0]?.year ?? empire.startYear
+        )} to ${formatYear(events[events.length - 1]?.year ?? empire.endYear)}`}
+        className="absolute inset-0 z-10 h-full w-full"
       />
+
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none absolute inset-0 z-20"
         style={{
           background:
-            'radial-gradient(ellipse at center, transparent 28%, rgba(0,0,0,0.42) 70%, rgba(0,0,0,0.88) 100%)',
+            'radial-gradient(ellipse at center, transparent 33%, rgba(0,0,0,0.34) 66%, rgba(0,0,0,0.9) 100%), linear-gradient(180deg, rgba(0,0,0,0.36), transparent 28%, transparent 72%, rgba(0,0,0,0.48))',
         }}
       />
 
@@ -454,32 +625,23 @@ export function InteractiveTimeline({
           }
           setIsPlaying((current) => !current);
         }}
-        className="absolute left-4 top-4 z-30 rounded-full border border-white/15 bg-black/55 px-4 py-2 text-sm font-semibold text-[#fff2c4] shadow-xl backdrop-blur-md transition hover:bg-black/70 focus:outline-none focus:ring-2 md:left-6 md:top-6"
+        className="absolute left-4 top-4 z-40 rounded-full border border-[#f5c967]/35 bg-black/55 px-4 py-2 text-sm font-semibold text-[#fff2c4] shadow-xl backdrop-blur-md transition hover:bg-black/72 focus:outline-none focus:ring-2 md:left-6 md:top-6"
         style={{ ['--tw-ring-color' as string]: empire.color }}
       >
         {isPlaying ? 'Pause' : '▶ Play'}
       </button>
 
-      <div className="pointer-events-none absolute left-4 top-20 z-20 max-w-[14rem] text-xs uppercase tracking-[0.22em] text-[#f5e6bd]/70 md:left-6 md:top-24">
+      <div className="pointer-events-none absolute left-4 top-20 z-30 max-w-[15rem] text-xs uppercase tracking-[0.22em] text-[#f5e6bd]/72 md:left-6 md:top-24">
         {empire.nativeName}
       </div>
 
-      <svg
-        ref={svgRef}
-        role="img"
-        aria-label={`${empire.name} cinematic timeline from ${formatYear(
-          events[0]?.year ?? empire.startYear
-        )} to ${formatYear(events[events.length - 1]?.year ?? empire.endYear)}`}
-        className="absolute inset-0 z-10 h-full w-full"
-      />
-
       {thumbnailPoints.map((point, thumbnailIndex) => {
         const imageUrl = point.event.ruler?.image_url ?? null;
-        const left = `${Math.min(87, Math.max(9, (point.x / VIEWBOX_WIDTH) * 100))}%`;
-        const topOffset = point.y > VIEWBOX_HEIGHT * 0.55 ? -16 : 11;
+        const left = `${Math.min(87, Math.max(11, (point.x / VIEWBOX_WIDTH) * 100))}%`;
+        const topOffset = point.y > VIEWBOX_HEIGHT * 0.55 ? -14 : 10;
         const top = `${Math.min(
-          80,
-          Math.max(13, (point.y / VIEWBOX_HEIGHT) * 100 + topOffset)
+          78,
+          Math.max(16, (point.y / VIEWBOX_HEIGHT) * 100 + topOffset)
         )}%`;
 
         return (
@@ -492,7 +654,7 @@ export function InteractiveTimeline({
               clearPlayInterval();
               openPoint(point);
             }}
-            className="absolute z-20 hidden w-32 -translate-x-1/2 overflow-hidden rounded-xl border border-white/15 bg-black/55 text-left shadow-2xl backdrop-blur-md transition hover:-translate-y-1 hover:border-[#f5c967]/60 focus:outline-none focus:ring-2 md:block"
+            className="absolute z-30 hidden w-36 -translate-x-1/2 overflow-hidden rounded-sm border border-[#f5dfad]/30 bg-[#160f09]/78 p-1 text-left shadow-[0_18px_50px_rgba(0,0,0,0.62)] backdrop-blur-md transition hover:-translate-y-1 hover:border-[#f5c967]/70 focus:outline-none focus:ring-2 md:block"
             style={{
               left,
               top,
@@ -504,20 +666,25 @@ export function InteractiveTimeline({
               <img
                 src={imageUrl}
                 alt={`${point.event.name} illustration`}
-                className="h-16 w-full object-cover opacity-85"
+                className="h-20 w-full object-cover sepia-[0.45] saturate-75"
               />
             ) : (
               <div
                 aria-hidden="true"
-                className="h-16 w-full"
+                className="flex h-20 w-full items-center justify-center border border-[#e8c987]/22 text-xl font-bold text-[#f6ddb0]"
                 style={{
-                  background: `linear-gradient(135deg, ${empire.color}66, rgba(245, 201, 103, 0.18)), radial-gradient(circle at ${
-                    24 + thumbnailIndex * 8
-                  }% 35%, rgba(255,255,255,0.28), transparent 21%)`,
+                  background: `radial-gradient(circle at ${
+                    24 + thumbnailIndex * 9
+                  }% 30%, rgba(255,239,194,0.22), transparent 18%), linear-gradient(135deg, rgba(76,45,18,0.92), rgba(30,21,14,0.95)), repeating-linear-gradient(35deg, transparent 0 13px, rgba(255,255,255,0.045) 13px 14px), linear-gradient(135deg, ${empire.color}55, transparent)`,
+                  boxShadow: `inset 0 0 24px ${getCategoryColor(
+                    point.event.category
+                  )}33`,
                 }}
-              />
+              >
+                {point.event.name.charAt(0)}
+              </div>
             )}
-            <div className="p-2">
+            <div className="px-2 py-1.5">
               <div className="text-[10px] font-semibold uppercase tracking-wide text-[#f5c967]">
                 {formatYear(point.event.year)}
               </div>
@@ -543,8 +710,8 @@ export function InteractiveTimeline({
         />
       )}
 
-      <div className="absolute right-5 top-1/2 z-20 hidden h-[58%] w-12 -translate-y-1/2 items-center justify-center md:flex">
-        <div className="relative h-full w-px bg-white/18">
+      <div className="absolute right-5 top-1/2 z-30 hidden h-[60%] w-12 -translate-y-1/2 items-center justify-center md:flex">
+        <div className="relative h-full w-px bg-[#f5c967]/20">
           <div
             className="absolute left-1/2 top-0 w-[3px] -translate-x-1/2 rounded-full bg-[#f5c967] shadow-[0_0_18px_rgba(245,201,103,0.8)] transition-all"
             style={{ height: `${progressPercent}%` }}
@@ -560,7 +727,7 @@ export function InteractiveTimeline({
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 z-20 flex flex-wrap items-center gap-2 border-t border-white/10 bg-black/45 px-4 py-3 text-xs text-[#f5e6bd]/80 backdrop-blur-md md:px-6">
+      <div className="absolute bottom-4 left-4 right-4 z-30 flex flex-wrap items-center justify-center gap-2 rounded-full border border-white/10 bg-black/45 px-4 py-3 text-xs text-[#f5e6bd]/84 shadow-2xl backdrop-blur-md md:left-auto md:right-8 md:justify-start">
         {Object.entries(CATEGORY_COLORS).map(([category, color]) => (
           <span key={category} className="inline-flex items-center gap-2">
             <span

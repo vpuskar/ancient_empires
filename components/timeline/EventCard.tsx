@@ -99,11 +99,13 @@ export function EventCard({
       ) : (
         <div
           aria-hidden="true"
-          className="h-40 w-full"
+          className="flex h-40 w-full items-center justify-center border-b border-[#e8c987]/18 text-5xl font-bold text-[#f6ddb0]/82 sepia"
           style={{
-            background: `radial-gradient(circle at 28% 35%, ${empire.color}99, transparent 24%), radial-gradient(circle at 72% 44%, rgba(245, 201, 103, 0.32), transparent 28%), linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02)), repeating-linear-gradient(35deg, transparent 0 14px, rgba(255,255,255,0.06) 14px 15px)`,
+            background: `radial-gradient(circle at 28% 35%, rgba(255,239,194,0.2), transparent 22%), radial-gradient(circle at 72% 44%, ${empire.color}66, transparent 28%), linear-gradient(135deg, rgba(93,58,25,0.96), rgba(24,17,11,0.98)), repeating-linear-gradient(35deg, transparent 0 14px, rgba(255,255,255,0.055) 14px 15px)`,
           }}
-        />
+        >
+          {event.name.charAt(0)}
+        </div>
       )}
 
       <div className="p-4">
