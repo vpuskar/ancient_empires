@@ -2,15 +2,15 @@
 
 import { useEffect } from 'react';
 import type { EmpireConfig } from '@/lib/empires/config';
-import type { TimelineEvent } from '@/lib/services/events';
-
-type TimelineEventWithImage = TimelineEvent & {
-  image_url?: string | null;
-};
+import {
+  formatCategoryLabel,
+  getInitial,
+  type NormalizedTimelineEvent,
+} from './timelineDisplay';
 
 interface EventCardProps {
   empire: EmpireConfig;
-  event: TimelineEventWithImage;
+  event: NormalizedTimelineEvent;
   leftPercent: number;
   topPercent: number;
   onClose: () => void;
@@ -31,16 +31,7 @@ function formatYear(year: number): string {
   return '0';
 }
 
-function formatCategoryLabel(category: string): string {
-  return category
-    .split('_')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-}
-
-function getFirstSentence(description: string | null): string {
-  if (!description) return 'No description available.';
-
+function getFirstSentence(description: string): string {
   const trimmed = description.trim();
   const match = trimmed.match(/^.*?[.!?](?:\s|$)/);
   return match?.[0]?.trim() || trimmed;
@@ -53,7 +44,8 @@ export function EventCard({
   topPercent,
   onClose,
 }: EventCardProps) {
-  const imageUrl = event.image_url ?? event.ruler?.image_url ?? null;
+  const imageUrl = event.imageUrl ?? event.rulerImageUrl;
+  const title = event.title;
   const badgeClass =
     CATEGORY_BADGES[event.category] ??
     'border-stone-300/35 bg-stone-400/15 text-stone-100';
@@ -73,7 +65,7 @@ export function EventCard({
     <div
       role="dialog"
       aria-modal="false"
-      aria-label={`${event.name} event details`}
+      aria-label={`${title} event details`}
       onClick={(clickEvent) => clickEvent.stopPropagation()}
       className="absolute z-40 w-[min(22rem,calc(100%-2rem))] -translate-x-1/2 overflow-hidden rounded-2xl border border-white/15 bg-[#080b0d]/82 text-[#fff8df] shadow-[0_24px_80px_rgba(0,0,0,0.72)] backdrop-blur-xl"
       style={{
@@ -93,7 +85,7 @@ export function EventCard({
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={imageUrl}
-          alt={`${event.name} illustration`}
+          alt={`${title} illustration`}
           className="h-40 w-full object-cover opacity-90"
         />
       ) : (
@@ -104,7 +96,7 @@ export function EventCard({
             background: `radial-gradient(circle at 28% 35%, rgba(255,239,194,0.2), transparent 22%), radial-gradient(circle at 72% 44%, ${empire.color}66, transparent 28%), linear-gradient(135deg, rgba(93,58,25,0.96), rgba(24,17,11,0.98)), repeating-linear-gradient(35deg, transparent 0 14px, rgba(255,255,255,0.055) 14px 15px)`,
           }}
         >
-          {event.name.charAt(0)}
+          {getInitial(title)}
         </div>
       )}
 
@@ -121,15 +113,15 @@ export function EventCard({
         </div>
 
         <h2 className="text-lg font-semibold leading-tight text-white">
-          {event.name}
+          {title}
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-[#d9ccb1]">
           {getFirstSentence(event.description)}
         </p>
 
-        {event.ruler && (
+        {event.rulerName && (
           <p className="mt-3 text-xs uppercase tracking-[0.18em] text-[#f5e6bd]/55">
-            {event.ruler.name}
+            {event.rulerName}
           </p>
         )}
       </div>

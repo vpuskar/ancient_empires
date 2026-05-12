@@ -7,6 +7,12 @@ import type { EmpireConfig } from '@/lib/empires/config';
 import type { TimelineEvent } from '@/lib/services/events';
 import { track } from '@/lib/posthog/track';
 import { EventCard } from './EventCard';
+import {
+  formatCategoryLabel,
+  getInitial,
+  normalizeTimelineEvents,
+  type NormalizedTimelineEvent,
+} from './timelineDisplay';
 
 interface InteractiveTimelineProps {
   empire: EmpireConfig;
@@ -16,14 +22,14 @@ interface InteractiveTimelineProps {
 }
 
 interface TimelinePoint {
-  event: TimelineEvent;
+  event: NormalizedTimelineEvent;
   x: number;
   y: number;
   index: number;
 }
 
 interface ActiveEvent {
-  event: TimelineEvent;
+  event: NormalizedTimelineEvent;
   xPercent: number;
   yPercent: number;
   index: number;
@@ -102,13 +108,6 @@ function formatYear(year: number): string {
   return '0';
 }
 
-function formatCategoryLabel(category: string): string {
-  return category
-    .split('_')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-}
-
 function getCategoryColor(category: string): string {
   return CATEGORY_COLORS[category] ?? '#a8a29e';
 }
@@ -154,7 +153,7 @@ function getProjection(geoJson: GeoJsonData | null) {
 }
 
 function getPoints(
-  events: TimelineEvent[],
+  events: NormalizedTimelineEvent[],
   empire: EmpireConfig,
   geoJson: GeoJsonData | null
 ): TimelinePoint[] {
@@ -211,9 +210,14 @@ export function InteractiveTimeline({
   const [isPlaying, setIsPlaying] = useState(false);
   const [geoJson, setGeoJson] = useState<GeoJsonData | null>(null);
 
+  const normalizedEvents = useMemo(
+    () => normalizeTimelineEvents(events),
+    [events]
+  );
+
   const points = useMemo(
-    () => getPoints(events, empire, geoJson),
-    [empire, events, geoJson]
+    () => getPoints(normalizedEvents, empire, geoJson),
+    [empire, normalizedEvents, geoJson]
   );
 
   const featuredPoints = useMemo(
@@ -227,11 +231,11 @@ export function InteractiveTimeline({
   );
 
   const progressPercent =
-    events.length <= 1 || !activeEvent
+    normalizedEvents.length <= 1 || !activeEvent
       ? activeEvent
         ? 100
         : 0
-      : (activeEvent.index / (events.length - 1)) * 100;
+      : (activeEvent.index / (normalizedEvents.length - 1)) * 100;
 
   const clearPlayInterval = useCallback(() => {
     if (intervalRef.current) {
@@ -248,10 +252,10 @@ export function InteractiveTimeline({
         yPercent: (point.y / VIEWBOX_HEIGHT) * 100,
         index: point.index,
       });
-      onEventClick?.(point.event);
+      onEventClick?.(point.event.source);
       track('timeline_event_clicked', {
         empire: empire.slug,
-        event_name: point.event.name,
+        event_name: point.event.title,
         event_year: point.event.year,
         category: point.event.category,
         selected_category: selectedCategory,
@@ -482,7 +486,7 @@ export function InteractiveTimeline({
       .attr(
         'aria-label',
         (point: TimelinePoint) =>
-          `${point.event.name}, ${formatYear(point.event.year)}`
+          `${point.event.title}, ${formatYear(point.event.year)}`
       )
       .style('cursor', 'pointer');
 
@@ -584,7 +588,7 @@ export function InteractiveTimeline({
     return clearPlayInterval;
   }, [clearPlayInterval]);
 
-  if (events.length === 0) return null;
+  if (normalizedEvents.length === 0) return null;
 
   return (
     <div
@@ -599,8 +603,10 @@ export function InteractiveTimeline({
         ref={svgRef}
         role="img"
         aria-label={`${empire.name} map-backed cinematic timeline from ${formatYear(
-          events[0]?.year ?? empire.startYear
-        )} to ${formatYear(events[events.length - 1]?.year ?? empire.endYear)}`}
+          normalizedEvents[0]?.year ?? empire.startYear
+        )} to ${formatYear(
+          normalizedEvents[normalizedEvents.length - 1]?.year ?? empire.endYear
+        )}`}
         className="absolute inset-0 z-10 h-full w-full"
       />
 
@@ -620,7 +626,7 @@ export function InteractiveTimeline({
           if (!isPlaying && activeEvent) {
             playIndexRef.current = Math.min(
               activeEvent.index + 1,
-              events.length - 1
+              normalizedEvents.length - 1
             );
           }
           setIsPlaying((current) => !current);
@@ -636,7 +642,7 @@ export function InteractiveTimeline({
       </div>
 
       {thumbnailPoints.map((point, thumbnailIndex) => {
-        const imageUrl = point.event.ruler?.image_url ?? null;
+        const imageUrl = point.event.imageUrl ?? point.event.rulerImageUrl;
         const left = `${Math.min(87, Math.max(11, (point.x / VIEWBOX_WIDTH) * 100))}%`;
         const topOffset = point.y > VIEWBOX_HEIGHT * 0.55 ? -14 : 10;
         const top = `${Math.min(
@@ -665,7 +671,7 @@ export function InteractiveTimeline({
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={imageUrl}
-                alt={`${point.event.name} illustration`}
+                alt={`${point.event.title} illustration`}
                 className="h-20 w-full object-cover sepia-[0.45] saturate-75"
               />
             ) : (
@@ -681,7 +687,7 @@ export function InteractiveTimeline({
                   )}33`,
                 }}
               >
-                {point.event.name.charAt(0)}
+                {getInitial(point.event.title)}
               </div>
             )}
             <div className="px-2 py-1.5">
@@ -689,7 +695,7 @@ export function InteractiveTimeline({
                 {formatYear(point.event.year)}
               </div>
               <div className="line-clamp-2 text-xs font-semibold leading-snug text-[#fff8df]">
-                {point.event.name}
+                {point.event.title}
               </div>
             </div>
           </button>
