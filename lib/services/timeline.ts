@@ -35,7 +35,7 @@ function toTimelineEvent(
   return {
     id: event.id,
     year: event.year,
-    title: event.name,
+    title: (event as { title?: string; name: string }).title ?? event.name,
     description: event.description,
     category: event.category,
     significance: event.significance,
