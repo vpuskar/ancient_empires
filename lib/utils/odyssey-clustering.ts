@@ -10,31 +10,33 @@ export interface ChapterDisplay {
   clusters: EventCluster[];
 }
 
+/**
+ * Organizes a chapter around a single featured anchor: the first sig-5 event.
+ * Earlier sig-3/4 events become the prelude; every later displayable event
+ * clusters under that anchor.
+ */
 export function organizeChapterEvents(events: TimelineEvent[]): ChapterDisplay {
   const sortedEvents = [...events]
     .filter((event) => event.significance >= 3)
     .sort((a, b) => a.year - b.year || a.id - b.id);
 
-  const prelude: TimelineEvent[] = [];
-  const clusters: EventCluster[] = [];
-  let currentCluster: EventCluster | null = null;
+  const anchorIndex = sortedEvents.findIndex(
+    (event) => event.significance === 5
+  );
 
-  for (const event of sortedEvents) {
-    if (event.significance === 5) {
-      currentCluster = {
-        anchor: event,
-        cluster: [],
-      };
-      clusters.push(currentCluster);
-      continue;
-    }
-
-    if (currentCluster) {
-      currentCluster.cluster.push(event);
-    } else {
-      prelude.push(event);
-    }
+  if (anchorIndex === -1) {
+    return {
+      prelude: sortedEvents,
+      clusters: [],
+    };
   }
 
-  return { prelude, clusters };
+  const prelude = sortedEvents.slice(0, anchorIndex);
+  const anchor = sortedEvents[anchorIndex];
+  const cluster = sortedEvents.slice(anchorIndex + 1);
+
+  return {
+    prelude,
+    clusters: [{ anchor, cluster }],
+  };
 }
