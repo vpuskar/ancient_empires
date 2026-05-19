@@ -1,12 +1,11 @@
 import { notFound } from 'next/navigation';
-import LegacyTimelinePage from '@/components/timeline/LegacyTimelinePage';
+
+import OdysseyCanvas from '@/components/timeline/odyssey/OdysseyCanvas';
 import { getEmpireBySlug } from '@/lib/empires/config';
-import { JsonLd } from '@/lib/seo/json-ld-script';
-import { buildBreadcrumbJsonLd } from '@/lib/seo/jsonld';
 import { buildEmpirePageMetadata } from '@/lib/seo/metadata';
-import { SITE_URL } from '@/lib/seo/metadata';
-import { getEventsWithRulers } from '@/lib/services/events';
-import { createClient } from '@/lib/supabase/server';
+import { getTimelineByEmpire } from '@/lib/services/timeline';
+
+export const revalidate = 3600;
 
 export async function generateMetadata({
   params,
@@ -24,7 +23,7 @@ export async function generateMetadata({
     empire.name,
     slug,
     'Timeline',
-    `${empire.name} timeline — key events from rise to fall. Filter by category, explore by century.`,
+    `${empire.name} timeline - key periods and events from rise to fall.`,
     '/timeline'
   );
 }
@@ -41,22 +40,13 @@ export default async function TimelinePage({
     notFound();
   }
 
-  const supabase = await createClient();
-  const events = await getEventsWithRulers(supabase, empire.id);
-  const sortedEvents = [...events].sort(
-    (left, right) => left.year - right.year
-  );
+  // Roman chapter structure is thematic, not chronological - being restructured
+  // in a separate branch. Show the empty state until chronological chapters land.
+  if (empire.id === 1) {
+    return <OdysseyCanvas empire={empire} data={{ chapters: [] }} />;
+  }
 
-  return (
-    <>
-      <JsonLd
-        data={buildBreadcrumbJsonLd([
-          { name: 'Home', url: SITE_URL },
-          { name: empire.name, url: `${SITE_URL}/${slug}` },
-          { name: 'Timeline', url: `${SITE_URL}/${slug}/timeline` },
-        ])}
-      />
-      <LegacyTimelinePage empire={empire} events={sortedEvents} />
-    </>
-  );
+  const data = await getTimelineByEmpire(empire.id);
+
+  return <OdysseyCanvas empire={empire} data={data} />;
 }
