@@ -15,7 +15,7 @@ export default function ChapterDotStrip({
 }: ChapterDotStripProps) {
   return (
     <div
-      className="absolute bottom-6 left-6 z-20 flex flex-col gap-2"
+      className="absolute bottom-6 left-6 z-20 hidden flex-col gap-2 lg:flex"
       aria-label="Chapter navigation"
       role="group"
     >
@@ -27,6 +27,7 @@ export default function ChapterDotStrip({
             key={chapter.id}
             type="button"
             onClick={() => onDotClick(index)}
+            title={chapter.subtitle ?? chapter.title}
             aria-label={`Jump to: ${chapter.subtitle ?? chapter.title}`}
             aria-current={isActive ? 'true' : undefined}
             className={

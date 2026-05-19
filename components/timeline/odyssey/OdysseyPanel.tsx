@@ -7,6 +7,11 @@ import type { TimelineData } from '@/lib/types/timeline';
 
 const HEADER_OFFSET = 72;
 
+function isDesktopViewport(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(min-width: 1024px)').matches;
+}
+
 export interface OdysseyPanelHandle {
   jumpToChapter: (index: number) => void;
 }
@@ -14,12 +19,16 @@ export interface OdysseyPanelHandle {
 interface OdysseyPanelProps {
   empire: EmpireConfig;
   data: TimelineData;
+  emptyMessage?: string;
   onActiveChange: (index: number) => void;
   onTitleClick: (index: number) => void;
 }
 
 const OdysseyPanel = forwardRef<OdysseyPanelHandle, OdysseyPanelProps>(
-  function OdysseyPanel({ empire, data, onActiveChange, onTitleClick }, ref) {
+  function OdysseyPanel(
+    { empire, data, emptyMessage, onActiveChange, onTitleClick },
+    ref
+  ) {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const sectionRefs = useRef<(HTMLElement | null)[]>([]);
     const lastActiveRef = useRef<number>(0);
@@ -29,18 +38,24 @@ const OdysseyPanel = forwardRef<OdysseyPanelHandle, OdysseyPanelProps>(
       () => ({
         jumpToChapter: (index: number) => {
           const target = sectionRefs.current[index];
-          const container = scrollContainerRef.current;
-          if (!target || !container) return;
+          if (!target) return;
 
-          const targetRect = target.getBoundingClientRect();
-          const containerRect = container.getBoundingClientRect();
-          const offset =
-            targetRect.top - containerRect.top + container.scrollTop;
+          if (isDesktopViewport()) {
+            const container = scrollContainerRef.current;
+            if (!container) return;
 
-          container.scrollTo({
-            top: Math.max(0, offset - HEADER_OFFSET),
-            behavior: 'smooth',
-          });
+            const targetRect = target.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const offset =
+              targetRect.top - containerRect.top + container.scrollTop;
+
+            container.scrollTo({
+              top: Math.max(0, offset - HEADER_OFFSET),
+              behavior: 'smooth',
+            });
+          } else {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
         },
       }),
       []
@@ -48,8 +63,12 @@ const OdysseyPanel = forwardRef<OdysseyPanelHandle, OdysseyPanelProps>(
 
     useEffect(() => {
       if (data.chapters.length === 0) return;
-      const container = scrollContainerRef.current;
-      if (!container) return;
+
+      // Initial breakpoint classification at mount. Crossing the lg breakpoint
+      // mid-session may yield best-effort behaviour until refresh.
+      const desktop = isDesktopViewport();
+      const root = desktop ? scrollContainerRef.current : null;
+      if (desktop && !root) return;
 
       const observer = new IntersectionObserver(
         (entries) => {
@@ -72,8 +91,10 @@ const OdysseyPanel = forwardRef<OdysseyPanelHandle, OdysseyPanelProps>(
           onActiveChange(next);
         },
         {
-          root: container,
-          rootMargin: `-${HEADER_OFFSET}px 0px -66% 0px`,
+          root,
+          rootMargin: desktop
+            ? `-${HEADER_OFFSET}px 0px -66% 0px`
+            : '0px 0px -66% 0px',
           threshold: 0,
         }
       );
@@ -86,7 +107,7 @@ const OdysseyPanel = forwardRef<OdysseyPanelHandle, OdysseyPanelProps>(
     }, [data.chapters.length, onActiveChange]);
 
     return (
-      <div ref={scrollContainerRef} className="h-full overflow-y-auto">
+      <div ref={scrollContainerRef} className="h-full lg:overflow-y-auto">
         <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/95 px-8 py-6 backdrop-blur">
           <div className="text-xs font-semibold tracking-widest text-zinc-500">
             {empire.name.toUpperCase()}: THE ODYSSEY
@@ -107,7 +128,9 @@ const OdysseyPanel = forwardRef<OdysseyPanelHandle, OdysseyPanelProps>(
               />
             ))
           ) : (
-            <div className="italic text-zinc-500">No timeline content yet.</div>
+            <div className="italic text-zinc-500">
+              {emptyMessage ?? 'No timeline content yet.'}
+            </div>
           )}
         </div>
       </div>

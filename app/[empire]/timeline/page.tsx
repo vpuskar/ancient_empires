@@ -43,7 +43,13 @@ export default async function TimelinePage({
   // Roman chapter structure is thematic, not chronological - being restructured
   // in a separate branch. Show the empty state until chronological chapters land.
   if (empire.id === 1) {
-    return <OdysseyCanvas empire={empire} data={{ chapters: [] }} />;
+    return (
+      <OdysseyCanvas
+        empire={empire}
+        data={{ chapters: [] }}
+        emptyMessage="Roman timeline is being restructured for the new period-based design. Coming soon."
+      />
+    );
   }
 
   const data = await getTimelineByEmpire(empire.id);

@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Volume2 } from 'lucide-react';
 
 import type { EmpireConfig } from '@/lib/empires/config';
 import type { TimelineChapter } from '@/lib/types/timeline';
@@ -64,6 +65,16 @@ export default function OdysseyHero({ empire, chapter }: OdysseyHeroProps) {
           </AnimatePresence>
         </div>
       ) : null}
+
+      <button
+        type="button"
+        disabled
+        aria-label="Ambient audio (coming soon)"
+        title="Ambient audio coming soon"
+        className="absolute bottom-6 right-6 z-20 flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-full border border-zinc-700 bg-black/40 text-zinc-500 opacity-60 backdrop-blur-sm"
+      >
+        <Volume2 className="h-4 w-4" />
+      </button>
     </div>
   );
 }

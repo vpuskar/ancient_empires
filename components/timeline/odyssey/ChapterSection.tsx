@@ -20,7 +20,11 @@ const ChapterSection = forwardRef<HTMLElement, ChapterSectionProps>(
     );
 
     return (
-      <section ref={ref} data-chapter-index={index}>
+      <section
+        ref={ref}
+        data-chapter-index={index}
+        className="scroll-mt-20 lg:scroll-mt-0"
+      >
         <button
           type="button"
           onClick={() => onTitleClick(index)}
