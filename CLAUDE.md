@@ -36,7 +36,7 @@ Current empire pages:
 - /[empire]/ — Overview (landing)
 - /[empire]/rulers — Rulers encyclopaedia
 - /[empire]/map — Interactive Leaflet map
-- /[empire]/timeline — Horizontal events timeline
+- /[empire]/timeline — Period-based timeline (Odyssey design, Phase 7) — replaces former horizontal timeline
 - /[empire]/chapters — Storytelling chapters
 - /[empire]/analytics — Analytics dashboard (Phase 3)
 - /[empire]/territorial — Territorial timeline (Phase 3)
@@ -73,6 +73,12 @@ empire_extent, quiz_questions, chapters, analytics_cache
 Materialised view: search_index
 
 Key convention: negative integers for BC dates (-117 = 117 BC)
+
+### chapters columns added in Phase 7 (timeline redesign):
+
+- `subtitle TEXT` (nullable) — short uppercase form for the timeline header (e.g. "THE UNIFICATION & EMPIRE FOUNDATIONS"). UI falls back to `title` when null.
+- `hero_image_url TEXT` (nullable) — path to cinematic background image. Pattern: `/timeline/{empire-slug}/{chapter-slug}.jpg`. UI falls back to empire-color gradient when null.
+Migration applied manually via Supabase SQL Editor; no migration file in repo (light debt).
 
 ### empire_extent actual years (Roman, empire_id=1):
 
@@ -646,6 +652,69 @@ Status: 🔄 IN PROGRESS — Compare page and cross-empire personality quiz comp
   ON CONFLICT (user_id) DO UPDATE SET role = 'admin'
 - Auth foundation only — admin CRUD pages built in Steps 2-4
 
+#### ✅ feature/period-timeline-data (merged to develop)
+
+Replaces the legacy horizontal /[empire]/timeline route with a period-based "Odyssey"
+design: split-pane layout, hero image per chapter on the left, scrollable event panel
+on the right, IntersectionObserver-driven active-chapter tracking, click-to-jump
+navigation via chapter titles or a left-pane dot strip. Built in 4 Codex steps plus
+two corrections.
+
+**Step 1 — Data layer:**
+- `lib/types/timeline.ts`: `TimelineEvent`, `TimelineChapter`, `TimelineData` interfaces
+- `lib/services/timeline.ts`: `getTimelineByEmpire(empireId)` — reuses existing
+  `getEventsWithRulers` from `lib/services/events.ts`, buckets events into the FIRST
+  chapter (by sort_order ASC) whose period covers `event.year`
+- Predicate: `(period_start IS NULL || year >= period_start) && (period_end IS NULL || year <= period_end)`
+- Events outside any chapter period are dropped silently
+- Sort: year ASC, then id ASC within each chapter
+- `is_featured = significance === 5`
+- Service is empire-agnostic; no empire-specific branches
+
+**Step 2 — Static UI shell:**
+- 5 server components: OdysseyCanvas, OdysseyHero, OdysseyPanel, ChapterSection, EventCard
+- `lib/utils/year.ts`: `formatYear(year)`, `formatYearRange(start, end)` (nested-if narrowing, no non-null assertions)
+- Split-pane layout (lg+): left 60% h-full, right 40% with internal scroll
+- Mobile (below lg): stacked, h-[40vh] hero on top, panel flows in document
+- Gradient fallback via empire.color when `hero_image_url` is null
+- Static inset map placeholder (top-left of hero) showing empire name + chapter period range
+- `app/[empire]/timeline/page.tsx` replaced; old `LegacyTimelinePage.tsx` left in place
+- Roman defer guard (Step 2.7): `if (empire.id === 1) return <OdysseyCanvas data={{ chapters: [] }} />` — Roman chapter structure is thematic, not chronological; deferred until restructured
+
+**Bug fix between Step 2 and 3:** `toTimelineEvent` in timeline.ts had `title: event.name` but the events service returns `title`. Patched with defensive cast `(event as { title?: string; name: string }).title ?? event.name` — works at runtime, leaves a small type-level cleanup task.
+
+**Step 3a — Within-panel interactivity:**
+- `lib/utils/odyssey-clustering.ts`: `organizeChapterEvents(events)` returns `{ prelude, clusters }`
+- `FeaturedEventCard.tsx`: gold-bordered card with curly-quote blockquote, optional cluster pill
+- `EventClusterToggle.tsx`: "+ N related events" / "Hide related events" pill (lucide-react Plus/Minus)
+- `EventCard.tsx`: interactive `<button type="button">` when description exists, non-interactive `<div>` when null; Framer Motion height-animated reveal (200ms ease-out)
+- `ChapterSection.tsx`: uses `organizeChapterEvents` via useMemo; renders prelude + clusters
+- Sig-2 events filtered out (filter `significance >= 3` on shallow copy `[...events]`)
+- `lucide-react` installed as new dependency
+
+**Path B (mid-Step 3 correction):** Original spec made every sig-5 event a featured anchor. Real data has 3-5 sig-5 events per chapter, producing visual noise (4+ gold cards stacked). Tightened `organizeChapterEvents` so only the FIRST sig-5 per chapter is an anchor; subsequent sig-5/sig-4/sig-3 events cluster under it. Accepted trade-off: long chapters (Han Dynasty 422 years) get a single anchor + large cluster. Reverse later if data calibration improves.
+
+**Step 3b — Cross-pane coordination:**
+- OdysseyCanvas becomes 'use client', owns `activeIndex` state, `panelRef`, `goToChapter` callback (clamped to bounds)
+- OdysseyHero becomes 'use client', AnimatePresence + motion.div with key={chapter.id} for hero + inset cross-fade (600ms easeInOut)
+- OdysseyPanel becomes 'use client', forwardRef exposing `OdysseyPanelHandle.jumpToChapter`, IntersectionObserver in useEffect, `lastActiveRef` guard against duplicate onActiveChange
+- ChapterSection becomes forwardRef, accepts index + onTitleClick, renders `data-chapter-index` attribute, gold title is a `<button type="button">` for click-to-jump
+- `ChapterDotStrip.tsx`: new component, absolute positioned bottom-left of left pane, vertical dot column, active dot gold + scale-125 + glow
+- `HEADER_OFFSET = 72` as single module-level const in OdysseyPanel, used in both scrollTo math and rootMargin template literal: `-${HEADER_OFFSET}px 0px -66% 0px`
+- Single scroll container on OdysseyPanel root (canvas right-pane wrapper is layout-only, no overflow)
+
+**Step 4 — Polish:**
+- Mobile: `flex flex-col lg:flex-row`, conditional `lg:overflow-y-auto` on panel root, `h-[40vh] lg:h-full` left pane
+- `isDesktopViewport()` helper using `window.matchMedia('(min-width: 1024px)')`; observer root + jumpToChapter branch on it (desktop = scroll container, mobile = `target.scrollIntoView` against viewport)
+- `scroll-mt-20 lg:scroll-mt-0` added to ChapterSection root — compensates for global sticky EmpireSectionNav on mobile
+- Keyboard nav in OdysseyCanvas: ArrowDown/Up, PageDown/Up, Home, End. Guard skips when focus is inside `input, textarea, select, button, a, [role="button"], [contenteditable="true"]`
+- Native browser `title` tooltips on dots
+- Dot strip hidden on mobile (`hidden lg:flex`)
+- Audio toggle placeholder: disabled `<button>` with lucide-react Volume2, positioned absolute bottom-right of left pane, `title="Ambient audio coming soon"`, no hover styles (disabled state)
+- Empty-state custom copy: `emptyMessage?` prop on OdysseyCanvas → OdysseyPanel; page.tsx Roman branch passes `"Roman timeline is being restructured for the new period-based design. Coming soon."`; default remains `"No timeline content yet."`
+
+**Branch:** `feature/period-timeline-data` — ready to merge to `develop`.
+
 ## Service Layer Pattern
 
 All Supabase access goes through `lib/services/*.ts`. API routes and page.tsx server components import services, never call Supabase directly.
@@ -660,6 +729,7 @@ Current services:
 - lib/services/territorial.ts (Phase 3)
 - lib/services/chapters.ts (Phase 7: admin CRUD — getChaptersByEmpire, getChapterById, createChapter, updateChapter, deleteChapter)
 - lib/services/quiz-admin.ts (Phase 7: admin CRUD — searchQuizQuestions, getQuizQuestionById, createQuizQuestion, updateQuizQuestion, deleteQuizQuestion)
+- lib/services/timeline.ts (Phase 7: getTimelineByEmpire — server-only, reuses getEventsWithRulers, buckets events into chapters by period, sets is_featured = significance === 5)
 
 Note: personality quiz does NOT use services — all data is static config in lib/config/personality/.
 
@@ -709,7 +779,81 @@ Child components (QuestionScreen, QuizTimer, QuizProgress, ScoreCard) are presen
 - Used in titles and metadata for clean user-facing copy
 - Does NOT modify global EmpireConfig
 
-## SEO Architecture
+## Timeline (Odyssey) Architecture
+
+### Period-based design (replaced legacy horizontal timeline)
+
+The new `/[empire]/timeline` route is a split-pane "Odyssey": a sticky cinematic hero
+on the left (one image per chapter/period), a vertical scrollable event panel on the
+right. As the user scrolls, the active chapter is detected via IntersectionObserver
+and the hero cross-fades.
+
+### File structure
+
+- `lib/types/timeline.ts` — TimelineEvent, TimelineChapter, TimelineData
+- `lib/services/timeline.ts` — server-only data fetch + bucketing
+- `lib/utils/year.ts` — formatYear, formatYearRange
+- `lib/utils/odyssey-clustering.ts` — `organizeChapterEvents` (single-anchor rule)
+- `components/timeline/odyssey/OdysseyCanvas.tsx` — client orchestrator, owns activeIndex, keyboard handler, panelRef
+- `components/timeline/odyssey/OdysseyHero.tsx` — client, AnimatePresence cross-fade for hero + inset map content
+- `components/timeline/odyssey/OdysseyPanel.tsx` — client, forwardRef + useImperativeHandle, IntersectionObserver, conditional desktop/mobile scroll
+- `components/timeline/odyssey/ChapterSection.tsx` — client, forwardRef, data-chapter-index, clickable title
+- `components/timeline/odyssey/EventCard.tsx` — client, button when description exists, div when null
+- `components/timeline/odyssey/FeaturedEventCard.tsx` — client, gold-bordered anchor with quote + optional cluster pill
+- `components/timeline/odyssey/EventClusterToggle.tsx` — client, "+ N related events" / "Hide related events" pill
+- `components/timeline/odyssey/ChapterDotStrip.tsx` — client, vertical dot column for chapter jump nav
+
+### Clustering rule (Path B — single anchor per chapter)
+
+`organizeChapterEvents(events)` returns `{ prelude: TimelineEvent[], clusters: EventCluster[] }`.
+The clusters array contains at most ONE element. Algorithm:
+1. Filter on shallow copy: `[...events].filter(e => e.significance >= 3).sort((a,b) => a.year - b.year || a.id - b.id)`
+2. Find index of first sig-5 event. If none, all events go to prelude, clusters = [].
+3. Otherwise prelude = events before that index; anchor = event at index; cluster = events after that index (any significance ≥ 3, including subsequent sig-5).
+4. Return `{ prelude, clusters: [{ anchor, cluster }] }`.
+
+Sig-2 events filtered out by default. Sig-5 events after the first one render as regular EventCards inside the cluster (lose featured treatment). This is a deliberate trade-off — reverse to multi-anchor only when data calibration justifies it.
+
+### Cross-pane state flow
+
+OdysseyCanvas owns `activeIndex` state. OdysseyPanel owns the scroll container and exposes `jumpToChapter(i)` via `useImperativeHandle`. State transitions:
+- Natural scroll → IntersectionObserver fires `onActiveChange(i)` → canvas updates activeIndex → hero cross-fades.
+- Title click in ChapterSection → bubbles up to canvas `goToChapter(i)` → sets state AND calls panel.jumpToChapter.
+- Dot click in ChapterDotStrip → same `goToChapter(i)`.
+
+`HEADER_OFFSET = 72` is a module-level const in OdysseyPanel.tsx used in BOTH the scrollTo math and the rootMargin template literal `-${HEADER_OFFSET}px 0px -66% 0px`. The "active zone" is the top third of the panel, offset by the sticky header height.
+
+### Desktop vs mobile
+
+`isDesktopViewport()` helper in OdysseyPanel uses `window.matchMedia('(min-width: 1024px)')`. The observer root and jumpToChapter behaviour both branch on it:
+- Desktop: observer.root = scroll container; jumpToChapter uses `container.scrollTo({ top, behavior: 'smooth' })` with HEADER_OFFSET.
+- Mobile: observer.root = null (viewport); jumpToChapter uses `target.scrollIntoView({ behavior: 'smooth', block: 'start' })`. ChapterSection's `scroll-mt-20 lg:scroll-mt-0` prevents titles landing under the global sticky EmpireSectionNav.
+
+Resize across the lg breakpoint mid-session: best-effort until refresh (initial classification at mount).
+
+### Roman defer
+
+`/roman/timeline` shows the generic empty-state with a Roman-specific message. Done at page-level in `app/[empire]/timeline/page.tsx`:
+
+```ts
+if (empire.id === 1) {
+  return (
+    <OdysseyCanvas
+      empire={empire}
+      data={{ chapters: [] }}
+      emptyMessage="Roman timeline is being restructured for the new period-based design. Coming soon."
+    />
+  );
+}
+```
+
+Service stays empire-agnostic. The defer is a page-level product decision, not a data-layer concern. Roman's existing 7 thematic chapters (Introduction, Geography, Key Figures, Events, Culture, Fall, Legacy) all have overlapping period ranges and don't bucket events meaningfully under the first-match rule — must be restructured into chronological periods (Kingdom → Early Republic → ... → Late Empire → Legacy) before timeline can include Roman.
+
+### Anchor-per-chapter discipline
+
+Roman chapters are thematic and overlap. Chinese/Japanese/Ottoman chapters are chronological and (mostly) non-overlapping. The bucketing rule "first chapter by sort_order whose period covers event.year" handles all three correctly only because the non-Roman empires have clean chronological structure. If you add new empires, ensure chapters form non-overlapping (or first-match-friendly) chronological partitions before enabling timeline.
+
+
 
 ### Metadata
 
@@ -823,6 +967,15 @@ Empire selector persists via `?empire=<slug>` URL param (default: roman)
 - Quiz questions severely depleted after dedup: Roman 210, Chinese 315, Japanese 198, Ottoman 400 — need regeneration to 5,000 each
 - Landing page stat "20000 quiz questions" is stale — actual count is 1,123 post-dedup; update after regeneration
 - Admin API routes at /api/admin/* are not covered by proxy.ts admin guard — each route does its own auth check via getCurrentUser() + isAdmin()
+- Timeline `toTimelineEvent` in lib/services/timeline.ts uses defensive cast `(event as { title?: string; name: string }).title ?? event.name` to handle field-name uncertainty. Works at runtime; clean up later by reading the actual return type of getEventsWithRulers and removing the cast.
+- Timeline migration (chapters.subtitle, chapters.hero_image_url) applied manually via Supabase SQL Editor — no migration file in `supabase/migrations/`. Recreate from live schema with `supabase db pull` or commit the SQL by hand so the repo stays self-describing.
+- Han Dynasty timeline cluster shows "+ 19 related events" after Path B single-anchor rule — 422-year span under one anchor. Acceptable for ship; revisit if user testing flags it as unwieldy (would require sig-5 data recalibration to safely re-enable multi-anchor).
+- Subsequent sig-5 events in a chapter lose featured treatment under Path B (e.g. 207 BCE Fall of Qin renders as a regular collapsed card inside the cluster, not as a gold-bordered anchor). Same Path B trade-off.
+- Timeline observer behaviour across the lg breakpoint mid-session is best-effort until refresh — no resize listener.
+- Hero images do not yet exist for any chapter; all 34 non-Roman chapters render with the empire-color gradient fallback. Needs ~34 generated images (Ottoman 10 + Chinese 10 + Japanese 17, minus Roman until restructured) saved as `/public/timeline/{empire-slug}/{chapter-slug}.jpg`.
+- Subtitles not populated on any chapter; UI falls back to `chapter.title` (which is long and verbose for the gold uppercase header).
+- Inset map is a static placeholder showing empire name + period range. Real implementation should render from `/public/geojson/{empire}_{year}.geojson` as a small SVG.
+- Audio toggle is a disabled UI placeholder. Real ambient audio implementation deferred to Phase 8+.
 
 ## Key decisions & why
 
@@ -934,6 +1087,17 @@ Empire selector persists via `?empire=<slug>` URL param (default: roman)
 - Zod .trim() added to all admin API string fields — prevents \r carriage return validation failures from CSV import artifacts
 - Quiz answer reveal delay: 5500ms (was 1500ms) — users need time to read the correct answer and explanation
 - EmpireSectionNav sticky: prevents losing navigation context when scrolling long pages (rulers, timeline)
+- Timeline redesign rolled out as one branch `feature/period-timeline-data` in 4 Codex steps + Path B + bug fix. Step splitting prevented context overflow and let each step be reviewed/pushed/eyeballed on Vercel preview before moving on.
+- Hero images stored at `/public/timeline/{empire-slug}/{chapter-slug}.jpg`, NOT in Supabase Storage and NOT in DB. Static files = CDN caching + next/image optimisation. DB only stores the path string in `chapters.hero_image_url`. Move to Supabase Storage later if admin upload becomes a workflow need; DB column is path-agnostic so no schema change required.
+- New `chapters.subtitle` column instead of editing `chapters.title`: title is used elsewhere (e.g. `/chapters` page) and is verbose; subtitle is the short uppercase form for the timeline header. UI falls back to title when subtitle is null.
+- Timeline service stays empire-agnostic; Roman defer is a page-level guard, not a service-level filter. Service returns whatever the data says; the page decides whether to surface it. Easy to lift the guard when Roman chapters are restructured.
+- Path B (single anchor per chapter) chosen over Path A (sig-5 data recalibration): Path B is a 5-line code change that ships visual hierarchy now; Path A requires editorial work across ~37 chapters. Ship first, recalibrate only if user feedback flags long-cluster chapters as a problem. Reversible — flipping back to multi-anchor is one algorithm change in `lib/utils/odyssey-clustering.ts`.
+- HEADER_OFFSET as module-level const reused in BOTH the scrollTo math AND the rootMargin template literal. No hardcoded -72px anywhere. Future tweaks happen in one place.
+- IntersectionObserver chosen over scroll listeners for active-chapter tracking: native, efficient, no per-scroll-event compute. rootMargin defines the "top 1/3 active zone" geometrically, no manual math.
+- forwardRef + useImperativeHandle pattern for parent → child scroll control: cleaner than passing a ref through and accessing scroll methods directly. Parent knows the contract (`OdysseyPanelHandle.jumpToChapter(i)`) without coupling to the child's internals.
+- `isDesktopViewport()` runtime check (not CSS-only switch) because IntersectionObserver root and scroll target are fundamentally different on mobile (document) vs desktop (container). CSS responsive layout + JS-conditional observer = correct.
+- Mobile: `scroll-mt-20 lg:scroll-mt-0` on ChapterSection root over a JS offset calculation. CSS scroll-margin is the right tool for "don't land me under the sticky nav."
+- Audio toggle as disabled placeholder rather than omitted: tells users (and future-self) that ambient audio is planned; also matches the template image's speaker icon. Costs 10 lines, zero runtime impact.
 
 ## Lighthouse scores (production — ancient-empires.vercel.app)
 
@@ -954,6 +1118,17 @@ Empire selector persists via `?empire=<slug>` URL param (default: roman)
 - Add `.codex-worktrees/` to `.gitignore` (causing repo-wide lint failures)
 - `SUPABASE_SERVICE_ROLE_KEY` rotation and mark as Sensitive in Vercel
 
+### Timeline (Odyssey) post-launch tasks
+
+- **Hero image generation** — ~34 cinematic 16:9 images, ~200KB each via squoosh.app, saved to `/public/timeline/{empire-slug}/{chapter-slug}.jpg`. Roll out empire-by-empire; populate `chapters.hero_image_url` via admin CRUD UI.
+- **Subtitle authoring** — short uppercase form per chapter (e.g. "THE UNIFICATION & EMPIRE FOUNDATIONS") via admin CRUD. UI falls back to `chapter.title` until populated.
+- **Roman chapter restructure** — replace 7 thematic chapters with chronological periods (Kingdom → Early Republic → Late Republic → Principate → High Empire → Crisis → Dominate → Legacy) so bucketing works. Then remove the Roman defer guard from `app/[empire]/timeline/page.tsx`.
+- **Real GeoJSON inset map** — render `/public/geojson/{empire}_{year}.geojson` as a small SVG in the placeholder slot, replacing the static "EMPIRE NAME + period range" content.
+- **Ambient audio implementation** — Web Audio API, bass drone ~55 Hz per CLAUDE.md horizon list. Wire the existing disabled placeholder button.
+- **Path A (deferred)** — sig-5 significance recalibration to demote some events to sig-4. Enables a future multi-anchor revival if Path B single-anchor proves too restrictive for long chapters.
+- **Cleanup defensive cast** in `lib/services/timeline.ts` `toTimelineEvent` once the events service return type is verified.
+- **Commit the timeline DB migration** as `supabase/migrations/<ts>_chapters_timeline_media.sql` so the repo stays self-describing.
+
 ## Do NOT change without consultation
 
 - Supabase table schema (migrations are final once data is imported)
@@ -970,3 +1145,9 @@ Empire selector persists via `?empire=<slug>` URL param (default: roman)
 - Personality quiz type structure (question/dimension/delta, not text/dimensions object)
 - SEO title ownership model (helpers return final title)
 - lib/seo/metadata.ts as single source for metadata helpers
+- Timeline single-anchor-per-chapter rule in `lib/utils/odyssey-clustering.ts` (Path B). Reverting to multi-anchor needs explicit signoff after user-feedback evidence.
+- HEADER_OFFSET module-level const pattern in OdysseyPanel (reused in both scrollTo math and rootMargin template literal).
+- OdysseyPanelHandle imperative ref contract (`jumpToChapter(i: number): void`). Adding methods is fine; renaming or removing breaks OdysseyCanvas.
+- Timeline service stays empire-agnostic. No empire-specific branches in `lib/services/timeline.ts`. All defer/override logic lives in `app/[empire]/timeline/page.tsx`.
+- `data-chapter-index` attribute on ChapterSection's root section element — required by IntersectionObserver to identify active chapter.
+- Single vertical scroll container on the right pane (lives on OdysseyPanel root via `lg:overflow-y-auto`). Never introduce nested scroll containers.
