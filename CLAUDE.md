@@ -715,6 +715,25 @@ two corrections.
 
 **Branch:** `feature/period-timeline-data` — ready to merge to `develop`.
 
+#### ✅ Ottoman, Chinese and Japanese timeline hero images (on feature/period-timeline-data)
+
+- **Ottoman** (10), **Chinese** (10), **Japanese** (17) — 37 images total generated,
+  optimized via squoosh.app below 200KB, committed to `public/timeline/{empire-slug}/`.
+- `chapters.hero_image_url` SQL update applied for empire_id 2, 3, 4.
+- All 37 chapters for Ottoman/Chinese/Japanese now render cinematic hero images.
+- Roman deferred — thematic chapters need restructuring before images are generated.
+
+**Key learnings from image workflow:**
+- Images saved as `.png` — SQL and `hero_image_url` values must use `.png` extension.
+  Mismatched extension = 404, gradient fallback shown with no error.
+- Filename must match chapter slug character-for-character. Found typo
+  `criss-court-and-comeback.png` (should be `crisis-court-and-comeback.png`) during
+  Ottoman commit — caused 404 for that chapter until renamed and recommitted.
+- Verify image URL directly in browser BEFORE running SQL update:
+  `https://[preview-url].vercel.app/timeline/ottoman/frontier-beginnings.png`
+- Optimize every image at squoosh.app → MozJPEG → below 200KB before committing.
+
+
 ## Service Layer Pattern
 
 All Supabase access goes through `lib/services/*.ts`. API routes and page.tsx server components import services, never call Supabase directly.
@@ -972,7 +991,7 @@ Empire selector persists via `?empire=<slug>` URL param (default: roman)
 - Han Dynasty timeline cluster shows "+ 19 related events" after Path B single-anchor rule — 422-year span under one anchor. Acceptable for ship; revisit if user testing flags it as unwieldy (would require sig-5 data recalibration to safely re-enable multi-anchor).
 - Subsequent sig-5 events in a chapter lose featured treatment under Path B (e.g. 207 BCE Fall of Qin renders as a regular collapsed card inside the cluster, not as a gold-bordered anchor). Same Path B trade-off.
 - Timeline observer behaviour across the lg breakpoint mid-session is best-effort until refresh — no resize listener.
-- Hero images do not yet exist for any chapter; all 34 non-Roman chapters render with the empire-color gradient fallback. Needs ~34 generated images (Ottoman 10 + Chinese 10 + Japanese 17, minus Roman until restructured) saved as `/public/timeline/{empire-slug}/{chapter-slug}.jpg`.
+- Hero images: Ottoman (10) ✅, Chinese (10) ✅, Japanese (17) ✅ — all committed to `public/timeline/{empire-slug}/`, SQL updated for empire_id 2, 3, 4. Roman deferred until chapter restructure. Extension is `.png` throughout.
 - Subtitles not populated on any chapter; UI falls back to `chapter.title` (which is long and verbose for the gold uppercase header).
 - Inset map is a static placeholder showing empire name + period range. Real implementation should render from `/public/geojson/{empire}_{year}.geojson` as a small SVG.
 - Audio toggle is a disabled UI placeholder. Real ambient audio implementation deferred to Phase 8+.
@@ -1098,6 +1117,9 @@ Empire selector persists via `?empire=<slug>` URL param (default: roman)
 - `isDesktopViewport()` runtime check (not CSS-only switch) because IntersectionObserver root and scroll target are fundamentally different on mobile (document) vs desktop (container). CSS responsive layout + JS-conditional observer = correct.
 - Mobile: `scroll-mt-20 lg:scroll-mt-0` on ChapterSection root over a JS offset calculation. CSS scroll-margin is the right tool for "don't land me under the sticky nav."
 - Audio toggle as disabled placeholder rather than omitted: tells users (and future-self) that ambient audio is planned; also matches the template image's speaker icon. Costs 10 lines, zero runtime impact.
+- Timeline hero images use `.png` extension confirmed during Ottoman workflow. SQL update, `hero_image_url` values, and filenames must all use `.png`. Using `.jpg` extension when files are `.png` produces silent 404s and the gradient fallback is shown with no error.
+- Hero image filenames must match chapter slugs character-for-character. Found typo (`criss` vs `crisis`) during Ottoman commit — caused one chapter to show gradient fallback despite SQL being correct. Always verify a direct image URL in browser before running the SQL update.
+- Image generation workflow per empire: generate → squoosh.app MozJPEG below 200KB → commit to `public/timeline/{empire-slug}/` → verify URL → SQL update → refresh timeline page. Never commit un-optimized originals.
 
 ## Lighthouse scores (production — ancient-empires.vercel.app)
 
@@ -1120,7 +1142,7 @@ Empire selector persists via `?empire=<slug>` URL param (default: roman)
 
 ### Timeline (Odyssey) post-launch tasks
 
-- **Hero image generation** — ~34 cinematic 16:9 images, ~200KB each via squoosh.app, saved to `/public/timeline/{empire-slug}/{chapter-slug}.jpg`. Roll out empire-by-empire; populate `chapters.hero_image_url` via admin CRUD UI.
+- **Hero image generation** — Ottoman ✅, Chinese ✅, Japanese ✅ done (37 images total committed). Roman deferred until chapter restructure. SQL update applied for empire_id 2, 3, 4. Workflow: generate → squoosh.app MozJPEG below 200KB → `public/timeline/{empire-slug}/{slug}.png` → commit → verify URL → SQL update.
 - **Subtitle authoring** — short uppercase form per chapter (e.g. "THE UNIFICATION & EMPIRE FOUNDATIONS") via admin CRUD. UI falls back to `chapter.title` until populated.
 - **Roman chapter restructure** — replace 7 thematic chapters with chronological periods (Kingdom → Early Republic → Late Republic → Principate → High Empire → Crisis → Dominate → Legacy) so bucketing works. Then remove the Roman defer guard from `app/[empire]/timeline/page.tsx`.
 - **Real GeoJSON inset map** — render `/public/geojson/{empire}_{year}.geojson` as a small SVG in the placeholder slot, replacing the static "EMPIRE NAME + period range" content.
