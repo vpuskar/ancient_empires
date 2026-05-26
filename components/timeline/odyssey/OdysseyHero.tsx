@@ -45,7 +45,7 @@ export default function OdysseyHero({ empire, chapter }: OdysseyHeroProps) {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 to-transparent" />
 
       {chapter ? (
-        <div className="absolute left-6 top-6 flex h-44 w-64 flex-col items-center justify-center rounded-lg border-2 border-amber-400/40 bg-black/50 backdrop-blur-sm">
+        <div className="absolute left-6 top-6 hidden lg:flex h-44 w-64 flex-col items-center justify-center rounded-lg border-2 border-amber-400/40 bg-black/50 backdrop-blur-sm">
           <AnimatePresence mode="wait">
             <motion.div
               key={chapter.id}
